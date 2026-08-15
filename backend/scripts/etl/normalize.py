@@ -13,7 +13,8 @@ from datetime import date
 from pathlib import Path
 from typing import Optional
 
-# ── Cấu hình lĩnh vực ─────────────────────────────────────────────
+# ── Từ khóa phát hiện lĩnh vực ──────────────────────────────────────
+# Dùng cho cả topic_title_vi và fallback trên content
 FIELD_KEYWORDS = {
     "labor": [
         "lao động", "lao-động", "bộ luật lao động",
@@ -21,13 +22,15 @@ FIELD_KEYWORDS = {
         "bhxh", "bhyt", "bhtn", "việc làm", "tuyển dụng",
         "sa thải", "thử việc", "nghỉ phép", "làm thêm giờ",
         "người lao động", "người sử dụng lao động",
+        "an toàn lao động", "quan hệ lao động",
+        "thị trường lao động", "lao động nước ngoài",
     ],
     "tax": [
         "thuế", "thuế thu nhập", "thuế giá trị gia tăng",
         "thuế gtgt", "thuế tncn", "thuế tndn", "thuế xuất nhập khẩu",
         "hoá đơn", "hóa đơn", "khai thuế", "nộp thuế",
         "tổng cục thuế", "cục thuế", "kế toán", "kiểm toán",
-        "tài chính", "ngân sách nhà nước",
+        "tài chính", "ngân sách nhà nước", "tài chính nhà nước",
     ],
 }
 
@@ -36,8 +39,20 @@ PROCESSED_DIR = Path(__file__).parent.parent.parent / "data" / "processed"
 PROCESSED_DIR.mkdir(parents=True, exist_ok=True)
 
 
+def detect_field_from_topic(topic_vi: str, subject_vi: str = "") -> Optional[str]:
+    """
+    Phát hiện lĩnh vực từ topic_title_vi / subject_title_vi.
+    Ưu tiên dùng hàm này vì chính xác hơn keyword search trên content.
+    """
+    combined = (topic_vi + " " + subject_vi).lower()
+    for field, keywords in FIELD_KEYWORDS.items():
+        if any(kw in combined for kw in keywords):
+            return field
+    return None
+
+
 def detect_field(title: str, content: str = "") -> Optional[str]:
-    """Phát hiện lĩnh vực pháp luật dựa trên từ khóa."""
+    """Fallback: Phát hiện lĩnh vực từ title và đầu content."""
     text = (title + " " + content[:500]).lower()
     for field, keywords in FIELD_KEYWORDS.items():
         if any(kw in text for kw in keywords):
@@ -75,46 +90,79 @@ def parse_date(date_str: Optional[str]) -> Optional[str]:
 def normalize_record(raw: dict) -> Optional[dict]:
     """
     Normalize một record raw → dict chuẩn schema documents.
-    Trả về None nếu không thuộc lĩnh vực cần thiết.
+    Hỗ trợ 2 schema:
+      - tmquan/phapdien-moj-gov-vn (Pháp điển — từng điều luật)
+      - Schema cũ (toàn văn)
     """
-    # Mapping linh hoạt cho nhiều schema dataset khác nhau
+    # ── Schema tmquan/phapdien-moj-gov-vn ───────────────────────────
+    if "article_title" in raw and "content_text" in raw:
+        article_title = (raw.get("article_title") or "").strip()
+        chapter_title = (raw.get("chapter_title") or "").strip()
+        title = f"{article_title} — {chapter_title}" if chapter_title else article_title
+        content = (raw.get("content_text") or "").strip()
+
+        if not title or not content:
+            return None
+
+        # Phát hiện lĩnh vực: ưu tiên topic_title_vi (chính xác nhất)
+        topic_vi = raw.get("topic_title_vi") or ""
+        subject_vi = raw.get("subject_title_vi") or ""
+        field = detect_field_from_topic(topic_vi, subject_vi)
+        # Fallback sang content nếu không detect được từ topic
+        if not field:
+            field = detect_field(title, content)
+        # Gán "Khác" nếu vẫn không xác định được
+        if not field:
+            field = "Khác"
+
+        # Doc number: dùng article_id hoặc record_id
+        doc_number = raw.get("article_id") or raw.get("record_id") or ""
+
+        # Ngày ban hành từ source_note_text
+        source_note = raw.get("source_note_text") or ""
+        issue_date = parse_date(source_note)
+
+        source_url = raw.get("source_url") or ""
+
+        return {
+            "doc_number": doc_number,
+            "title": title[:500],
+            "doc_type": "Điều luật",
+            "issuing_body": subject_vi,
+            "field": field,
+            "issue_date": issue_date,
+            "effective_date": None,
+            "expired_date": None,
+            "status": "active",
+            "content": content[:100_000],
+            "source_url": source_url,
+        }
+
+    # ── Schema cũ (toàn văn) ────────────────────────────────────────
     title = (
-        raw.get("title") or raw.get("ten_van_ban") or raw.get("name") or ""
+        raw.get("title") or raw.get("ten_van_ban") or raw.get("de muc") or raw.get("name") or ""
     ).strip()
     content = (
         raw.get("content") or raw.get("noi_dung") or raw.get("text") or ""
     ).strip()
 
+    if not title and content:
+        title = content.split('\n')[0][:100]
+
     if not title or not content:
         return None
 
-    # Phát hiện lĩnh vực
-    field = detect_field(title, content)
-    if not field:
-        return None
+    chu_de = raw.get("chu de", "")
+    field = raw.get("field_detected") or chu_de or detect_field(title, content) or "Khác"
 
-    doc_number = (
-        raw.get("doc_number") or raw.get("so_hieu") or raw.get("number") or ""
-    ).strip()
-
+    doc_number = (raw.get("doc_number") or raw.get("so_ky_hieu") or raw.get("so_hieu") or raw.get("number") or "").strip()
     doc_type = raw.get("doc_type") or raw.get("loai_van_ban") or raw.get("type") or ""
+    issuing_body = (raw.get("issuing_body") or raw.get("co_quan_ban_hanh") or raw.get("agency") or "").strip()
+    issue_date = parse_date(raw.get("issue_date") or raw.get("ngay_ban_hanh") or raw.get("date"))
+    effective_date = parse_date(raw.get("effective_date") or raw.get("ngay_co_hieu_luc") or raw.get("ngay_hieu_luc"))
+    expired_date = parse_date(raw.get("expired_date") or raw.get("ngay_het_hieu_luc"))
 
-    issuing_body = (
-        raw.get("issuing_body") or raw.get("co_quan_ban_hanh") or raw.get("agency") or ""
-    ).strip()
-
-    issue_date = parse_date(
-        raw.get("issue_date") or raw.get("ngay_ban_hanh") or raw.get("date")
-    )
-    effective_date = parse_date(
-        raw.get("effective_date") or raw.get("ngay_hieu_luc")
-    )
-    expired_date = parse_date(
-        raw.get("expired_date") or raw.get("ngay_het_hieu_luc")
-    )
-
-    # Xác định trạng thái hiệu lực
-    status_raw = (raw.get("status") or raw.get("tinh_trang") or "").lower()
+    status_raw = (raw.get("status") or raw.get("tinh_trang_hieu_luc") or raw.get("tinh_trang") or "").lower()
     if "hết hiệu lực" in status_raw or "het hieu luc" in status_raw:
         status = "expired"
     elif "sửa đổi" in status_raw or "sua doi" in status_raw:
@@ -136,45 +184,48 @@ def normalize_record(raw: dict) -> Optional[dict]:
         "effective_date": effective_date,
         "expired_date": expired_date,
         "status": status,
-        "content": content[:100_000],  # Giới hạn 100K chars để tránh quá lớn
+        "content": content[:100_000],
         "source_url": source_url,
     }
 
 
 def normalize_dataset(input_file: Path, output_file: Path) -> int:
-    """Normalize toàn bộ file JSON, trả về số record hợp lệ."""
+    """Normalize file JSON Array của Mock Dataset, trả về số record hợp lệ."""
     print(f"📂 Đọc: {input_file}")
 
     normalized = []
-    total = 0
     skipped = 0
 
-    with open(input_file, "r", encoding="utf-8") as f:
-        for line in f:
-            line = line.strip()
-            if not line:
-                continue
-            try:
-                raw = json.loads(line)
-                total += 1
+    try:
+        with open(input_file, "r", encoding="utf-8") as f:
+            data = json.load(f)
+            if not isinstance(data, list):
+                data = [data]
+            
+            for raw in data:
                 result = normalize_record(raw)
                 if result:
                     normalized.append(result)
                 else:
                     skipped += 1
-            except json.JSONDecodeError:
-                skipped += 1
+    except Exception as e:
+        print(f"❌ Lỗi đọc JSON: {e}")
+        return 0
 
-    print(f"   Tổng: {total:,} | Hợp lệ: {len(normalized):,} | Bỏ qua: {skipped:,}")
+    print(f"   Tổng raw: {len(data):,} | Hợp lệ: {len(normalized):,} | Bỏ qua: {skipped:,}")
 
     # Thống kê theo lĩnh vực
-    field_counts = {}
+    field_counts: dict[str, int] = {}
     for doc in normalized:
         f = doc["field"]
         field_counts[f] = field_counts.get(f, 0) + 1
-    print(f"   Phân bố lĩnh vực: {field_counts}")
 
-    # Lưu ra file processed
+    print("   📊 Phân bố lĩnh vực sau normalize:")
+    for fname, cnt in sorted(field_counts.items(), key=lambda x: -x[1]):
+        bar = "█" * min(cnt // 10, 40)
+        print(f"      {fname:<30s}: {cnt:>5,}  {bar}")
+
+    # Lưu ra file processed format JSONL
     with open(output_file, "w", encoding="utf-8") as f:
         for doc in normalized:
             f.write(json.dumps(doc, ensure_ascii=False) + "\n")

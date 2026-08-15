@@ -24,6 +24,7 @@ from sqlalchemy import (
     Text,
     UniqueConstraint,
 )
+from sqlalchemy.dialects.postgresql import TSVECTOR
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
@@ -57,6 +58,7 @@ class Document(Base):
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
     )
+    search_vector: Mapped[Optional[str]] = mapped_column(TSVECTOR, nullable=True)
 
     # Relationships
     chunks: Mapped[List["DocumentChunk"]] = relationship(

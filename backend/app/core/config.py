@@ -22,7 +22,7 @@ class Settings(BaseSettings):
 
     # pgvector / Search
     hnsw_m: int = 16
-    hnsw_ef_construction: int = 64
+    hnsw_ef_construction: int = 128  # Theo PhanTichHeThong_v2_Fixed.docx mục 10.2
     top_k_retrieve: int = 20
     top_k_rerank: int = 5
     rrf_k: int = 60

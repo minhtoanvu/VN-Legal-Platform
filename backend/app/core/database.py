@@ -3,16 +3,18 @@ from sqlalchemy.orm import DeclarativeBase
 
 from app.core.config import settings
 
-# Async engine
 engine = create_async_engine(
     settings.database_url,
-    echo=False,          # Set True để debug SQL
-    pool_pre_ping=True,  # Kiểm tra connection trước khi dùng
+    echo=False,
+    pool_pre_ping=True,
     pool_size=10,
     max_overflow=20,
+    connect_args={
+        "command_timeout": 5,
+        "timeout": 5
+    }
 )
 
-# Session factory
 AsyncSessionLocal = async_sessionmaker(
     bind=engine,
     class_=AsyncSession,
@@ -23,12 +25,10 @@ AsyncSessionLocal = async_sessionmaker(
 
 
 class Base(DeclarativeBase):
-    """Base class cho tất cả SQLAlchemy models."""
     pass
 
 
 async def get_db() -> AsyncSession:
-    """FastAPI dependency — cấp một DB session cho mỗi request."""
     async with AsyncSessionLocal() as session:
         try:
             yield session
@@ -41,7 +41,6 @@ async def get_db() -> AsyncSession:
 
 
 async def create_tables():
-    """Tạo tất cả bảng (dùng trong dev, production dùng Alembic)."""
     async with engine.begin() as conn:
         from app.models import document, user, workspace  # noqa: F401
         await conn.run_sync(Base.metadata.create_all)

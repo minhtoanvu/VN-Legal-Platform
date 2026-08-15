@@ -12,6 +12,7 @@ import uuid
 from datetime import datetime, timezone
 from typing import Optional
 
+import sqlalchemy as sa
 from sqlalchemy import (
     UUID,
     Boolean,
@@ -123,7 +124,11 @@ class Note(Base):
 class QueryLog(Base):
     """
     Log mỗi truy vấn tìm kiếm / hỏi AI.
-    Dùng để: Analytics nội bộ, gợi ý câu hỏi phổ biến, caching.
+    Dùng để: Analytics nội bộ, gợi ý câu hỏi phổ biến, RAG Evaluation.
+
+    Theo PhanTichHeThong_v2_Fixed.docx mục 10.4:
+      - response    JSONB    -- lưu câu trả lời AI + sources để RAG Evaluation
+      - duration_ms INTEGER  -- thời gian xử lý (ms) để đo hiệu năng
     """
 
     __tablename__ = "query_logs"
@@ -140,7 +145,10 @@ class QueryLog(Base):
     query_text: Mapped[str] = mapped_column(Text, nullable=False)
     # keyword / semantic / hybrid / ai_chat / summarize
     query_type: Mapped[Optional[str]] = mapped_column(String(20), nullable=True)
-    response_time_ms: Mapped[Optional[int]] = mapped_column(nullable=True)
+    # Câu trả lời AI + sources (để RAG Evaluation sau này)
+    response: Mapped[Optional[dict]] = mapped_column(sa.JSON, nullable=True)
+    # Thời gian xử lý (ms) để đo hiệu năng theo SLA
+    duration_ms: Mapped[Optional[int]] = mapped_column(nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
     )
@@ -150,3 +158,4 @@ class QueryLog(Base):
 
     def __repr__(self) -> str:
         return f"<QueryLog type={self.query_type} user={self.user_id}>"
+

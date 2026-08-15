@@ -306,27 +306,68 @@ Hệ thống xây dựng theo kiến trúc **Modular Monolith** kết hợp **Co
 
 ## 10. THIẾT KẾ MÔ HÌNH DỮ LIỆU
 
-Kiến trúc Database chuẩn hóa trên **PostgreSQL**, phục vụ Relational query, Full-text search và Vector search qua **pgvector**.
+Kiến trúc cơ sở dữ liệu được thiết kế chuẩn hóa trên **PostgreSQL**, kết hợp extension **pgvector** phục vụ AI. Dưới đây là đặc tả chi tiết các thực thể dữ liệu (Data Dictionary):
 
-**Bảng documents** — Lưu metadata văn bản pháp luật:
-- id (UUID PK), doc_number, title, doc_type, issuing_body, field, issue_date, effective_date, expired_date, status ('active'/'expired'/'amended'), content, source_url, created_at
+### 10.1. Bảng DOCUMENTS (Quản lý Văn bản Pháp lý)
+Lưu trữ thông tin siêu dữ liệu (metadata) của các văn bản quy phạm pháp luật.
+1. **id**: Khóa chính (PK), kiểu UUID, tự động sinh.
+2. **doc_number**: Kiểu Varchar(100), mô tả số/ký hiệu văn bản (VD: 45/2013/QH13), không được rỗng.
+3. **title**: Kiểu Text, tiêu đề hoặc trích yếu nội dung văn bản, không được rỗng.
+4. **doc_type**: Kiểu Varchar(50), loại văn bản (VD: Luật, Nghị định, Thông tư).
+5. **issuing_body**: Kiểu Varchar(200), cơ quan ban hành (VD: Quốc hội, Chính phủ).
+6. **field**: Kiểu Varchar(100), lĩnh vực pháp lý (VD: Lao động, Thuế).
+7. **issue_date**: Kiểu Date, ngày ban hành văn bản.
+8. **effective_date**: Kiểu Date, ngày văn bản bắt đầu có hiệu lực.
+9. **expired_date**: Kiểu Date, ngày văn bản hết hiệu lực (nếu có).
+10. **status**: Kiểu Varchar(20) ('active', 'expired', 'amended'), trạng thái hiệu lực hiện tại.
+11. **content**: Kiểu Text, toàn văn nội dung văn bản (phục vụ Full-text search).
+12. **source_url**: Kiểu Text, đường dẫn gốc của văn bản để đối chiếu.
+13. **created_at**: Kiểu Timestamp, thời gian tạo dữ liệu.
 
-**Bảng document_chunks** — Dữ liệu nền cho RAG:
-- id (UUID PK), document_id (FK → documents), chunk_index, content_chunk (256–512 tokens), embedding (VECTOR(768) pgvector), token_count
-- Index: `CREATE INDEX USING ivfflat (embedding vector_cosine_ops) WITH (lists = 100)`
+### 10.2. Bảng DOCUMENT_CHUNKS (Dữ liệu Vector cho AI)
+Lưu trữ các đoạn văn bản đã được cắt nhỏ (chunks) và nhúng (embedding) để phục vụ Semantic Search và RAG.
+1. **id**: Khóa chính (PK), kiểu UUID, tự động sinh.
+2. **document_id**: Khóa ngoại (FK) liên kết đến bảng DOCUMENTS, không được rỗng.
+3. **chunk_index**: Kiểu Integer, số thứ tự của đoạn cắt trong văn bản gốc.
+4. **content_chunk**: Kiểu Text, nội dung đoạn văn bản đã cắt (từ 256-512 tokens).
+5. **embedding**: Kiểu Vector(768), lưu trữ ma trận số hóa do AI tạo ra (dùng extension pgvector).
+6. **token_count**: Kiểu Integer, số lượng token của đoạn văn bản.
 
-**Bảng document_relations** — Dữ liệu nền cho Knowledge Graph:
-- id, source_doc_id (FK), target_doc_id (FK), relation_type (GUIDES/AMENDS/REPLACES/REVOKES/CITES), description
-- UNIQUE(source_doc_id, target_doc_id, relation_type)
+### 10.3. Bảng DOCUMENT_RELATIONS (Mạng lưới Quan hệ Pháp lý)
+Lưu trữ mối quan hệ ràng buộc giữa các văn bản, phục vụ vẽ Knowledge Graph.
+1. **id**: Khóa chính (PK), kiểu UUID, tự động sinh.
+2. **source_doc_id**: Khóa ngoại (FK) liên kết đến DOCUMENTS (Văn bản gốc).
+3. **target_doc_id**: Khóa ngoại (FK) liên kết đến DOCUMENTS (Văn bản đích).
+4. **relation_type**: Kiểu Varchar(50) ('GUIDES', 'AMENDS', 'REPLACES', 'REVOKES', 'CITES'), mô tả loại quan hệ.
+5. **description**: Kiểu Text, ghi chú chi tiết về mối quan hệ (nếu có).
 
-**Bảng users** — Xác thực và phân quyền:
-- id, email (UNIQUE), password_hash (Bcrypt), full_name, role ('user'/'enterprise'/'admin'), organization_id, created_at
+### 10.4. Bảng USERS (Quản lý Người dùng)
+Quản lý thông tin tài khoản, xác thực và phân quyền truy cập.
+1. **id**: Khóa chính (PK), kiểu UUID, tự động sinh.
+2. **email**: Kiểu Varchar(100), định danh đăng nhập, ràng buộc Duy nhất (Unique).
+3. **password_hash**: Kiểu Varchar(255), chuỗi mật khẩu đã được mã hóa bằng Bcrypt.
+4. **full_name**: Kiểu Varchar(100), họ và tên người dùng.
+5. **role**: Kiểu Varchar(20) ('user', 'enterprise', 'admin'), vai trò phân quyền.
+6. **organization_id**: Kiểu UUID, mã tổ chức (dành cho gói Enterprise).
+7. **created_at**: Kiểu Timestamp, thời gian tạo tài khoản.
 
-**Workspace Entities:**
-- `collections`: id, name, owner_id (FK users), is_shared (BOOL), created_at
-- `collection_documents`: (collection_id, document_id) — bảng trung gian n-n
-- `notes`: id, user_id, document_id, content, created_at
-- `query_logs`: id, user_id, query_text, query_type ('keyword'/'semantic'/'ai_chat'), created_at
+### 10.5. Nhóm Bảng WORKSPACE (Không gian làm việc)
+**Bảng COLLECTIONS (Thư mục lưu trữ)**
+1. **id**: Khóa chính (PK), kiểu UUID.
+2. **name**: Kiểu Varchar(100), tên thư mục.
+3. **owner_id**: Khóa ngoại (FK) liên kết đến USERS.
+4. **is_shared**: Kiểu Boolean, trạng thái chia sẻ công khai hay riêng tư.
+
+**Bảng COLLECTION_DOCUMENTS (Chi tiết Thư mục - Bảng trung gian)**
+1. **collection_id**: Khóa ngoại (FK) liên kết đến COLLECTIONS.
+2. **document_id**: Khóa ngoại (FK) liên kết đến DOCUMENTS.
+*(collection_id, document_id) tạo thành Khóa chính kép (Composite PK).*
+
+**Bảng NOTES (Ghi chú cá nhân)**
+1. **id**: Khóa chính (PK), kiểu UUID.
+2. **user_id**: Khóa ngoại (FK) liên kết đến USERS.
+3. **document_id**: Khóa ngoại (FK) liên kết đến DOCUMENTS.
+4. **content**: Kiểu Text, nội dung ghi chú của người dùng.
 
 ---
 

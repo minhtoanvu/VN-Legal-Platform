@@ -1,5 +1,12 @@
 version: '3.8'
 
+# ============================================================
+# CẤU HÌNH NHẸ CHO MÁY 8GB RAM
+# Chỉ chạy PostgreSQL+pgvector trong Docker.
+# Backend chạy thẳng Python trên máy (không cần container).
+# pgAdmin bỏ qua để tiết kiệm ~500MB RAM.
+# ============================================================
+
 services:
   db:
     image: ankane/pgvector:latest
@@ -12,44 +19,26 @@ services:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+    # Giới hạn RAM cho container PostgreSQL (chỉ dùng 512MB)
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 256M
+    # Tối ưu PostgreSQL cho RAM thấp
+    command: >
+      postgres
+      -c shared_buffers=128MB
+      -c effective_cache_size=256MB
+      -c work_mem=4MB
+      -c maintenance_work_mem=64MB
+      -c max_connections=50
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres}"]
       interval: 10s
       timeout: 5s
       retries: 5
-    restart: unless-stopped
-
-  pgadmin:
-    image: dpage/pgadmin4
-    container_name: legal_pgadmin
-    environment:
-      PGADMIN_DEFAULT_EMAIL: admin@admin.com
-      PGADMIN_DEFAULT_PASSWORD: admin
-    ports:
-      - "5050:80"
-    depends_on:
-      db:
-        condition: service_healthy
-    restart: unless-stopped
-
-  backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
-    container_name: legal_backend
-    environment:
-      - DATABASE_URL=postgresql+asyncpg://${DB_USER:-postgres}:${DB_PASSWORD:-password}@db:5432/${DB_NAME:-legal_db}
-      - SECRET_KEY=${SECRET_KEY:-changeme-in-production}
-      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
-      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
-    ports:
-      - "8000:8000"
-    volumes:
-      - ./backend:/app
-    depends_on:
-      db:
-        condition: service_healthy
-    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
     restart: unless-stopped
 
 volumes:

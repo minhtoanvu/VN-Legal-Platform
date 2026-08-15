@@ -1,23 +1,25 @@
+import bcrypt
 from datetime import datetime, timedelta, timezone
 from typing import Optional
 
 from jose import JWTError, jwt
-from passlib.context import CryptContext
-
 from app.core.config import settings
-
-# Bcrypt context — automatically handles salt + hashing
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 def hash_password(plain_password: str) -> str:
-    """Hash mật khẩu bằng Bcrypt."""
-    return pwd_context.hash(plain_password)
+    """Hash mật khẩu bằng Bcrypt trực tiếp."""
+    # Bcrypt chỉ xử lý 72 bytes đầu tiên — truncate explicit
+    password_bytes = plain_password.encode("utf-8")[:72]
+    salt = bcrypt.gensalt(rounds=12)
+    hashed = bcrypt.hashpw(password_bytes, salt)
+    return hashed.decode("utf-8")
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     """Kiểm tra mật khẩu với hash đã lưu."""
-    return pwd_context.verify(plain_password, hashed_password)
+    password_bytes = plain_password.encode("utf-8")[:72]
+    hashed_bytes = hashed_password.encode("utf-8")
+    return bcrypt.checkpw(password_bytes, hashed_bytes)
 
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
