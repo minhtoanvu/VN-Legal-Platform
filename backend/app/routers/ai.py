@@ -18,7 +18,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
 from app.models.document import Document
+from app.models.workspace import QueryLog
 from app.services.rag_service import rag_generate_stream
+import time
 
 router = APIRouter()
 
@@ -84,6 +86,8 @@ async def ai_chat(
         )
 
     async def event_stream():
+        start_time = time.perf_counter()
+        full_response_text = ""
         try:
             async for token in rag_generate_stream(
                 session=db,
@@ -91,11 +95,26 @@ async def ai_chat(
                 field=body.field,
                 history=body.history,
             ):
+                if not token.startswith("__CITATIONS__"):
+                    full_response_text += token
                 yield f"data: {json.dumps({'text': token}, ensure_ascii=False)}\n\n"
         except Exception as e:
             yield f"data: {json.dumps({'error': str(e)})}\n\n"
         finally:
             yield "data: [DONE]\n\n"
+            # Lưu log truy vấn
+            try:
+                duration_ms = int((time.perf_counter() - start_time) * 1000)
+                query_log = QueryLog(
+                    query_text=body.question,
+                    query_type="ai_chat",
+                    response={"text": full_response_text},
+                    duration_ms=duration_ms,
+                )
+                db.add(query_log)
+                await db.commit()
+            except Exception as e:
+                print("Failed to save query log:", str(e))
 
     return StreamingResponse(
         event_stream(),

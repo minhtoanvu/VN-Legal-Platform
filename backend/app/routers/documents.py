@@ -79,8 +79,15 @@ async def get_document(
     if not doc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Không tìm thấy văn bản.")
 
+    from sqlalchemy.orm import selectinload
+
     rel_result = await db.execute(
-        select(DocumentRelation).where(
+        select(DocumentRelation)
+        .options(
+            selectinload(DocumentRelation.source_document),
+            selectinload(DocumentRelation.target_document)
+        )
+        .where(
             (DocumentRelation.source_doc_id == doc_id) |
             (DocumentRelation.target_doc_id == doc_id)
         )
@@ -89,10 +96,29 @@ async def get_document(
 
     timeline = _build_timeline(doc, relations)
 
+    mapped_relations = []
+    for r in relations:
+        if r.source_doc_id == doc_id:
+            direction = "outgoing"
+            related_doc = r.target_document
+        else:
+            direction = "incoming"
+            related_doc = r.source_document
+            
+        mapped_relations.append(DocumentRelationOut(
+            id=r.id,
+            relation_type=r.relation_type,
+            related_doc_id=related_doc.id,
+            related_doc_title=related_doc.title,
+            related_doc_number=related_doc.doc_number,
+            direction=direction,
+            description=r.description
+        ))
+
     return DocumentWithTimeline(
         **{c: getattr(doc, c) for c in DocumentDetail.model_fields if hasattr(doc, c)},
         timeline=timeline,
-        relations=[DocumentRelationOut.model_validate(r) for r in relations],
+        relations=mapped_relations,
     )
 
 

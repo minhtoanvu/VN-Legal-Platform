@@ -47,7 +47,7 @@ async def search(
             query=body.query,
             field=body.field,
             filters=body.filters,
-            limit=20,
+            limit=body.limit + body.offset,
         )
 
     if body.mode in ("semantic", "hybrid"):
@@ -59,12 +59,12 @@ async def search(
                 query=body.query,
                 field=body.field,
                 filters=body.filters,
-                top_k=20,
+                top_k=body.limit + body.offset,
             )
         else:
             # Fallback BM25 nếu embedding chưa sẵn sàng
             semantic_docs, _ = await bm25_search(
-                session=db, query=body.query, field=body.field, filters=body.filters, limit=20
+                session=db, query=body.query, field=body.field, filters=body.filters, limit=body.limit + body.offset
             )
             for i, doc in enumerate(semantic_docs):
                 doc["rank"] = i + 1

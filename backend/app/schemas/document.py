@@ -38,9 +38,11 @@ class DocumentDetail(DocumentBase):
 class DocumentRelationOut(BaseModel):
     """Quan hệ văn bản — dùng cho Knowledge Graph và Timeline."""
     id: UUID
-    source_doc_id: UUID
-    target_doc_id: UUID
     relation_type: str       # GUIDES / AMENDS / REPLACES / REVOKES / CITES / IMPLEMENTS
+    related_doc_id: UUID
+    related_doc_title: str
+    related_doc_number: str
+    direction: str           # outgoing / incoming
     description: Optional[str]
 
     model_config = {"from_attributes": True}
