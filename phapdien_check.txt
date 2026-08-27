@@ -1,0 +1,40 @@
+TONG SO RECORDS: 2907
+
+CAC TRUONG DU LIEU (keys):
+['record_id', 'subject_id', 'topic_id', 'topic_number', 'topic_title', 'topic_title_vi', 'subject_number', 'subject_title', 'subject_title_vi', 'article_id', 'article_anchor', 'article_title', 'chapter_title', 'source_note_text', 'source_links', 'related_note_text', 'content_text', 'content_char_len', 'content_word_count', 'source_url', 'scraped_at']
+
+PHAN BO THEO TOPIC (top 20):
+   1500  Kế toán, kiểm toán
+   1407  Lao động
+
+MOT SO SOURCE_URL:
+  https://phapdien.moj.gov.vn/TraCuuPhapDien/ViewBoP
+
+KIEM TRA BO LUAT LAO DONG 2019 (45/2019/QH14):
+  Records lien quan lao dong: 1407co
+
+MOT RECORD MAU (record[0]):
+  record_id: d429b2aaa13010b1
+  subject_id: 2efd8c6f-509f-4207-84b6-6b22ff780f2a
+  topic_id: ed53d710-e3ae-4741-abc7-0f5dd82dec24
+  topic_number: 20
+  topic_title: Labour
+  topic_title_vi: Lao động
+  subject_number: 2
+  subject_title: Labour
+  subject_title_vi: Lao động
+  article_id: Điều 20.2.LQ.1
+  article_anchor: #2000200000000000100000100000000000000000
+  article_title: Điều 20.2.LQ.1. Phạm vi điều chỉnh
+  chapter_title: Chương I - NHỮNG QUY ĐỊNH CHUNG
+  source_note_text: (Điều 1 Bộ luật số 45/2019/QH14 Bộ Luật lao động ngày 20/11/2019 của Quốc hội, có hiệu lực thi hành kể từ ngày 01/01/202
+  source_links: [{'text': '(Điều 1 Bộ luật số 45/2019/QH14 Bộ Luật lao động ngày 20/11/2019 của Quốc hội, có hiệu lực thi hành kể từ ngà
+  related_note_text: (Điều này có nội dung liên quan đến Điều 6.3.LQ.33. Việc làm đối với người khuyết tật ; Điều 24.10.TT.5.3. Nội dung chi 
+  content_text: Bộ luật Lao động quy định tiêu chuẩn lao động; quyền, nghĩa vụ, trách nhiệm của người lao động, người sử dụng lao động, 
+  content_char_len: 317
+  content_word_count: 69
+  source_url: https://phapdien.moj.gov.vn/TraCuuPhapDien/ViewBoPD.aspx?obj=&demucid=2efd8c6f-509f-4207-84b6-6b22ff780f2a&mapc=1#200020
+  scraped_at: 2026-07-21T10:01:16+00:00
+
+RECORDS CO CONTENT (>50 ky tu): 2902/2907
+DO DAI CONTENT TRUNG BINH: 2124 ky tu
