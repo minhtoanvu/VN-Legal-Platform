@@ -1,0 +1,180 @@
+﻿TR╞»ß╗£NG ─Éß║áI Hß╗îC Mß╗₧ TP. Hß╗Æ CH├ì MINH
+THIß║╛T Kß║╛ Hß╗å THß╗ÉNG
+─Éß╗Æ ├üN NG├ÇNH - HK3 N─éM Hß╗îC 2025-2026
+AI LEGAL INTELLIGENCE PLATFORM
+Nß╗ün tß║úng hß╗ù trß╗ú tra cß╗⌐u, ph├ón t├¡ch v├á khai th├íc tri thß╗⌐c ph├íp l├╜
+d├ánh cho doanh nghiß╗çp Viß╗çt Nam
+T├ái liß╗çu Thiß║┐t kß║┐ Hß╗ç thß╗æng (System Design Document)
+Kß║┐ thß╗½a v├á triß╗ân khai chi tiß║┐t tß╗½ t├ái liß╗çu Ph├ón t├¡ch Hß╗ç thß╗æng
+
+Mß╗ñC Lß╗ñC
+
+
+CH╞»╞áNG 1: THIß║╛T Kß║╛ KIß║╛N TR├ÜC Tß╗öNG THß╗é (ARCHITECTURE DESIGN)
+Ch╞░╞íng n├áy m├┤ tß║ú c├ích c├íc th├ánh phß║ºn trong hß╗ç thß╗æng giao tiß║┐p vß╗¢i nhau, tß╗½ kiß║┐n tr├║c logic ─æß║┐n kiß║┐n tr├║c triß╗ân khai thß╗▒c tß║┐.
+1.1. Kiß║┐n tr├║c Hß╗ç thß╗æng (System Architecture)
+Hß╗ç thß╗æng ─æ╞░ß╗úc tß╗ò chß╗⌐c theo m├┤ h├¼nh 3 tß║ºng (3-Tier Architecture) nhß║▒m t├ích biß╗çt r├╡ tr├ích nhiß╗çm giß╗»a giao diß╗çn ng╞░ß╗¥i d├╣ng, xß╗¡ l├╜ nghiß╗çp vß╗Ñ v├á l╞░u trß╗» dß╗» liß╗çu ΓÇö gi├║p dß╗à bß║úo tr├¼, kiß╗âm thß╗¡ ─æß╗Öc lß║¡p tß╗½ng tß║ºng, v├á thuß║¡n tiß╗çn khi mß╗ƒ rß╗Öng quy m├┤ sau n├áy.
+
+H├¼nh 1.1 ΓÇö S╞í ─æß╗ô kiß║┐n tr├║c 3 tß║ºng: Client / API Server / Database
+1.2. Kiß║┐n tr├║c Triß╗ân khai (Deployment Architecture)
+To├án bß╗Ö hß╗ç thß╗æng ─æ╞░ß╗úc container h├│a bß║▒ng Docker Compose, ph├╣ hß╗úp vß╗¢i quy m├┤ v├á thß╗¥i gian thß╗▒c hiß╗çn ─æß╗ô ├ín (10 tuß║ºn), ─æß╗ông thß╗¥i vß║½n ─æß║úm bß║úo khß║ú n─âng n├óng cß║Ñp l├¬n m├┤i tr╞░ß╗¥ng production sau n├áy.
+
+H├¼nh 1.2 ΓÇö S╞í ─æß╗ô triß╗ân khai Docker Compose
+Giß╗¢i hß║ín RAM v├á tß╗æi ╞░u PostgreSQL/pgvector
+V├¼ chß║íy tr├¬n hß║í tß║ºng c├│ t├ái nguy├¬n giß╗¢i hß║ín, container postgres ─æ╞░ß╗úc cß║Ñu h├¼nh:
+Giß╗¢i hß║ín bß╗Ö nhß╗¢ container qua deploy.resources.limits.memory trong docker-compose.yml, tr├ính mß╗Öt container chiß║┐m hß║┐t RAM host.
+─Éiß╗üu chß╗ënh shared_buffers v├á work_mem cß╗ºa PostgreSQL ph├╣ hß╗úp vß╗¢i RAM khß║ú dß╗Ñng, c├ón bß║▒ng giß╗»a hiß╗çu n─âng truy vß║Ñn vector (HNSW cß║ºn bß╗Ö nhß╗¢ ─æß╗â giß╗» index) v├á ß╗òn ─æß╗ïnh hß╗ç thß╗æng.
+Dß╗» liß╗çu ─æ╞░ß╗úc l╞░u tr├¬n Docker Volume (pgdata) ─æß╗â ─æß║úm bß║úo t├¡nh bß╗ün vß╗»ng (persistence) khi container khß╗ƒi ─æß╗Öng lß║íi.
+CI/CD: GitHub Actions build image khi c├│ thay ─æß╗òi tr├¬n nh├ính ch├¡nh ΓåÆ ─æß║⌐y image ΓåÆ deploy bß║▒ng docker compose pull && up -d tr├¬n server.
+1.3. Thiß║┐t kß║┐ Component (Component Diagram)
+Frontend
+SearchPage.tsx ΓÇö Giao diß╗çn t├¼m kiß║┐m 3 chß║┐ ─æß╗Ö hybrid/semantic/keyword vß╗¢i bß╗Ö lß╗ìc ─æa chiß╗üu (l─⌐nh vß╗▒c, loß║íi v─ân bß║ún, hiß╗çu lß╗▒c).
+DocumentPage.tsx ΓÇö Xem to├án v─ân, Timeline lß╗ïch sß╗¡ v├á Knowledge Graph. T├¡ch hß╗úp Vis.js Network ─æß╗â trß╗▒c quan h├│a quan hß╗ç v─ân bß║ún.
+AnalyticsPage.tsx ΓÇö Dashboard 5 biß╗âu ─æß╗ô (Line, Pie, Bar, Heatmap, KPI Cards) d├╣ng th╞░ viß╗çn Recharts.
+WorkspacePage.tsx ΓÇö Quß║ún l├╜ Collections, Bookmarks v├á Ghi ch├║ c├í nh├ón.
+AuthPage.tsx ΓÇö ─É─âng k├╜ / ─É─âng nhß║¡p. L╞░u JWT trong localStorage; tß╗▒ ─æß╗Öng refresh khi hß║┐t hß║ín.
+State Management: Zustand store quß║ún l├╜ trß║íng th├íi to├án cß╗Ñc (user session, search filters).
+API Layer: services/ ΓÇö T├ích biß╗çt ho├án to├án logic gß╗ìi API khß╗Åi UI component.
+Backend ΓÇö C├íc module ch├¡nh
+
+1.4. Ma trß║¡n Truy vß║┐t (Traceability Matrix)
+Bß║úng d╞░ß╗¢i ─æ├óy ─æß╗æi chiß║┐u c├íc Use Case tß╗½ Ph├ón t├¡ch Hß╗ç thß╗æng ─æß╗â chß╗⌐ng minh Thiß║┐t kß║┐ ─æ├ú phß╗º ─æß║ºy ─æß╗º v├á kh├┤ng ─æi lß╗çch khß╗Åi phß║ím vi:
+CH╞»╞áNG 2: THIß║╛T Kß║╛ Dß╗« LIß╗åU (DATABASE DESIGN)
+Kiß║┐n tr├║c Database ─æ╞░ß╗úc thiß║┐t kß║┐ chuß║⌐n h├│a tr├¬n PostgreSQL, phß╗Ñc vß╗Ñ ─æß╗ông thß╗¥i Relational query, Full-text search v├á Vector search th├┤ng qua extension pgvector. Ch├║ th├¡ch: PK = Kh├│a ch├¡nh, FK = Kh├│a ngoß║íi.
+2.1. S╞í ─æß╗ô Thß╗▒c thß╗â Li├¬n kß║┐t (ERD)
+
+H├¼nh 2.1 ΓÇö S╞í ─æß╗ô ERD giß╗»a 9 bß║úng dß╗» liß╗çu cß╗ºa hß╗ç thß╗æng
+2.2. ─Éß║╖c tß║ú Thiß║┐t kß║┐ Vß║¡t l├╜ (Physical Data Model)
+2.2.1. Bß║úng documents ΓÇö V─ân bß║ún ph├íp l├╜
+Quan hß╗ç: 1ΓÇôn vß╗¢i document_chunks, document_relations, notes, collection_documents.
+2.2.2. Bß║úng document_chunks ΓÇö Dß╗» liß╗çu nß╗ün cho RAG
+Quan hß╗ç: nΓÇô1 vß╗¢i documents. Index HNSW tr├¬n embedding ─æ╞░ß╗úc tß║ío bß║▒ng migration sau khi dß╗» liß╗çu ─æ├ú nß║íp ─æß╗º, kh├┤ng tß║ío ngay l├║c khß╗ƒi tß║ío bß║úng.
+2.2.3. Bß║úng document_relations ΓÇö Dß╗» liß╗çu nß╗ün cho Knowledge Graph
+R├áng buß╗Öc: cß║╖p (source_doc_id, target_doc_id, relation_type) kh├┤ng ─æ╞░ß╗úc lß║╖p lß║íi (Unique constraint).
+2.2.4. Bß║úng organizations ΓÇö Tß╗ò chß╗⌐c/Doanh nghiß╗çp
+Ghi ch├║: Bß║úng organizations ─æ╞░ß╗úc thiß║┐t kß║┐ sß║╡n ─æß╗â ─æß║úm bß║úo khß║ú n─âng mß╗ƒ rß╗Öng (forward-compatible), nh╞░ng chß╗⌐c n─âng doanh nghiß╗çp n├óng cao tß║ím ho├ún trong phß║ím vi 10 tuß║ºn cß╗ºa ─æß╗ô ├ín.
+Quan hß╗ç: 1ΓÇôn vß╗¢i users (mß╗Öt tß╗ò chß╗⌐c c├│ nhiß╗üu nh├ón sß╗▒).
+2.2.5. Bß║úng users ΓÇö Ng╞░ß╗¥i d├╣ng v├á ph├ón quyß╗ün
+Quan hß╗ç: nΓÇô1 vß╗¢i organizations; 1ΓÇôn vß╗¢i collections, notes, query_logs.
+Ghi ch├║: Tr╞░ß╗¥ng is_shared (nß║┐u c├│) ─æ╞░ß╗úc thiß║┐t kß║┐ dß╗▒ ph├▓ng cho t├¡nh n─âng chia sß║╗ nh├│m nh╞░ng ch╞░a triß╗ân khai ß╗ƒ phi├¬n bß║ún hiß╗çn tß║íi.
+2.2.6. Bß║úng collections ΓÇö Bß╗Ö s╞░u tß║¡p c├í nh├ón/nh├│m
+2.2.7. Bß║úng collection_documents ΓÇö Bß║úng trung gian nΓÇôn
+2.2.8. Bß║úng notes ΓÇö Ghi ch├║ c├í nh├ón tr├¬n v─ân bß║ún
+2.2.9. Bß║úng query_logs ΓÇö Log lß╗ïch sß╗¡ hß╗Åi AI
+Phß╗Ñc vß╗Ñ Analytics nß╗Öi bß╗Ö v├á RAG Evaluation (─æß╗æi chiß║┐u response ─æ├ú trß║ú lß╗¥i vß╗¢i ─æ├ính gi├í chß║Ñt l╞░ß╗úng sau n├áy).
+2.3. Thiß║┐t kß║┐ Index v├á Tß╗æi ╞░u T├¼m kiß║┐m (Crucial for AI)
+Full-text Search ΓÇö search_vector (TSVECTOR)
+Tr╞░ß╗¥ng search_vector tr├¬n bß║úng documents l╞░u dß║íng biß╗âu diß╗àn tß╗½ kh├│a ─æ├ú ─æ╞░ß╗úc PostgreSQL xß╗¡ l├╜ (loß║íi bß╗Å tß╗½ dß╗½ng, chuß║⌐n h├│a) ─æß╗â phß╗Ñc vß╗Ñ t├¼m kiß║┐m BM25/ranking theo tß╗½ kh├│a ch├¡nh x├íc ΓÇö nh├ính 'ch├¡nh x├íc' cß╗ºa Hybrid Search, bß╗ò trß╗ú cho nh├ính 'ngß╗» ngh─⌐a'.
+Semantic Search ΓÇö VECTOR(768) v├á HNSW
+Tr╞░ß╗¥ng embedding tr├¬n bß║úng document_chunks l╞░u vector 768 chiß╗üu ΓÇö ─æß║ºu ra cß╗ºa m├┤ h├¼nh bkai-foundation-models/vietnamese-bi-encoder. ─Éß╗â t├¼m kiß║┐m hiß╗çu quß║ú tr├¬n h├áng tr─âm ngh├¼n vector, hß╗ç thß╗æng d├╣ng chß╗ë mß╗Ñc HNSW (Hierarchical Navigable Small World) thay v├¼ IVFFlat, v├¼:
+HNSW kh├┤ng y├¬u cß║ºu biß║┐t tr╞░ß╗¢c sß╗æ l╞░ß╗úng vector khi tß║ío index ΓÇö ph├╣ hß╗úp vß╗¢i dß╗» liß╗çu t─âng dß║ºn theo thß╗¥i gian.
+HNSW ─æß║ít recall (─æß╗Ö ─æß║ºy ─æß╗º kß║┐t quß║ú ─æ├║ng) cao h╞ín IVFFlat ß╗ƒ c├╣ng mß╗⌐c ─æß╗Ö trß╗à truy vß║Ñn.
+HNSW kh├┤ng cß║ºn chß║íy VACUUM ANALYZE sau mß╗ùi lß║ºn insert ─æß╗â giß╗» chß║Ñt l╞░ß╗úng index ΓÇö giß║úm chi ph├¡ vß║¡n h├ánh.
+─É├óy l├á lß╗▒a chß╗ìn kß╗╣ thuß║¡t cß╗æt l├╡i quyß║┐t ─æß╗ïnh tß╗æc ─æß╗Ö v├á ─æß╗Ö ch├¡nh x├íc cß╗ºa t├¡nh n─âng Semantic Search ΓÇö ─æiß╗âm kh├íc biß╗çt kß╗╣ thuß║¡t ch├¡nh so vß╗¢i c├íc hß╗ç thß╗æng tra cß╗⌐u ph├íp luß║¡t hiß╗çn c├│ tß║íi Viß╗çt Nam.
+
+CH╞»╞áNG 3: THIß║╛T Kß║╛ THUß║¼T TO├üN & Xß╗¼ L├¥ (ALGORITHM & LOGIC DESIGN)
+Ch╞░╞íng n├áy biß╗âu diß╗àn luß╗ông chß║íy thß╗▒c tß║┐ cß╗ºa c├íc t├¡nh n─âng l├╡i bß║▒ng Sequence Diagram, tß║¡p trung v├áo 3 luß╗ông xß╗¡ l├╜ quan trß╗ìng nhß║Ñt cß╗ºa hß╗ç thß╗æng.
+3.1. Thiß║┐t kß║┐ Luß╗ông Hybrid Search (Search Pipeline)
+Hybrid Search kß║┐t hß╗úp BM25 (ch├¡nh x├íc tß╗½ kh├│a) v├á Semantic Search (ngß╗» ngh─⌐a) ΓÇö hai ph╞░╞íng ph├íp c├│ thang ─æiß╗âm (scale) ho├án to├án kh├íc nhau n├¬n kh├┤ng thß╗â cß╗Öng trß╗▒c tiß║┐p. Hß╗ç thß╗æng d├╣ng thuß║¡t to├ín Reciprocal Rank Fusion (RRF) ─æß╗â hß╗úp nhß║Ñt kß║┐t quß║ú dß╗▒a tr├¬n thß╗⌐ hß║íng (rank) thay v├¼ ─æiß╗âm sß╗æ th├┤.
+
+H├¼nh 3.1 ΓÇö Luß╗ông Hybrid Search kß║┐t hß╗úp BM25 v├á Semantic Search qua RRF
+k = 60 l├á gi├í trß╗ï mß║╖c ─æß╗ïnh ─æ╞░ß╗úc Cormack et al. (2009) ─æß╗ü xuß║Ñt v├á ─æ╞░ß╗úc sß╗¡ dß╗Ñng rß╗Öng r├úi trong c├┤ng nghiß╗çp cho b├ái to├ín Hybrid Search ΓÇö d├╣ng ─æß╗â chß╗⌐ng minh c─ân cß╗⌐ hß╗ìc thuß║¡t cß╗ºa lß╗▒a chß╗ìn thuß║¡t to├ín.
+3.2. Thiß║┐t kß║┐ Luß╗ông Hß╗Åi ─æ├íp AI (RAG Pipeline)
+
+H├¼nh 3.2 ΓÇö Sequence Diagram: luß╗ông RAG tß╗½ c├óu hß╗Åi ng╞░ß╗¥i d├╣ng ─æß║┐n c├óu trß║ú lß╗¥i c├│ tr├¡ch dß║½n
+To├án bß╗Ö luß╗ông gß╗ôm 10 b╞░ß╗¢c: m├ú h├│a c├óu hß╗Åi th├ánh vector ΓåÆ Hybrid Search lß║Ñy top-5 ─æoß║ín li├¬n quan ΓåÆ ─æ├│ng g├│i (augment) th├ánh prompt ΓåÆ gß╗ìi Gemini AI ΓåÆ stream c├óu trß║ú lß╗¥i k├¿m tr├¡ch dß║½n nguß╗ôn vß╗ü client qua SSE.
+System Prompt chß╗æng ß║úo gi├íc (Anti-hallucination)
+3.3. Thiß║┐t kß║┐ Luß╗ông Xß╗¡ l├╜ Dß╗» liß╗çu (ETL Pipeline)
+Dß╗» liß╗çu ─æß║ºu v├áo ─æ╞░ß╗úc lß║Ñy tß╗½ c├íc bß╗Ö dataset c├┤ng khai tr├¬n HuggingFace (th1nhng0/vietnamese-legal-documents, tmquan/phapdien-moj-gov-vn...), kh├┤ng thß╗▒c hiß╗çn crawl/scrape thß╗º c├┤ng. Quy tr├¼nh ETL gß╗ôm 4 b╞░ß╗¢c:
+Extract: Tß║úi dataset tß╗½ HuggingFace ΓåÆ chuß║⌐n h├│a schema, ├ính xß║í c├íc tr╞░ß╗¥ng vß╗ü ─æ├║ng cß║Ñu tr├║c bß║úng documents.
+Transform: Lß╗ìc theo 2 l─⌐nh vß╗▒c trß╗ìng t├óm (Lao ─æß╗Öng - BHXH, Thuß║┐ - Kß║┐ to├ín) ΓåÆ cß║»t nß╗Öi dung th├ánh chunk 256-512 tokens theo chiß║┐n l╞░ß╗úc sliding window c├│ overlap 50 tokens ─æß╗â giß╗» ngß╗» cß║únh qua ranh giß╗¢i chunk.
+Embed: Sinh vector 768 chiß╗üu cho tß╗½ng chunk bß║▒ng m├┤ h├¼nh bkai-foundation-models/vietnamese-bi-encoder (─æ├ú fine-tune tr├¬n Zalo Legal Text Retrieval, Accuracy@10 = 93.59%). Xß╗¡ l├╜ theo batch ─æß╗â tß╗æi ╞░u tß╗æc ─æß╗Ö.
+Load: Ghi metadata v├áo bß║úng documents, vector v├áo document_chunks.embedding. Build chß╗ë mß╗Ñc HNSW sau khi ─æ├ú nß║íp ─æß╗º dß╗» liß╗çu.
+
+CH╞»╞áNG 4: THIß║╛T Kß║╛ API (API DESIGN)
+─Éß║╖c tß║ú c├íc cß╗òng giao tiß║┐p RESTful API giß╗»a Frontend v├á Backend.
+4.1. Ti├¬u chuß║⌐n Thiß║┐t kß║┐ API
+Tiß╗ün tß╗æ API: To├án bß╗Ö endpoint ─æ╞░ß╗úc ─æß║╖t d╞░ß╗¢i tiß╗ün tß╗æ /api/v1/ ─æß╗â ─æß║úm bß║úo an to├án khi n├óng cß║Ñp (API Versioning).
+Cß║Ñu tr├║c Lß╗ùi chuß║⌐n (Standard Error Response): Hß╗ç thß╗æng thß╗æng nhß║Ñt trß║ú vß╗ü JSON c├│ dß║íng {"error": {"code": "ERROR_CODE", "message": "M├┤ tß║ú"}} thay v├¼ text thuß║ºn, ─æß╗â frontend dß╗à xß╗¡ l├╜.
+Kiß║┐n tr├║c RESTful, trao ─æß╗òi dß╗» liß╗çu qua JSON.
+X├íc thß╗▒c bß║▒ng JWT Bearer Token trong header Authorization cho c├íc endpoint y├¬u cß║ºu ─æ─âng nhß║¡p.
+Endpoint AI Chat sß╗¡ dß╗Ñng Server-Sent Events (SSE) ─æß╗â stream c├óu trß║ú lß╗¥i theo thß╗¥i gian thß╗▒c thay v├¼ chß╗¥ phß║ún hß╗ôi trß╗ìn vß║╣n.
+M├ú trß║íng th├íi HTTP chuß║⌐n: 200 (th├ánh c├┤ng), 201 (tß║ío mß╗¢i), 400 (dß╗» liß╗çu kh├┤ng hß╗úp lß╗ç), 401 (ch╞░a x├íc thß╗▒c), 403 (kh├┤ng ─æß╗º quyß╗ün), 404 (kh├┤ng t├¼m thß║Ñy), 429 (v╞░ß╗út giß╗¢i hß║ín tß║ºn suß║Ñt), 500 (lß╗ùi hß╗ç thß╗æng).
+4.2. ─Éß║╖c tß║ú c├íc Endpoint ch├¡nh
+Bß║úng liß╗çt k├¬ c├íc endpoint ─æß║íi diß╗çn cho tß╗½ng nh├│m chß╗⌐c n─âng ch├¡nh; danh s├ích ─æß║ºy ─æß╗º (bao gß╗ôm c├íc endpoint CRUD phß╗Ñ trß╗ú) ─æ╞░ß╗úc quß║ún l├╜ tß╗▒ ─æß╗Öng qua t├ái liß╗çu OpenAPI do FastAPI tß╗▒ sinh (/docs).
+(*) Khuyen nghi yeu cau xac thuc trong moi truong production de kiem soat chi phi goi LLM. Danh sach day du endpoint CRUD phu tro qua OpenAPI tai /docs.
+
+CH╞»╞áNG 5: THIß║╛T Kß║╛ GIAO DIß╗åN (UI/UX DESIGN)
+5.1. Phong c├ích Thiß║┐t kß║┐ (Design System)
+Giao diß╗çn ├íp dß╗Ñng phong c├ích Dark Glassmorphism (nß╗ün tß╗æi kß║┐t hß╗úp hiß╗çu ß╗⌐ng k├¡nh mß╗¥ - backdrop blur, ─æß╗Ö trong suß╗æt, viß╗ün ph├ít s├íng nhß║╣), tß║ío cß║úm gi├íc hiß╗çn ─æß║íi v├á chuy├¬n nghiß╗çp ΓÇö ph├╣ hß╗úp ─æß╗ïnh vß╗ï sß║ún phß║⌐m c├┤ng nghß╗ç cao cho doanh nghiß╗çp, kh├íc biß╗çt vß╗¢i giao diß╗çn truyß╗ün thß╗æng cß╗ºa c├íc hß╗ç thß╗æng tra cß╗⌐u ph├íp luß║¡t hiß╗çn c├│ (thuvienphapluat.vn, vbpl.vn).
+Bß║úng m├áu nß╗ün: t├┤ng tß╗æi (navy/charcoal), ─æiß╗âm nhß║Ñn bß║▒ng gradient t├¡m-xanh cho c├íc th├ánh phß║ºn t╞░╞íng t├íc (n├║t bß║Ñm, node ─æang chß╗ìn trong Knowledge Graph).
+Typography: font sans-serif r├╡ r├áng, ╞░u ti├¬n ─æß╗Ö t╞░╞íng phß║ún cao ─æß╗â ─æß╗ìc v─ân bß║ún ph├íp l├╜ d├ái trong thß╗¥i gian d├ái kh├┤ng mß╗Åi mß║»t.
+Component k├¡nh mß╗¥ d├╣ng nhß║Ñt qu├ín cho: thß║╗ kß║┐t quß║ú t├¼m kiß║┐m, khung chat AI, panel chi tiß║┐t v─ân bß║ún, card thß╗æng k├¬ tr├¬n Dashboard.
+5.2. S╞í ─æß╗ô ─Éiß╗üu h╞░ß╗¢ng (Navigation Map)
+
+H├¼nh 5.1 ΓÇö S╞í ─æß╗ô ─æiß╗üu h╞░ß╗¢ng: Kh├ích Γåö ─É─âng nhß║¡p Γåö Trang chß╗º Γåö Chat AI / Knowledge Graph / Dashboard Γåö Workspace
+5.3. Thiß║┐t kß║┐ M├án h├¼nh (Mockups/Wireframes)
+M├án h├¼nh T├¼m kiß║┐m
+Thanh t├¼m kiß║┐m trung t├óm hß╗ù trß╗ú cß║ú tß╗½ kh├│a v├á c├óu hß╗Åi tß╗▒ nhi├¬n.
+Bß╗Ö lß╗ìc b├¬n tr├íi: loß║íi v─ân bß║ún, l─⌐nh vß╗▒c, c╞í quan ban h├ánh, khoß║úng thß╗¥i gian, trß║íng th├íi hiß╗çu lß╗▒c.
+Danh s├ích kß║┐t quß║ú dß║íng thß║╗ k├¡nh mß╗¥, c├│ nh├ún trß║íng th├íi hiß╗çu lß╗▒c (c├▓n/hß║┐t hiß╗çu lß╗▒c) nß╗òi bß║¡t bß║▒ng m├áu.
+M├án h├¼nh Hß╗Åi ─æ├íp AI (Chat)
+Khung chat dß║íng hß╗Öi thoß║íi, c├óu trß║ú lß╗¥i AI stream theo thß╗¥i gian thß╗▒c (hiß╗çu ß╗⌐ng g├╡ chß╗»).
+Mß╗ùi c├óu trß║ú lß╗¥i k├¿m danh s├ích nguß╗ôn tr├¡ch dß║½n c├│ thß╗â click ─æß╗â mß╗ƒ v─ân bß║ún gß╗æc.
+├ö nhß║¡p c├óu hß╗Åi tiß║┐p theo giß╗» ngß╗» cß║únh hß╗Öi thoß║íi (lich su hoi thoai duoc truyen theo tung request - stateless design).
+M├án h├¼nh Knowledge Graph
+Canvas ─æß╗ô thß╗ï t╞░╞íng t├íc: v─ân bß║ún trung t├óm ß╗ƒ giß╗»a, c├íc v─ân bß║ún li├¬n quan tß╗Åa ra xung quanh theo loß║íi quan hß╗ç (m├áu cß║ính kh├íc nhau cho GUIDES/AMENDS/REPLACES...).
+Click v├áo node hiß╗ân thß╗ï panel t├│m tß║»t b├¬n phß║úi, c├│ n├║t 'Xem to├án v─ân'.
+M├án h├¼nh Dashboard Thß╗æng k├¬
+Bß╗Ö lß╗ìc l─⌐nh vß╗▒c + khoß║úng thß╗¥i gian ß╗ƒ ─æß║ºu trang.
+Biß╗âu ─æß╗ô ─æ╞░ß╗¥ng: sß╗æ v─ân bß║ún ban h├ánh theo n─âm. Biß╗âu ─æß╗ô cß╗Öt: ph├ón bß╗æ theo c╞í quan ban h├ánh. Biß╗âu ─æß╗ô tr├▓n: tß╗ë lß╗ç c├▓n/hß║┐t hiß╗çu lß╗▒c.
+Wireframe chi tiß║┐t (Figma) sß║╜ ─æ╞░ß╗úc ─æ├¡nh k├¿m phß╗Ñ lß╗Ñc ri├¬ng khi ho├án thiß╗çn giao diß╗çn; phß║ºn n├áy m├┤ tß║ú bß╗æ cß╗Ñc v├á luß╗ông t╞░╞íng t├íc dß╗▒ kiß║┐n cho tß╗½ng m├án h├¼nh.
+
+CH╞»╞áNG 6: THIß║╛T Kß║╛ Bß║óO Mß║¼T & AN TO├ÇN Hß╗å THß╗ÉNG
+6.1. Bß║úo mß║¡t X├íc thß╗▒c
+Hß╗ç thß╗æng d├╣ng chuß║⌐n JWT (JSON Web Token) cho x├íc thß╗▒c stateless:
+Access Token: thß╗¥i hß║ín ngß║»n (VD: 30-60 ph├║t), gß╗¡i k├¿m trong header Authorization: Bearer <token> cho mß╗ùi request cß║ºn x├íc thß╗▒c.
+Refresh Token: thß╗¥i hß║ín d├ái h╞ín, d├╣ng ─æß╗â cß║Ñp lß║íi Access Token mß╗¢i m├á kh├┤ng cß║ºn ─æ─âng nhß║¡p lß║íi, l╞░u ß╗ƒ n╞íi an to├án ph├¡a client (httpOnly cookie khuyß║┐n nghß╗ï).
+Middleware x├íc thß╗▒c kiß╗âm tra chß╗» k├╜ v├á hß║ín d├╣ng token tr╞░ß╗¢c khi cho ph├⌐p truy cß║¡p route bß║úo vß╗ç.
+6.2. Bß║úo mß║¡t Dß╗» liß╗çu
+Mß║¡t khß║⌐u ng╞░ß╗¥i d├╣ng ─æ╞░ß╗úc m├ú h├│a mß╗Öt chiß╗üu bß║▒ng Bcrypt tr╞░ß╗¢c khi l╞░u v├áo cß╗Öt password_hash ΓÇö kh├┤ng bao giß╗¥ l╞░u plaintext.
+Kß║┐t nß╗æi giß╗»a Client v├á API Server qua HTTPS trong m├┤i tr╞░ß╗¥ng production.
+Sß╗¡ dß╗Ñng ORM (SQLAlchemy) vß╗¢i truy vß║Ñn tham sß╗æ h├│a, tr├ính SQL Injection.
+6.3. Ph├ón quyß╗ün (RBAC - Role-Based Access Control)
+Ghi ch├║: Vai tr├▓ Enterprise User ─æ╞░ß╗úc ─æß╗ïnh ngh─⌐a ─æß╗â sß║╡n s├áng ─æß╗ông bß╗Ö vß╗¢i bß║úng organizations, tuy nhi├¬n sß║╜ kh├┤ng hoß║ít ─æß╗Öng trong phß║ím vi 10 tuß║ºn (out-of-scope).
+Logic kiß╗âm tra quyß╗ün ─æ╞░ß╗úc ─æß║╖t tß║íi tß║ºng middleware/dependency cß╗ºa FastAPI (VD: Depends(require_role("admin"))), ├íp dß╗Ñng thß╗æng nhß║Ñt cho mß╗ìi route ΓÇö tr├ính viß╗çc kiß╗âm tra quyß╗ün rß║úi r├íc v├á kh├┤ng nhß║Ñt qu├ín trong tß╗½ng handler.
+6.4. Ph├▓ng chß╗æng Prompt Injection
+V├¼ AI Assistant nhß║¡n input tß╗▒ do tß╗½ ng╞░ß╗¥i d├╣ng, hß╗ç thß╗æng ├íp dß╗Ñng c├íc biß╗çn ph├íp giß║úm thiß╗âu rß╗ºi ro ng╞░ß╗¥i d├╣ng cß╗æ t├¼nh ch├¿n chß╗ë thß╗ï nhß║▒m ghi ─æ├¿ System Prompt gß╗æc (Prompt Injection):
+System Prompt ─æ╞░ß╗úc cß╗æ ─æß╗ïnh tß║íi tß║ºng Backend (Prompt Builder), ng╞░ß╗¥i d├╣ng kh├┤ng c├│ c├ích n├áo truyß╗ün trß╗▒c tiß║┐p v├áo vß╗ï tr├¡ System role cß╗ºa request gß╗¡i tß╗¢i Gemini AI.
+C├óu hß╗Åi ng╞░ß╗¥i d├╣ng chß╗ë ─æ╞░ß╗úc ch├¿n v├áo vß╗ï tr├¡ [CONTEXT]/[QUESTION] ─æ├ú quy ─æß╗ïnh sß║╡n trong template prompt, kh├┤ng ─æ╞░ß╗úc nß╗æi chuß╗ùi tß╗▒ do v├áo phß║ºn chß╗ë thß╗ï hß╗ç thß╗æng.
+Giß╗¢i hß║ín ─æß╗Ö d├ái input c├óu hß╗Åi ─æß╗â giß║úm bß╗ü mß║╖t tß║Ñn c├┤ng v├á chi ph├¡ gß╗ìi LLM.
+
+CH╞»╞áNG 7: THIß║╛T Kß║╛ Xß╗¼ L├¥ Lß╗ûI & KHß║ó N─éNG CHß╗èU Lß╗ûI (RESILIENCE DESIGN)
+V├¼ hß╗ç thß╗æng phß╗Ñ thuß╗Öc v├áo dß╗ïch vß╗Ñ AI b├¬n ngo├ái (Gemini AI) ΓÇö th├ánh phß║ºn nß║▒m ngo├ái tß║ºm kiß╗âm so├ít trß╗▒c tiß║┐p ΓÇö ch╞░╞íng n├áy thiß║┐t kß║┐ c├íc c╞í chß║┐ ─æß║úm bß║úo hß╗ç thß╗æng vß║½n phß║ún hß╗ôi hß╗úp l├╜ khi th├ánh phß║ºn phß╗Ñ thuß╗Öc gß║╖p sß╗▒ cß╗æ, thay v├¼ ─æß╗â lß╗ùi lan ra to├án hß╗ç thß╗æng.
+7.1. Circuit Breaker cho lß╗¥i gß╗ìi LLM
+├üp dß╗Ñng mß║½u thiß║┐t kß║┐ Circuit Breaker quanh lß╗¥i gß╗ìi Gemini AI trong RAG Service:
+Trß║íng th├íi Closed (b├¼nh th╞░ß╗¥ng): mß╗ìi request ─æ╞░ß╗úc gß╗ìi thß║│ng tß╗¢i Gemini AI.
+Khi sß╗æ lß║ºn lß╗ùi/timeout li├¬n tiß║┐p v╞░ß╗út ng╞░ß╗íng trong mß╗Öt cß╗¡a sß╗ò thß╗¥i gian, breaker chuyß╗ân sang trß║íng th├íi Open: tß║ím ngß║»t gß╗ìi Gemini AI, trß║ú ngay th├┤ng b├ío dß╗▒ ph├▓ng cho ng╞░ß╗¥i d├╣ng (VD: "Trß╗ú l├╜ AI ─æang tß║ím gi├ín ─æoß║ín, vui l├▓ng thß╗¡ lß║íi sau ├¡t ph├║t Hß╗ç thß╗æng tß╗▒ ─æß╗Öng trß║ú vß╗ü danh s├ích kß║┐t quß║ú t├¼m kiß║┐m li├¬n quan tß╗½ c╞í sß╗ƒ dß╗» liß╗çu thay thß║┐.") thay v├¼ ─æß╗â ng╞░ß╗¥i d├╣ng chß╗¥ timeout.
+Sau mß╗Öt khoß║úng thß╗¥i gian nghß╗ë, breaker chuyß╗ân sang trß║íng th├íi Half-Open: cho ph├⌐p mß╗Öt sß╗æ request thß╗¡ nghiß╗çm ─æi qua; nß║┐u th├ánh c├┤ng, quay lß║íi Closed, nß║┐u vß║½n lß╗ùi, quay lß║íi Open.
+7.2. Timeout v├á Retry Policy
+Hß╗ç thß╗æng thiß║┐t lß║¡p thß╗¥i gian chß╗¥ (timeout) cß╗æ ─æß╗ïnh l├á 10 gi├óy cho mß╗ùi lß║ºn gß╗ìi LLM API ΓÇö ─æ╞░ß╗úc cß║Ñu h├¼nh qua hß║▒ng sß╗æ LLM_TIMEOUT_SEC = 10 trong module rag_service.py. ─É├óy l├á ng╞░ß╗íng c├ón bß║▒ng giß╗»a trß║úi nghiß╗çm ng╞░ß╗¥i d├╣ng (kh├┤ng chß╗¥ qu├í l├óu) v├á ─æß╗Ö phß╗⌐c tß║íp cß╗ºa c├óu hß╗Åi ph├íp l├╜.
+Hß╗ç thß╗æng kh├┤ng thß╗▒c hiß╗çn Retry tß╗▒ ─æß╗Öng sau timeout v├¼ c├óu hß╗Åi ph├íp l├╜ c├│ thß╗â kh├┤ng ─æß╗ông bß╗Ö vß╗¢i ngß╗» cß║únh nß║┐u gß╗ìi lß║íi ΓÇö thay v├áo ─æ├│, Circuit Breaker k├¡ch hoß║ít Fallback ngay lß║¡p tß╗⌐c ─æß╗â ─æß║úm bß║úo phß║ún hß╗ôi nhanh.
+Thß╗¥i gian timeout 10 gi├óy ─æ╞░ß╗úc ─æo tß╗½ token ─æß║ºu ti├¬n cß╗ºa stream (first-token latency), kh├┤ng phß║úi tß╗òng thß╗¥i gian stream ΓÇö ─æß║úm bß║úo ng╞░ß╗¥i d├╣ng kh├┤ng phß║úi chß╗¥ qu├í l├óu tr╞░ß╗¢c khi thß║Ñy phß║ún hß╗ôi ─æß║ºu ti├¬n.
+7.3. Rate Limiting
+Endpoint /ai/chat ─æ╞░ß╗úc giß╗¢i hß║ín tß║ºn suß║Ñt gß╗ìi theo ng╞░ß╗¥i d├╣ng (VD: 15 request/ph├║t/user) nhß║▒m:
+Tr├ính mß╗Öt t├ái khoß║ún spam g├óy tß╗æn chi ph├¡ gß╗ìi Gemini AI cß╗ºa to├án hß╗ç thß╗æng.
+─Éß║úm bß║úo c├┤ng bß║▒ng t├ái nguy├¬n giß╗»a nhiß╗üu ng╞░ß╗¥i d├╣ng ─æß╗ông thß╗¥i trong giß╗¥ cao ─æiß╗âm.
+V╞░ß╗út giß╗¢i hß║ín trß║ú vß╗ü m├ú 429 (Too Many Requests) k├¿m thß╗¥i gian chß╗¥ gß╗úi ├╜ (Retry-After header).
+7.4. Logging & Gi├ím s├ít
+Mß╗ìi l╞░ß╗út gß╗ìi AI ─æ╞░ß╗úc ghi v├áo bß║úng query_logs (duration_ms, query_type, response) ΓÇö vß╗½a phß╗Ñc vß╗Ñ Analytics, vß╗½a l├á dß╗» liß╗çu ─æß╗â ph├ít hiß╗çn bß║Ñt th╞░ß╗¥ng (VD: tß╗ë lß╗ç lß╗ùi t─âng ─æß╗Öt biß║┐n).
+Log c├│ cß║Ñu tr├║c (structured logging) ß╗ƒ tß║ºng Backend, ph├ón biß╗çt r├╡ log nghiß╗çp vß╗Ñ v├á log lß╗ùi hß╗ç thß╗æng, thuß║¡n tiß╗çn tra cß╗⌐u khi sß╗▒ cß╗æ xß║úy ra.
+C├íc ng╞░ß╗íng cß╗ºa Circuit Breaker v├á Rate Limiting n├¬n ─æ╞░ß╗úc theo d├╡i qua log ─æß╗â tinh chß╗ënh tham sß╗æ ph├╣ hß╗úp trong qu├í tr├¼nh vß║¡n h├ánh thß╗▒c tß║┐.
+
+CH╞»╞áNG 8: Y├èU Cß║ªU PHI CHß╗¿C N─éNG (NON-FUNCTIONAL REQUIREMENTS)
+Thß╗¥i gian phß║ún hß╗ôi (Latency): Truy vß║Ñn t├¼m kiß║┐m th├┤ng th╞░ß╗¥ng (BM25/Semantic) phß║úi ho├án th├ánh v├á trß║ú vß╗ü d╞░ß╗¢i 2 gi├óy.
+AI First-Token Latency: Tß╗½ l├║c ng╞░ß╗¥i d├╣ng gß╗¡i c├óu hß╗Åi ph├íp l├╜, AI phß║úi bß║»t ─æß║ºu stream k├╜ tß╗▒ ─æß║ºu ti├¬n l├¬n m├án h├¼nh d╞░ß╗¢i 3 gi├óy ─æß╗â ─æß║úm bß║úo UX (L├╜ do thiß║┐t lß║¡p timeout 10s cß╗ºa Circuit Breaker).
+Sß╗⌐c chß╗ïu tß║úi (Concurrency): Hß╗ù trß╗ú tß╗æi thiß╗âu 50 users thao t├íc ─æß╗ông thß╗¥i tr├¬n kiß║┐n tr├║c Docker mß╗Öt m├íy chß╗º (8GB RAM), sß╗¡ dß╗Ñng FastAPI async workers.
+GHI CH├Ü CHUNG
+T├ái liß╗çu n├áy ─æ├│ng vai tr├▓ bß╗ò sung chi tiß║┐t kß╗╣ thuß║¡t cho t├ái liß╗çu Ph├ón t├¡ch Hß╗ç thß╗æng ─æ├ú nß╗Öp tr╞░ß╗¢c ─æ├│ ΓÇö kh├┤ng lß║╖p lß║íi nß╗Öi dung Use Case, Activity Diagram v├á bß╗æi cß║únh nghiß╗çp vß╗Ñ ─æ├ú tr├¼nh b├áy ß╗ƒ t├ái liß╗çu ─æ├│. Mß╗ìi quyß║┐t ─æß╗ïnh thiß║┐t kß║┐ trong t├ái liß╗çu n├áy cß║ºn ─æ╞░ß╗úc ─æß╗æi chiß║┐u v├á giß╗» ─æß╗ông bß╗Ö vß╗¢i code hiß╗çn h├ánh trong qu├í tr├¼nh triß╗ân khai.
+Kß║╛T LUß║¼N THIß║╛T Kß║╛
+T├ái liß╗çu thiß║┐t kß║┐ n├áy ─æ├ú vß║¡t l├╜ h├│a ho├án to├án 6 nhu cß║ºu cß╗æt l├╡i ─æ╞░ß╗úc vß║ích ra ß╗ƒ giai ─æoß║ín ph├ón t├¡ch (Tra cß╗⌐u v─ân bß║ún, Hß╗Åi ─æ├íp AI, T├│m tß║»t, Dashboard, Workspace, Knowledge Graph). Viß╗çc ─æß║╖t r├╡ r├áng ma trß║¡n truy vß║┐t c┼⌐ng nh╞░ giß╗¢i hß║ín ─æß╗â ngß╗Å c├íc thß╗▒c thß╗â doanh nghiß╗çp cho t╞░╞íng lai ─æß║úm bß║úo hß╗ç thß╗æng thß╗Åa m├ún ─æ├║ng phß║ím vi 10 tuß║ºn cß╗ºa ─æß╗ô ├ín, tr├ính ─æ╞░ß╗úc rß╗ºi ro 'ph├¼nh phß║ím vi' (scope creep). Giai ─æoß║ín tiß║┐p theo sß║╜ tiß║┐n h├ánh lß║¡p tr├¼nh dß╗▒a tr├¬n class/service architecture n├áy.

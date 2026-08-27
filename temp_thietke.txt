@@ -1,0 +1,140 @@
+TRƯỜNG ĐẠI HỌC MỞ TP. HỒ CHÍ MINH
+THIẾT KẾ HỆ THỐNG
+ĐỒ ÁN NGÀNH - HK3 NĂM HỌC 2025-2026
+AI LEGAL INTELLIGENCE PLATFORM
+Nền tảng hỗ trợ tra cứu, phân tích và khai thác tri thức pháp lý
+dành cho doanh nghiệp Việt Nam
+Tài liệu Thiết kế Hệ thống (System Design Document)
+Kế thừa và triển khai chi tiết từ tài liệu Phân tích Hệ thống
+MỤC LỤC
+CHƯƠNG 1: THIẾT KẾ KIẾN TRÚC TỔNG THỂ (ARCHITECTURE DESIGN)
+Chương này mô tả cách các thành phần trong hệ thống giao tiếp với nhau, từ kiến trúc logic đến kiến trúc triển khai thực tế.
+1.1. Kiến trúc Hệ thống (System Architecture)
+Hệ thống được tổ chức theo mô hình 3 tầng (3-Tier Architecture) nhằm tách biệt rõ trách nhiệm giữa giao diện người dùng, xử lý nghiệp vụ và lưu trữ dữ liệu — giúp dễ bảo trì, kiểm thử độc lập từng tầng, và thuận tiện khi mở rộng quy mô sau này.
+Hình 1.1 — Sơ đồ kiến trúc 3 tầng: Client / API Server / Database
+1.2. Kiến trúc Triển khai (Deployment Architecture)
+Toàn bộ hệ thống được container hóa bằng Docker Compose, phù hợp với quy mô và thời gian thực hiện đồ án (10 tuần), đồng thời vẫn đảm bảo khả năng nâng cấp lên môi trường production sau này.
+Hình 1.2 — Sơ đồ triển khai Docker Compose
+Giới hạn RAM và tối ưu PostgreSQL/pgvector
+Vì chạy trên hạ tầng có tài nguyên giới hạn, container postgres được cấu hình:
+Giới hạn bộ nhớ container qua deploy.resources.limits.memory trong docker-compose.yml, tránh một container chiếm hết RAM host.
+Điều chỉnh shared_buffers và work_mem của PostgreSQL phù hợp với RAM khả dụng, cân bằng giữa hiệu năng truy vấn vector (HNSW cần bộ nhớ để giữ index) và ổn định hệ thống.
+Dữ liệu được lưu trên Docker Volume (pgdata) để đảm bảo tính bền vững (persistence) khi container khởi động lại.
+CI/CD: GitHub Actions build image khi có thay đổi trên nhánh chính → đẩy image → deploy bằng docker compose pull && up -d trên server.
+1.3. Thiết kế Component (Component Diagram)
+Frontend
+Backend — Các module chính
+CHƯƠNG 2: THIẾT KẾ DỮ LIỆU (DATABASE DESIGN)
+Kiến trúc Database được thiết kế chuẩn hóa trên PostgreSQL, phục vụ đồng thời Relational query, Full-text search và Vector search thông qua extension pgvector. Chú thích: PK = Khóa chính, FK = Khóa ngoại.
+2.1. Sơ đồ Thực thể Liên kết (ERD)
+Hình 2.1 — Sơ đồ ERD giữa 9 bảng dữ liệu của hệ thống
+2.2. Đặc tả Thiết kế Vật lý (Physical Data Model)
+2.2.1. Bảng documents — Văn bản pháp lý
+Quan hệ: 1–n với document_chunks, document_relations, notes, collection_documents.
+2.2.2. Bảng document_chunks — Dữ liệu nền cho RAG
+Quan hệ: n–1 với documents. Index HNSW trên embedding được tạo bằng migration sau khi dữ liệu đã nạp đủ, không tạo ngay lúc khởi tạo bảng.
+2.2.3. Bảng document_relations — Dữ liệu nền cho Knowledge Graph
+Ràng buộc: cặp (source_doc_id, target_doc_id, relation_type) không được lặp lại (Unique constraint).
+2.2.4. Bảng organizations — Tổ chức/Doanh nghiệp
+Quan hệ: 1–n với users (một tổ chức có nhiều nhân sự).
+2.2.5. Bảng users — Người dùng và phân quyền
+Quan hệ: n–1 với organizations; 1–n với collections, notes, query_logs.
+2.2.6. Bảng collections — Bộ sưu tập cá nhân/nhóm
+2.2.7. Bảng collection_documents — Bảng trung gian n–n
+2.2.8. Bảng notes — Ghi chú cá nhân trên văn bản
+2.2.9. Bảng query_logs — Log lịch sử hỏi AI
+Phục vụ Analytics nội bộ và RAG Evaluation (đối chiếu response đã trả lời với đánh giá chất lượng sau này).
+2.3. Thiết kế Index và Tối ưu Tìm kiếm (Crucial for AI)
+Full-text Search — search_vector (TSVECTOR)
+Trường search_vector trên bảng documents lưu dạng biểu diễn từ khóa đã được PostgreSQL xử lý (loại bỏ từ dừng, chuẩn hóa) để phục vụ tìm kiếm BM25/ranking theo từ khóa chính xác — nhánh 'chính xác' của Hybrid Search, bổ trợ cho nhánh 'ngữ nghĩa'.
+Semantic Search — VECTOR(768) và HNSW
+Trường embedding trên bảng document_chunks lưu vector 768 chiều — đầu ra của mô hình bkai-foundation-models/vietnamese-bi-encoder. Để tìm kiếm hiệu quả trên hàng trăm nghìn vector, hệ thống dùng chỉ mục HNSW (Hierarchical Navigable Small World) thay vì IVFFlat, vì:
+HNSW không yêu cầu biết trước số lượng vector khi tạo index — phù hợp với dữ liệu tăng dần theo thời gian.
+HNSW đạt recall (độ đầy đủ kết quả đúng) cao hơn IVFFlat ở cùng mức độ trễ truy vấn.
+HNSW không cần chạy VACUUM ANALYZE sau mỗi lần insert để giữ chất lượng index — giảm chi phí vận hành.
+Đây là lựa chọn kỹ thuật cốt lõi quyết định tốc độ và độ chính xác của tính năng Semantic Search — điểm khác biệt kỹ thuật chính so với các hệ thống tra cứu pháp luật hiện có tại Việt Nam.
+CHƯƠNG 3: THIẾT KẾ THUẬT TOÁN & XỬ LÝ (ALGORITHM & LOGIC DESIGN)
+Chương này biểu diễn luồng chạy thực tế của các tính năng lõi bằng Sequence Diagram, tập trung vào 3 luồng xử lý quan trọng nhất của hệ thống.
+3.1. Thiết kế Luồng Hybrid Search (Search Pipeline)
+Hybrid Search kết hợp BM25 (chính xác từ khóa) và Semantic Search (ngữ nghĩa) — hai phương pháp có thang điểm (scale) hoàn toàn khác nhau nên không thể cộng trực tiếp. Hệ thống dùng thuật toán Reciprocal Rank Fusion (RRF) để hợp nhất kết quả dựa trên thứ hạng (rank) thay vì điểm số thô.
+Hình 3.1 — Luồng Hybrid Search kết hợp BM25 và Semantic Search qua RRF
+k = 60 là giá trị mặc định được Cormack et al. (2009) đề xuất và được sử dụng rộng rãi trong công nghiệp cho bài toán Hybrid Search — dùng để chứng minh căn cứ học thuật của lựa chọn thuật toán.
+3.2. Thiết kế Luồng Hỏi đáp AI (RAG Pipeline)
+Hình 3.2 — Sequence Diagram: luồng RAG từ câu hỏi người dùng đến câu trả lời có trích dẫn
+Toàn bộ luồng gồm 10 bước: mã hóa câu hỏi thành vector → Hybrid Search lấy top-5 đoạn liên quan → đóng gói (augment) thành prompt → gọi Gemini AI → stream câu trả lời kèm trích dẫn nguồn về client qua SSE.
+System Prompt chống ảo giác (Anti-hallucination)
+3.3. Thiết kế Luồng Xử lý Dữ liệu (ETL Pipeline)
+Dữ liệu đầu vào được lấy từ các bộ dataset công khai trên HuggingFace (th1nhng0/vietnamese-legal-documents, tmquan/phapdien-moj-gov-vn...), không thực hiện crawl/scrape thủ công. Quy trình ETL gồm 4 bước:
+Extract: Tải dataset từ HuggingFace → chuẩn hóa schema, ánh xạ các trường về đúng cấu trúc bảng documents.
+Transform: Lọc theo 2 lĩnh vực trọng tâm (Lao động - BHXH, Thuế - Kế toán) → cắt nội dung thành chunk 256-512 tokens theo chiến lược sliding window có overlap 50 tokens để giữ ngữ cảnh qua ranh giới chunk.
+Embed: Sinh vector 768 chiều cho từng chunk bằng mô hình bkai-foundation-models/vietnamese-bi-encoder (đã fine-tune trên Zalo Legal Text Retrieval, Accuracy@10 = 93.59%). Xử lý theo batch để tối ưu tốc độ.
+Load: Ghi metadata vào bảng documents, vector vào document_chunks.embedding. Build chỉ mục HNSW sau khi đã nạp đủ dữ liệu.
+CHƯƠNG 4: THIẾT KẾ API (API DESIGN)
+Đặc tả các cổng giao tiếp RESTful API giữa Frontend và Backend.
+4.1. Tiêu chuẩn Thiết kế API
+Kiến trúc RESTful, trao đổi dữ liệu qua JSON.
+Xác thực bằng JWT Bearer Token trong header Authorization cho các endpoint yêu cầu đăng nhập.
+Endpoint AI Chat sử dụng Server-Sent Events (SSE) để stream câu trả lời theo thời gian thực thay vì chờ phản hồi trọn vẹn.
+Mã trạng thái HTTP chuẩn: 200 (thành công), 201 (tạo mới), 400 (dữ liệu không hợp lệ), 401 (chưa xác thực), 403 (không đủ quyền), 404 (không tìm thấy), 429 (vượt giới hạn tần suất), 500 (lỗi hệ thống).
+4.2. Đặc tả các Endpoint chính
+Bảng liệt kê các endpoint đại diện cho từng nhóm chức năng chính; danh sách đầy đủ (bao gồm các endpoint CRUD phụ trợ) được quản lý tự động qua tài liệu OpenAPI do FastAPI tự sinh (/docs).
+CHƯƠNG 5: THIẾT KẾ GIAO DIỆN (UI/UX DESIGN)
+5.1. Phong cách Thiết kế (Design System)
+Giao diện áp dụng phong cách Dark Glassmorphism (nền tối kết hợp hiệu ứng kính mờ - backdrop blur, độ trong suốt, viền phát sáng nhẹ), tạo cảm giác hiện đại và chuyên nghiệp — phù hợp định vị sản phẩm công nghệ cao cho doanh nghiệp, khác biệt với giao diện truyền thống của các hệ thống tra cứu pháp luật hiện có (thuvienphapluat.vn, vbpl.vn).
+Bảng màu nền: tông tối (navy/charcoal), điểm nhấn bằng gradient tím-xanh cho các thành phần tương tác (nút bấm, node đang chọn trong Knowledge Graph).
+Typography: font sans-serif rõ ràng, ưu tiên độ tương phản cao để đọc văn bản pháp lý dài trong thời gian dài không mỏi mắt.
+Component kính mờ dùng nhất quán cho: thẻ kết quả tìm kiếm, khung chat AI, panel chi tiết văn bản, card thống kê trên Dashboard.
+5.2. Sơ đồ Điều hướng (Navigation Map)
+Hình 5.1 — Sơ đồ điều hướng: Khách ↔ Đăng nhập ↔ Trang chủ ↔ Chat AI / Knowledge Graph / Dashboard ↔ Workspace
+5.3. Thiết kế Màn hình (Mockups/Wireframes)
+Màn hình Tìm kiếm
+Thanh tìm kiếm trung tâm hỗ trợ cả từ khóa và câu hỏi tự nhiên.
+Bộ lọc bên trái: loại văn bản, lĩnh vực, cơ quan ban hành, khoảng thời gian, trạng thái hiệu lực.
+Danh sách kết quả dạng thẻ kính mờ, có nhãn trạng thái hiệu lực (còn/hết hiệu lực) nổi bật bằng màu.
+Màn hình Hỏi đáp AI (Chat)
+Khung chat dạng hội thoại, câu trả lời AI stream theo thời gian thực (hiệu ứng gõ chữ).
+Mỗi câu trả lời kèm danh sách nguồn trích dẫn có thể click để mở văn bản gốc.
+Ô nhập câu hỏi tiếp theo giữ ngữ cảnh hội thoại (session_id).
+Màn hình Knowledge Graph
+Canvas đồ thị tương tác: văn bản trung tâm ở giữa, các văn bản liên quan tỏa ra xung quanh theo loại quan hệ (màu cạnh khác nhau cho GUIDES/AMENDS/REPLACES...).
+Click vào node hiển thị panel tóm tắt bên phải, có nút 'Xem toàn văn'.
+Màn hình Dashboard Thống kê
+Bộ lọc lĩnh vực + khoảng thời gian ở đầu trang.
+Biểu đồ đường: số văn bản ban hành theo năm. Biểu đồ cột: phân bố theo cơ quan ban hành. Biểu đồ tròn: tỉ lệ còn/hết hiệu lực.
+Wireframe chi tiết (Figma) sẽ được đính kèm phụ lục riêng khi hoàn thiện giao diện; phần này mô tả bố cục và luồng tương tác dự kiến cho từng màn hình.
+CHƯƠNG 6: THIẾT KẾ BẢO MẬT & AN TOÀN HỆ THỐNG
+6.1. Bảo mật Xác thực
+Hệ thống dùng chuẩn JWT (JSON Web Token) cho xác thực stateless:
+Access Token: thời hạn ngắn (VD: 30-60 phút), gửi kèm trong header Authorization: Bearer <token> cho mỗi request cần xác thực.
+Refresh Token: thời hạn dài hơn, dùng để cấp lại Access Token mới mà không cần đăng nhập lại, lưu ở nơi an toàn phía client (httpOnly cookie khuyến nghị).
+Middleware xác thực kiểm tra chữ ký và hạn dùng token trước khi cho phép truy cập route bảo vệ.
+6.2. Bảo mật Dữ liệu
+Mật khẩu người dùng được mã hóa một chiều bằng Bcrypt trước khi lưu vào cột password_hash — không bao giờ lưu plaintext.
+Kết nối giữa Client và API Server qua HTTPS trong môi trường production.
+Sử dụng ORM (SQLAlchemy) với truy vấn tham số hóa, tránh SQL Injection.
+6.3. Phân quyền (RBAC - Role-Based Access Control)
+Logic kiểm tra quyền được đặt tại tầng middleware/dependency của FastAPI (VD: Depends(require_role("admin"))), áp dụng thống nhất cho mọi route — tránh việc kiểm tra quyền rải rác và không nhất quán trong từng handler.
+6.4. Phòng chống Prompt Injection
+Vì AI Assistant nhận input tự do từ người dùng, hệ thống áp dụng các biện pháp giảm thiểu rủi ro người dùng cố tình chèn chỉ thị nhằm ghi đè System Prompt gốc (Prompt Injection):
+System Prompt được cố định tại tầng Backend (Prompt Builder), người dùng không có cách nào truyền trực tiếp vào vị trí System role của request gửi tới Gemini AI.
+Câu hỏi người dùng chỉ được chèn vào vị trí [CONTEXT]/[QUESTION] đã quy định sẵn trong template prompt, không được nối chuỗi tự do vào phần chỉ thị hệ thống.
+Giới hạn độ dài input câu hỏi để giảm bề mặt tấn công và chi phí gọi LLM.
+CHƯƠNG 7: THIẾT KẾ XỬ LÝ LỖI & KHẢ NĂNG CHỊU LỖI (RESILIENCE DESIGN)
+Vì hệ thống phụ thuộc vào dịch vụ AI bên ngoài (Gemini AI) — thành phần nằm ngoài tầm kiểm soát trực tiếp — chương này thiết kế các cơ chế đảm bảo hệ thống vẫn phản hồi hợp lý khi thành phần phụ thuộc gặp sự cố, thay vì để lỗi lan ra toàn hệ thống.
+7.1. Circuit Breaker cho lời gọi LLM
+Áp dụng mẫu thiết kế Circuit Breaker quanh lời gọi Gemini AI trong RAG Service:
+Trạng thái Closed (bình thường): mọi request được gọi thẳng tới Gemini AI.
+Khi số lần lỗi/timeout liên tiếp vượt ngưỡng trong một cửa sổ thời gian, breaker chuyển sang trạng thái Open: tạm ngắt gọi Gemini AI, trả ngay thông báo dự phòng cho người dùng (VD: "Trợ lý AI đang tạm gián đoạn, vui lòng thử lại sau ít phút hoặc dùng chức năng tìm kiếm.") thay vì để người dùng chờ timeout.
+Sau một khoảng thời gian nghỉ, breaker chuyển sang trạng thái Half-Open: cho phép một số request thử nghiệm đi qua; nếu thành công, quay lại Closed, nếu vẫn lỗi, quay lại Open.
+7.2. Timeout và Retry Policy
+7.3. Rate Limiting
+Endpoint /ai/chat được giới hạn tần suất gọi theo người dùng (VD: N request/phút) nhằm:
+Tránh một tài khoản spam gây tốn chi phí gọi Gemini AI của toàn hệ thống.
+Đảm bảo công bằng tài nguyên giữa nhiều người dùng đồng thời trong giờ cao điểm.
+Vượt giới hạn trả về mã 429 (Too Many Requests) kèm thời gian chờ gợi ý (Retry-After header).
+7.4. Logging & Giám sát
+Mọi lượt gọi AI được ghi vào bảng query_logs (duration_ms, query_type, response) — vừa phục vụ Analytics, vừa là dữ liệu để phát hiện bất thường (VD: tỉ lệ lỗi tăng đột biến).
+Log có cấu trúc (structured logging) ở tầng Backend, phân biệt rõ log nghiệp vụ và log lỗi hệ thống, thuận tiện tra cứu khi sự cố xảy ra.
+Các ngưỡng của Circuit Breaker và Rate Limiting nên được theo dõi qua log để tinh chỉnh tham số phù hợp trong quá trình vận hành thực tế.
+GHI CHÚ CHUNG
+Tài liệu này đóng vai trò bổ sung chi tiết kỹ thuật cho tài liệu Phân tích Hệ thống đã nộp trước đó — không lặp lại nội dung Use Case, Activity Diagram và bối cảnh nghiệp vụ đã trình bày ở tài liệu đó. Mọi quyết định thiết kế trong tài liệu này cần được đối chiếu và giữ đồng bộ với code hiện hành trong quá trình triển khai.

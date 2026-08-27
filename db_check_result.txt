@@ -1,0 +1,184 @@
+Ket noi den CSDL...
+
+1. Kiem tra so luong documents theo field:
+  - An ninh và trật tự, an toàn xã hội, Lao động, tiền lương, tiền công: 1
+  - An toàn lao động: 83
+  - An toàn lao động, Giáo dục nghề nghiệp: 1
+  - An toàn lao động, Người có công, Khám chữa bệnh: 1
+  - An toàn lao động, Quản lý hoạt động xây dựng: 2
+  - An toàn lao động, Viên chức: 2
+  - An toàn, vệ sinh lao động: 30
+  - Bảo hiểm thất nghiệp, Bảo hiểm xã hội bắt buộc và bảo hiểm xã hội tự nguyện, Lao động ngoài nước, La: 1
+  - Bảo hiểm xã hội, Quản lý thuế, phí, lệ phí và thu khác của ngân sách nhà nước: 1
+  - Bảo trợ xã hội, Lao động, tiền lương, tiền công, Người có công: 1
+  - Bảo trợ xã hội, Quản lý thuế, phí, lệ phí và thu khác của ngân sách nhà nước: 1
+  - Bảo vệ và chăm sóc trẻ em, An toàn lao động: 1
+  - Bưu chính, Quản lý thuế, phí, lệ phí và thu khác của ngân sách nhà nước: 1
+  - Cán bộ, công chức, Lao động, tiền lương, tiền công: 1
+  - Cấp giấy chứng minh nhân dân, Đăng ký, quản lý cư trú, Quản lý thuế, phí, lệ phí và thu khác của ngâ: 2
+  - Cấp giấy chứng minh nhân dân, Quản lý thuế, phí, lệ phí và thu khác của ngân sách nhà nước: 1
+  - Chính sách thuế: 474
+  - Chính sách thuế Chứng khoán Chứng khoán và thị trường chứng khoán Dự trữ nhà nước Kế toán, kiểm toán: 1
+  - Chính sách thuế, Hải quan: 1
+  - Chính sách thuế, Kế toán, kiểm toán, Thanh tra, kiểm tra tài chính: 1
+  - Chính sách thuế, Lĩnh vực giá: 3
+  - Chính sách thuế, Ngân sách nhà nước: 1
+  - Chính sách thuế, Quản lý ngân sách nhà nước: 1
+  - Chính sách thuế Quản lý thuế, phí, lệ phí và thu khác của ngân sách nhà nước: 3
+  - Chính sách thuế, Quản lý thuế, phí, lệ phí và thu khác của ngân sách nhà nước: 2
+  - Chính sách thuế, Quản lý thuế, phí, lệ phí và thu khác của ngân sách nhà nước, Tài nguyên khoáng sản: 1
+  - Chính sách thuế, Tài nguyên khoáng sản, địa chất: 1
+  - Cơ sở vật chất và thiết bị trường học, Lao động, tiền lương, tiền công: 1
+  - Đăng ký, quản lý con dấu, Chính sách thuế: 1
+  - Đăng ký, quản lý con dấu, Quản lý thuế, phí và lệ phí: 1
+  - Đăng ký, quản lý con dấu, Thành lập và hoạt động của doanh nghiệp, Quản lý thuế, phí, lệ phí và thu : 1
+  - Đăng ký, quản lý cư trú, Lao động, tiền lương, tiền công, Nông nghiệp: 1
+  - Đăng ký, quản lý cư trú, Quản lý thuế, phí, lệ phí và thu khác của ngân sách nhà nước: 2
+  - Đăng ký, quản lý phương tiện giao thông, Quản lý thuế, phí, lệ phí và thu khác của ngân sách nhà nướ: 1
+  - Dân sự - Kinh tế, Lao động: 1
+  - Đất đai, Chính sách thuế: 12
+  - Đất đai, Chính sách thuế, Ngân sách nhà nước: 1
+  - Đất đai, Môi trường, Chính sách thuế: 1
+  - Đất đai, Quản lý thuế, phí, lệ phí và thu khác của ngân sách nhà nước: 19
+  - Đất đai, Quản lý thuế, phí, lệ phí và thu khác của ngân sách nhà nước, Đo đạc và bản đồ: 1
+  - Đất đai, Quản lý thuế, phí, lệ phí và thu khác của ngân sách nhà nước, Quản lý hoạt động xây dựng: 1
+  - Đất đai, Quản lý thuế, phí, lệ phí và thu khác của ngân sách nhà nước, Tài nguyên nước: 1
+  - Đấu thầu, Quản lý thuế, phí, lệ phí và thu khác của ngân sách nhà nước: 1
+  - Đầu tư và nông nghiệp, nông thôn, Phát triển nông thôn, Quản lý thuế, phí, lệ phí và thu khác của ng: 1
+  - Dịch vụ thương mại, Quản lý thuế, phí, lệ phí và thu khác của ngân sách nhà nước: 2
+  - Điện, Quản lý thuế, phí, lệ phí và thu khác của ngân sách nhà nước: 4
+  - Du lịch, Quản lý thuế, phí, lệ phí và thu khác của ngân sách nhà nước: 1
+  - Đường bộ, Quản lý thuế, phí, lệ phí và thu khác của ngân sách nhà nước: 24
+  - Đường thủy nội địa, Quản lý thuế, phí, lệ phí và thu khác của ngân sách nhà nước: 2
+  - Dự trữ nhà nước, Quản lý dự trữ nhà nước, Quản lý thuế, phí, lệ phí và thu khác của ngân sách nhà nư: 1
+  - Giáo dục đào tạo thuộc hệ thống giáo dục quốc dân và các cơ sở khác, Quản lý thuế, phí, lệ phí và th: 1
+  - Giáo dục mầm non, Quản lý thuế, phí, lệ phí và thu khác của ngân sách nhà nước: 1
+  - Giáo dục thường xuyên, Quản lý thuế, phí, lệ phí và thu khác của ngân sách nhà nước: 1
+  - Giáo dục trung học, Giáo dục mầm non, Quản lý thuế, phí, lệ phí và thu khác của ngân sách nhà nước: 1
+  - Giáo dục trung học, Quản lý thuế, phí, lệ phí và thu khác của ngân sách nhà nước: 1
+  - Hải quan Quản lý thuế, phí, lệ phí và thu khác của ngân sách nhà nước: 2
+  - Hải quan, Quản lý thuế, phí, lệ phí và thu khác của ngân sách nhà nước: 1
+  - Hóa chất, vật liệu nổ công nghiệp, Quản lý thuế, phí, lệ phí và thu khác của ngân sách nhà nước: 1
+  - Lâm nghiệp, Quản lý thuế, phí, lệ phí và thu khác của ngân sách nhà nước: 2
+  - Lao động: 17
+  - lao động ngoài nước: 3
+  - Lao động ngoài nước: 85
+  - Lao động ngoài nước, Đăng ký giao dịch bảo đảm: 1
+  - Lao động ngoài nước, Quản lý ngân sách nhà nước: 2
+  - Lao động ngoài nước, Quản lý thuế, phí, lệ phí và thu khác của ngân sách nhà nước: 3
+  - Lao động ngoài nước, Tài chính hành chính sự nghiệp: 1
+  - Lao động, Người khuyết tật: 1
+  - Lao động, Người lao động Việt Nam đi làm việc ở nước ngoài theo hợp đồng: 1
+  - Lao động, Phân cấp, phân quyền, phân định thẩm quyền và lĩnh vực: 1
+  - Lao động, tiền lương, tiền công: 1479
+  - Lao động, tiền lương, tiền công, Chính quyền địa phương: 3
+  - Lao động, tiền lương, tiền công, Công chức, viên chức: 2
+  - Lao động, tiền lương, tiền công, Công chức, viên chức, Lĩnh vực giá, Quản lý nhà: 1
+  - Lao động, tiền lương, tiền công, Giáo dục nghề nghiệp: 1
+  - Lao động, tiền lương, tiền công, Ngân sách nhà nước: 1
+  - Lao động, tiền lương, tiền công, Người có công: 1
+  - Lao động, tiền lương, tiền công, Quản lý ngân sách nhà nước: 1
+  - Lao động, tiền lương, tiền công, Tài chính hành chính sự nghiệp: 1
+  - Lao động, Việc làm: 1
+  - Lĩnh vực giá, Quản lý thuế, phí, lệ phí và thu khác của ngân sách nhà nước: 18
+  - Môi trường, Chính sách thuế: 1
+  - Môi trường, Quản lý thuế, phí, lệ phí và thu khác của ngân sách nhà nước: 33
+  - Ngân sách nhà nước, Quản lý thuế, phí, lệ phí và thu khác của ngân sách nhà nước: 1
+  - Người lao động Việt Nam đi làm việc ở nước ngoài theo hợp đồng: 8
+  - Người lao động Việt Nam đi làm việc ở nước ngoài theo hợp đồng, Quản lý xuất nhập cảnh: 1
+  - Người lao động Việt Nam đi làm việc ở nước ngoài theo hợp đồng, Việc làm: 2
+  - Nông nghiệp, Chính sách thuế: 9
+  - Nông nghiệp, Quản lý thuế, phí, lệ phí và thu khác của ngân sách nhà nước: 1
+  - phân cấp, phân quyền, Người lao động Việt Nam đi làm việc ở nước ngoài theo hợp đồng, Chứng thực, Nh: 1
+  - Quản lý dịch vụ tài chính và các quỹ tài chính; Quản lý thuế, phí và lệ phí: 3
+  - Quản lý giá; Quản lý thuế, phí và lệ phí: 5
+  - Quản lý ngân sách, Chính sách thuế, Phòng, chống thiên tai: 1
+  - Quản lý ngân sách nhà nước, Chính sách thuế: 1
+  - Quản lý ngân sách nhà nước, Quản lý quỹ ngân sách, quỹ dự trữ nhà nước, và các quỹ tài chính khác củ: 1
+  - Quản lý ngân sách nhà nước, Quản lý thuế, phí, lệ phí và thu khác của ngân sách nhà nước: 4
+  - Quản lý ngân sách; Quản lý thuế, phí và lệ phí: 7
+  - Quản lý ngân sách; Tài chính khác; Quản lý thuế, phí và lệ phí: 2
+  - Quản lý tài chính doanh nghiệp; Quản lý thuế, phí và lệ phí: 2
+  - Quản lý tài sản nhà nước, Quản lý thuế, phí, lệ phí và thu khác của ngân sách nhà nước: 1
+  - Quản lý thuế: 38
+  - Quản lý thuế, phí, lệ phí và thu khác của ngân sách nhà nước: 2390
+  - Quản lý thuế, phí, lệ phí và thu khác của ngân sách nhà nước, Bổ trợ tư pháp: 5
+  - Quản lý thuế, phí, lệ phí và thu khác của ngân sách nhà nước, Chính sách thuế: 3
+  - Quản lý thuế, phí, lệ phí và thu khác của ngân sách nhà nước, Đăng ký giao dịch bảo đảm: 5
+  - Quản lý thuế, phí, lệ phí và thu khác của ngân sách nhà nước, Đo đạc và bản đồ: 1
+  - Quản lý thuế, phí, lệ phí và thu khác của ngân sách nhà nước, Hành chính tư pháp, Hộ tịch, quốc tịch: 1
+  - Quản lý thuế, phí, lệ phí và thu khác của ngân sách nhà nước, Hộ tịch: 4
+  - Quản lý thuế, phí, lệ phí và thu khác của ngân sách nhà nước, Hộ tịch, quốc tịch, chứng thực: 13
+  - Quản lý thuế, phí, lệ phí và thu khác của ngân sách nhà nước, Khám chữa bệnh: 3
+  - Quản lý thuế, phí, lệ phí và thu khác của ngân sách nhà nước, Kiến trúc, quy hoạch xây dựng: 1
+  - Quản lý thuế, phí, lệ phí và thu khác của ngân sách nhà nước, Nhà ở và công sở: 1
+  - Quản lý thuế, phí, lệ phí và thu khác của ngân sách nhà nước, Quản lý hoạt động xây dựng: 1
+  - Quản lý thuế, phí, lệ phí và thu khác của ngân sách nhà nước, Quản lý Khám, chữa bệnh: 1
+  - Quản lý thuế, phí, lệ phí và thu khác của ngân sách nhà nước, Quản lý nhà: 2
+  - Quản lý thuế, phí, lệ phí và thu khác của ngân sách nhà nước, Quản lý nhà và thị trường bất động sản: 1
+  - Quản lý thuế, phí, lệ phí và thu khác của ngân sách nhà nước, Tài chính doanh nghiệp: 1
+  - Quản lý thuế, phí, lệ phí và thu khác của ngân sách nhà nước, Tài nguyên khoáng sản, địa chất: 12
+  - Quản lý thuế, phí, lệ phí và thu khác của ngân sách nhà nước, Tài nguyên nước: 7
+  - Quản lý thuế, phí, lệ phí và thu khác của ngân sách nhà nước, Thư viện: 1
+  - Quản lý thuế, phí, lệ phí và thu khác của ngân sách nhà nước, Văn hóa: 2
+  - Quản lý thuế, phí, lệ phí và thu khác của ngân sách nhà nước, Xây dựng: 1
+  - Quản lý thuế, phí và lệ phí: 1742
+  - Quản lý thuế, phí và lệ phí, Lưu thông hàng hóa trong nước và xuất khẩu, nhập khẩu, Hải quan: 1
+  - Quản lý thuế, phí và lệ phí; Quản lý dịch vụ tài chính và các quỹ tài chính: 6
+  - Quản lý thuế, phí và lệ phí; Quản lý giá: 1
+  - Quản lý thuế, phí và lệ phí; Quản lý ngân sách: 7
+  - Quản lý thuế, phí và lệ phí; Quản lý tài chính doanh nghiệp: 5
+  - Quản lý thuế, phí và lệ phí; Tài chính đối ngoại: 4
+  - Quản lý thuế, phí và lệ phí; Tài chính khác: 21
+  - Quản lý thuế, phí và lệ phí; TCNH và thị trường TC, trái phiếu, khác: 2
+  - Quản lý thuế, phí và lệ phí, Thuế xuất khẩu, thuế nhập khẩu: 1
+  - Quản lý thuế, Thuế thu nhập doanh nghiệp, Thuế thu nhập cá nhân: 1
+  - Quản lý xuất nhập cảnh, Lao động, tiền lương, tiền công: 1
+  - Quy chế thi, tuyển sinh, Quản lý thuế, phí, lệ phí và thu khác của ngân sách nhà nước: 2
+  - Quy hoạch, Lao động: 1
+  - Tài chính đối ngoại; Quản lý thuế, phí và lệ phí: 3
+  - Tài chính khác; Quản lý thuế, phí và lệ phí: 23
+  - Tài chính, Lao động, tiền lương, tiền công: 1
+  - TCNH và thị trường TC, trái phiếu, khác; Quản lý thuế, phí và lệ phí: 2
+  - Thành lập và hoạt động của doanh nghiệp, Quản lý thuế, phí, lệ phí và thu khác của ngân sách nhà nướ: 1
+  - Thuế bảo vệ môi trường: 1
+  - Thuế sử dụng đất nông nghiệp: 2
+  - Thuế sử dụng đất nông nghiệp, Đất đai, Thủy lợi: 1
+  - Thuế sử dụng đất phi nông nghiệp: 1
+  - Thuế sử dụng đất phi nông nghiệp, Đất đai: 1
+  - Thuế tài nguyên: 3
+  - Thuế thu nhập cá nhân: 4
+  - Thuế thu nhập doanh nghiệp: 4
+  - Thuế tiêu thụ đặc biệt: 1
+  - Thuế xuất khẩu, thuế nhập khẩu: 12
+  - Thủy lợi, Quản lý thuế, phí, lệ phí và thu khác của ngân sách nhà nước: 15
+  - Thủy sản, Chính sách thuế: 2
+  - Thủy sản, Quản lý thuế, phí, lệ phí và thu khác của ngân sách nhà nước: 1
+  - Tiêu chuẩn đo lường chất lượng, Quản lý thuế, phí, lệ phí và thu khác của ngân sách nhà nước: 1
+  - Vận tải, Quản lý thuế, phí, lệ phí và thu khác của ngân sách nhà nước: 5
+  - Vận tải, Quản lý thuế, phí, lệ phí và thu khác của ngân sách nhà nước, Lĩnh vực khác: 1
+  - Việc làm, Lao động ngoài nước, Lao động, tiền lương, tiền công: 1
+  - Việc làm, Người lao động Việt Nam đi làm việc ở nước ngoài theo hợp đồng, Đất đai: 1
+  - Xuất nhập khẩu Chính sách thuế: 1
+  - Xuất nhập khẩu, Chính sách thuế: 5
+  - Xuất nhập khẩu, Quản lý thuế, phí, lệ phí và thu khác của ngân sách nhà nước: 1
+
+2. Kiem tra nam ban hanh cua field 'labor':
+  - Tu 1956-03-23 den 2026-07-15
+
+3. Kiem tra Bo luat Lao dong 2019:
+  - 45/2026/NQ-HĐND: Ban hành Quy định chính sách hỗ trợ cho người lao động trên địa bàn tỉnh Vĩnh Long đi làm việc ở nước ngoài theo hợp đồng (2026-07-15)
+  - 101/2026/QĐ-UBND: Quyết định số 101/2026/QĐ-UBND Bãi bỏ Quyết định số 57/2025/QĐ-UBND ngày 26 tháng 6 năm 2025 của Ủy ban nhân dân tỉnh Tây Ninh phân cấp nhận báo cáo về việc cho thôi việc nhiều người lao động của các doanh nghiệp trong khu công nghiệp, khu chế xuất, khu kinh tế trên địa bàn tỉnh Tây Ninh (2026-07-06)
+  - 15/2026/TT-BNV: Thông tư số 15/2026/TT-BNV Sửa đổi, bổ sung một số nội dung của Thông tư liên tịch số 11/2005/TTLT-BNV-BLĐTBXH-BTC-UBDT ngày 05 tháng 01 năm 2005 của Bộ trưởng Bộ Nội vụ, Bộ trưởng Bộ Lao động - Thương binh và Xã hội, Bộ trưởng Bộ Tài chính và Bộ trưởng, Chủ nhiệm Ủy ban Dân tộc về hướng dẫn thực hiện chế độ phụ cấp khu vực (2026-06-30)
+  - 65/2026/NQ-HĐND: Quy định chính sách hỗ trợ người lao động trên địa bàn thành phố Đà Nẵng đi làm việc ở nước ngoài theo hợp đồng (2026-06-29)
+  - 98/2026/QĐ-UBND: Về việc phân cấp thực hiện thẩm quyền cấp, cấp lại, gia hạn, thu hồi giấy phép lao động và giấy xác nhận không thuộc diện cấp giấy phép lao động đối với người lao động nước ngoài làm việc tại Việt Nam theo quy định tại khoản 1 Điều 4 Nghị định số 219/2025/NĐ-CP trên địa bàn thành phố Đà Nẵng (2026-06-29)
+  - 47/2026/QĐ-UBND: Quyết định số 47/2026/QĐ-UBND Ban hành Quy chế phối hợp quản lý người lao động nước ngoài làm việc trên địa bàn thành phố Hải Phòng (2026-06-17)
+  - 11 /2026/QĐ-UBND: Quyết định 11/2026/QĐ-UBND Ban hành Quy chế phối hợp quản lý lao động là người nước ngoài làm việc trên địa bàn thành phố Đồng Nai (2026-06-08)
+  - 57/2026/QĐ-UBND: Quyết định số 57/2026/QĐ-UBND Ban hành Quy định chế độ nâng bậc lương trước thời hạn do lập thành tích xuất sắc trong thực hiện nhiệm vụ đối với cán bộ, công chức, viên chức, người lao động thuộc tỉnh Thái Nguyên (2026-06-05)
+  - 599/QĐ-UBND: Quyết định 599/QĐ-UBND Về việc bãi bỏ Quyết định số 39/2016/QĐ-UBND ngày 16 tháng 6 năm 2016 của Ủy ban nhân dân tỉnh Đồng Nai ban hành Quy chế phối hợp giải quyết bước đầu các vụ tranh chấp lao động tập thể, đình công không theo trình tự, thủ tục quy định của pháp luật lao động tại các doanh nghiệp trên địa bàn tỉnh Đồng Nai (2026-06-04)
+  - 52/2026/QĐ-UBND: Quyết định Quy định hệ số điều chỉnh tăng thêm tiền lương làm cơ sở xác định chi phí tiền lương của lao động trực tiếp sản xuất, lao động chuyên môn, nghiệp vụ, thừa hành, phục vụ trong giá, đơn giá sản phẩm, dịch vụ công sử dụng kinh phí ngân sách nhà nước do doanh nghiệp thực hiện trên địa bàn tỉnh Thái Nguyên (2026-06-04)
+
+4. Bo luat 45/2019 cu the:
+  - Khong thay so 45/2019
+
+Xong.
