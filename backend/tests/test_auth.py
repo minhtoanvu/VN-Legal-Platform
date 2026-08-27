@@ -42,7 +42,7 @@ async def test_register_success(client: AsyncClient):
     assert "refresh_token" in data
     assert data["user"]["email"] == "pytest_user@test.com"
 
-
+  
 @pytest.mark.anyio
 async def test_register_duplicate_email(client: AsyncClient):
     """Đăng ký email trùng → 409 hoặc 400."""
@@ -68,7 +68,6 @@ async def test_register_invalid_email(client: AsyncClient):
         "full_name": "Bad Email",
     })
     assert resp.status_code == 422
-
 
 # ---------- Login ----------
 
