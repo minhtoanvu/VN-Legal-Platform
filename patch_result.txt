@@ -1,4 +1,0 @@
-﻿[OK] Fixed session_id description (Ch.5)
-[OK] Fixed Fallback description (Ch.7.1)
-[OK] Added Ch.7.2 content (3 items)
-[OK] Added Frontend component list (Ch.1.3)
