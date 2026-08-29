@@ -12,9 +12,11 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
 
 from app.core.config import settings
-
+from app.core.dependencies import limiter
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -31,7 +33,6 @@ async def lifespan(app: FastAPI):
     yield
     # Shutdown
     print("[STOP] Server dang tat...")
-
 
 app = FastAPI(
     title="AI Legal Intelligence Platform",
@@ -52,6 +53,10 @@ app = FastAPI(
     redoc_url="/redoc",
     lifespan=lifespan,
 )
+
+# Kích hoạt SlowAPI vào ứng dụng
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 # ── CORS ─────────────────────────────────────────────────────────────
 app.add_middleware(

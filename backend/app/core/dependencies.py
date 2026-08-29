@@ -6,8 +6,13 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from app.core.security import decode_token
 from app.core.database import get_db, AsyncSession
+from slowapi import Limiter
+from slowapi.util import get_remote_address
 
 security = HTTPBearer()
+
+# Khởi tạo Rate Limiter
+limiter = Limiter(key_func=get_remote_address)
 
 
 async def get_current_user(
@@ -55,6 +60,32 @@ async def get_current_active_user(
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Tai khoan da bi khoa."
+        )
+    return current_user
+
+
+async def require_admin(
+    current_user: Annotated["User", Depends(get_current_active_user)]  # type: ignore[name-defined]
+):
+    """Dependency chỉ cho phép Admin."""
+    from fastapi import HTTPException, status
+    if not current_user.is_admin:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Bạn không có quyền quản trị viên (Admin) để thực hiện hành động này."
+        )
+    return current_user
+
+
+async def require_enterprise(
+    current_user: Annotated["User", Depends(get_current_active_user)]  # type: ignore[name-defined]
+):
+    """Dependency chỉ cho phép gói Enterprise hoặc Admin."""
+    from fastapi import HTTPException, status
+    if not current_user.is_enterprise:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Tính năng này yêu cầu gói Doanh nghiệp (Enterprise)."
         )
     return current_user
 

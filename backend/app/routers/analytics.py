@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
 from app.services.analytics_service import get_dashboard_metrics
+from app.core.dependencies import require_admin
 
 router = APIRouter()
 
@@ -21,8 +22,13 @@ Trả về 5 aggregation metrics cho Dashboard:
 3. **documents_by_status** — active/expired/amended (Donut Chart)
 4. **documents_by_year** — Văn bản ban hành theo năm (Line Chart)
 5. **top_query_types** — Loại truy vấn phổ biến nhất (Bar Chart)
+
+🚨 **Yêu cầu Quyền:** Admin
     """,
 )
-async def get_dashboard(db: AsyncSession = Depends(get_db)):
+async def get_dashboard(
+    db: AsyncSession = Depends(get_db),
+    current_user = Depends(require_admin)
+):
     """Tổng hợp metrics cho Dashboard UI."""
     return await get_dashboard_metrics(db)

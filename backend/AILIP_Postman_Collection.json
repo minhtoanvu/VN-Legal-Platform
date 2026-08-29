@@ -1,0 +1,88 @@
+{
+  "info": {
+    "name": "AILIP API Tests",
+    "description": "Collection dùng để test các API cốt lõi của hệ thống AI Legal Intelligence Platform.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Search API",
+      "item": [
+        {
+          "name": "Keyword Search (BM25)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/search",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8000",
+              "path": ["search"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"query\": \"tiền lương tăng ca\",\n    \"mode\": \"keyword\",\n    \"limit\": 5\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Response time is less than 1000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(1000);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Semantic Search (Vector)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/search",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8000",
+              "path": ["search"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"query\": \"tiền lương tăng ca\",\n    \"mode\": \"semantic\",\n    \"limit\": 5\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Documents API",
+      "item": [
+        {
+          "name": "Get Document by Number",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8000/documents/doc/45/2019/QH14",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8000",
+              "path": ["documents", "doc", "45", "2019", "QH14"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

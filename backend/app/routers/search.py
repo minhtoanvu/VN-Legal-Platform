@@ -9,7 +9,7 @@ Search Router — /search (keyword / semantic / hybrid)
 import time
 from typing import Optional
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
@@ -17,6 +17,7 @@ from app.schemas.search import SearchRequest, SearchResponse, DocumentResult
 from app.services.bm25_service import bm25_search
 from app.services.rrf_service import reciprocal_rank_fusion, merge_by_score
 from app.services import semantic_service
+from app.core.dependencies import get_current_active_user
 
 router = APIRouter()
 
@@ -35,6 +36,7 @@ Tìm kiếm với 3 chế độ:
 async def search(
     body: SearchRequest,
     db: AsyncSession = Depends(get_db),
+    current_user = Depends(get_current_active_user),
 ):
     start_total = time.perf_counter()
 
@@ -68,6 +70,14 @@ async def search(
             )
             for i, doc in enumerate(semantic_docs):
                 doc["rank"] = i + 1
+
+    # Giới hạn offset tối đa để chống tràn RAM khi tính toán RRF
+    MAX_OFFSET = 200
+    if body.offset > MAX_OFFSET:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Để đảm bảo hiệu năng, hệ thống chỉ hỗ trợ xem tối đa {MAX_OFFSET} kết quả đầu tiên."
+        )
 
     # Merge kết quả
     if body.mode == "hybrid":
@@ -104,7 +114,8 @@ async def search_get(
     field: Optional[str] = Query(default=None, description="Lọc theo lĩnh vực"),
     limit: int = Query(default=10, ge=1, le=50),
     db: AsyncSession = Depends(get_db),
+    current_user = Depends(get_current_active_user),
 ):
     """GET endpoint để dễ test trên Swagger / browser."""
     body = SearchRequest(query=q, mode=mode, field=field, limit=limit)
-    return await search(body, db)
+    return await search(body=body, db=db, current_user=current_user)

@@ -20,10 +20,11 @@ from app.core.database import get_db
 from app.models.document import Document
 from app.models.workspace import QueryLog
 from app.services.rag_service import rag_generate_stream
+from app.core.dependencies import get_current_active_user, limiter
+from fastapi import Request
 import time
 
 router = APIRouter()
-
 
 class AIChatRequest:
     def __init__(self, question: str, field: Optional[str] = None):
@@ -66,18 +67,15 @@ class SummarizeRequest(BaseModel):
     "/chat",
     summary="Hỏi đáp pháp luật (RAG Streaming) - UC-04",
     description="""
-Gửi câu hỏi, nhận câu trả lời streaming kèm Citations.
-
-**Response format (SSE):**
-- Mỗi chunk là một đoạn text của câu trả lời
-- Chunk cuối cùng có dạng `__CITATIONS__:[...]` — list các văn bản nguồn
-
-**Circuit Breaker:** LLM timeout > 10s → fallback sang Semantic Search results
-    """,
+Gửi câu hỏi, nhận câu trả lời streaming kèm Citations. Đã bật tính năng chống Spam (Rate Limiter).
+""",
 )
+@limiter.limit("5/minute")
 async def ai_chat(
+    request: Request,
     body: ChatRequest,
     db: AsyncSession = Depends(get_db),
+    current_user = Depends(get_current_active_user),
 ):
     if not body.question or not body.question.strip():
         raise HTTPException(

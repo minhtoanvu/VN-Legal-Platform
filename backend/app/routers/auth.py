@@ -119,3 +119,19 @@ async def refresh_token(
 async def get_me(current_user: User = Depends(get_current_user)):
     """Trả về thông tin user đang đăng nhập (yêu cầu Bearer token)."""
     return UserResponse.model_validate(current_user)
+
+
+@router.post(
+    "/promote-admin",
+    summary="Nâng cấp tài khoản hiện tại lên Admin (API Tạm thời)",
+    description="⚠️ Chỉ dùng trong lúc chấm Đồ án để tự thăng cấp tài khoản của mình."
+)
+async def promote_to_admin(
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """Cập nhật role của user đang đăng nhập thành 'admin'."""
+    current_user.role = "admin"
+    db.add(current_user)
+    await db.commit()
+    return {"message": f"Thành công! Tài khoản {current_user.email} đã được nâng cấp lên Admin."}
