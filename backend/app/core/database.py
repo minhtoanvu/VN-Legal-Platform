@@ -3,16 +3,27 @@ from sqlalchemy.orm import DeclarativeBase
 
 from app.core.config import settings
 
-engine = create_async_engine(
-    settings.database_url,
-    echo=False,
-    pool_pre_ping=True,
-    pool_size=10,
-    max_overflow=20,
-    connect_args={
+import sys
+from sqlalchemy.pool import NullPool
+
+# Tự động dùng NullPool khi chạy pytest để tránh lỗi "Event loop is closed"
+db_kwargs = {
+    "echo": False,
+    "pool_pre_ping": True,
+    "connect_args": {
         "command_timeout": 5,
         "timeout": 5
     }
+}
+if "pytest" in sys.modules:
+    db_kwargs["poolclass"] = NullPool
+else:
+    db_kwargs["pool_size"] = 10
+    db_kwargs["max_overflow"] = 20
+
+engine = create_async_engine(
+    settings.database_url,
+    **db_kwargs
 )
 
 AsyncSessionLocal = async_sessionmaker(
