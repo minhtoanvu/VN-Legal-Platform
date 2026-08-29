@@ -8,9 +8,10 @@ interface SearchResultsProps {
   isLoading: boolean;
   query: string;
   hasSearched: boolean;
+  onLoadMore?: () => void;
 }
 
-export const SearchResults: React.FC<SearchResultsProps> = ({ response, isLoading, query, hasSearched }) => {
+export const SearchResults: React.FC<SearchResultsProps> = ({ response, isLoading, query, hasSearched, onLoadMore }) => {
   if (isLoading) {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '24px' }}>
@@ -76,6 +77,20 @@ export const SearchResults: React.FC<SearchResultsProps> = ({ response, isLoadin
           <DocumentCard key={doc.id} doc={doc} query={query} />
         ))}
       </div>
+
+      {/* Load More Button */}
+      {response.results.length > 0 && response.results.length < response.total && (
+        <div style={{ textAlign: 'center', marginTop: '24px', marginBottom: '40px' }}>
+          <button
+            className="btn btn-outline"
+            onClick={onLoadMore}
+            disabled={isLoading}
+            style={{ width: '100%', maxWidth: '300px', padding: '12px' }}
+          >
+            {isLoading ? 'Đang tải...' : 'Tải thêm kết quả'}
+          </button>
+        </div>
+      )}
     </div>
   );
 };

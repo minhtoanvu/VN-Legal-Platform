@@ -397,11 +397,11 @@ export const DocumentPage: React.FC = () => {
                       >
                         <span style={{
                           fontSize: '0.72rem', fontWeight: 700, padding: '3px 10px', borderRadius: '999px', flexShrink: 0,
-                          background: `${RELATION_COLORS[rel.relation_type]}18`,
-                          color: RELATION_COLORS[rel.relation_type],
-                          border: `1px solid ${RELATION_COLORS[rel.relation_type]}33`,
+                          background: `${RELATION_COLORS[rel.relation_type.toLowerCase()] || '#6b7280'}18`,
+                          color: RELATION_COLORS[rel.relation_type.toLowerCase()] || '#6b7280',
+                          border: `1px solid ${RELATION_COLORS[rel.relation_type.toLowerCase()] || '#6b7280'}33`,
                         }}>
-                          {RELATION_LABELS[rel.relation_type] || rel.relation_type}
+                          {RELATION_LABELS[rel.relation_type.toLowerCase()] || rel.relation_type}
                         </span>
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <p style={{ fontSize: '0.82rem', fontWeight: 500, color: 'var(--text-secondary)' }}>{rel.related_doc_number}</p>
@@ -424,7 +424,8 @@ export const DocumentPage: React.FC = () => {
                     style={{
                       fontSize: '0.9rem', color: 'var(--text-secondary)', lineHeight: 1.75,
                       maxHeight: '600px', overflowY: 'auto',
-                      paddingRight: '12px'
+                      paddingRight: '12px',
+                      whiteSpace: 'pre-wrap'
                     }}
                     dangerouslySetInnerHTML={{ __html: doc.content }}
                   />
@@ -458,7 +459,10 @@ export const DocumentPage: React.FC = () => {
           <div style={{ maxWidth: '900px' }}>
             <h2 style={{ fontSize: '1rem', fontWeight: 700, marginBottom: '16px' }}>Sơ đồ quan hệ văn bản</h2>
             {graph ? (
-              <KnowledgeGraph data={graph} />
+              <KnowledgeGraph 
+                data={graph} 
+                onNodeClick={(nodeId) => navigate(`/documents/${nodeId}`)}
+              />
             ) : (
               <div className="glass-card" style={{ padding: '48px', textAlign: 'center', color: 'var(--text-muted)' }}>
                 <GitBranch size={36} style={{ margin: '0 auto 12px', opacity: 0.3 }} />

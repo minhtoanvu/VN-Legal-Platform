@@ -5,6 +5,7 @@ import type { GraphData } from '../../types';
 
 interface KnowledgeGraphProps {
   data: GraphData;
+  onNodeClick?: (nodeId: string) => void;
 }
 
 const RELATION_COLORS: Record<string, string> = {
@@ -23,7 +24,7 @@ const RELATION_LABELS: Record<string, string> = {
   cites:    'Trích dẫn',
 };
 
-export const KnowledgeGraph: React.FC<KnowledgeGraphProps> = ({ data }) => {
+export const KnowledgeGraph: React.FC<KnowledgeGraphProps> = ({ data, onNodeClick }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const networkRef = useRef<Network | null>(null);
 
@@ -54,21 +55,26 @@ export const KnowledgeGraph: React.FC<KnowledgeGraphProps> = ({ data }) => {
     );
 
     const edges = new DataSet(
-      data.edges.map(edge => ({
-        id: edge.id,
-        from: edge.from,
-        to: edge.to,
-        label: RELATION_LABELS[edge.relation_type] || edge.relation_type,
-        color: {
-          color: RELATION_COLORS[edge.relation_type] || '#6b7280',
-          highlight: '#fff',
-          opacity: 0.8,
-        },
-        font: { color: RELATION_COLORS[edge.relation_type] || '#6b7280', size: 10, align: 'middle' },
-        arrows: 'to',
-        smooth: { enabled: true, type: 'curvedCW', roundness: 0.2 },
-        width: 1.5,
-      }))
+      data.edges.map(edge => {
+        const relType = edge.relation_type || edge.label || 'cites';
+        const relTypeLower = relType.toLowerCase();
+        
+        return {
+          id: edge.id,
+          from: edge.from,
+          to: edge.to,
+          label: RELATION_LABELS[relTypeLower] || relType,
+          color: {
+            color: RELATION_COLORS[relTypeLower] || '#6b7280',
+            highlight: '#fff',
+            opacity: 0.8,
+          },
+          font: { color: RELATION_COLORS[relTypeLower] || '#6b7280', size: 10, align: 'middle' },
+          arrows: 'to',
+          smooth: { enabled: true, type: 'curvedCW', roundness: 0.2 },
+          width: 1.5,
+        };
+      })
     );
 
     const options = {
@@ -90,6 +96,21 @@ export const KnowledgeGraph: React.FC<KnowledgeGraphProps> = ({ data }) => {
     };
 
     networkRef.current = new Network(containerRef.current, { nodes, edges: edges as any }, options);
+
+    if (onNodeClick) {
+      networkRef.current.on('click', (params: any) => {
+        if (params.nodes.length > 0) {
+          onNodeClick(params.nodes[0] as string);
+        }
+      });
+      
+      networkRef.current.on('hoverNode', () => {
+        if (containerRef.current) containerRef.current.style.cursor = 'pointer';
+      });
+      networkRef.current.on('blurNode', () => {
+        if (containerRef.current) containerRef.current.style.cursor = 'default';
+      });
+    }
 
     return () => {
       networkRef.current?.destroy();

@@ -64,13 +64,17 @@ export const AIChatPanel: React.FC<AIChatPanelProps> = ({ contextDocId }) => {
       const reader = response.body?.getReader();
       const decoder = new TextDecoder();
       let accumulated = '';
+      let sseBuffer = '';
 
       while (reader) {
         const { done, value } = await reader.read();
         if (done) break;
 
-        const chunk = decoder.decode(value, { stream: true });
-        const lines = chunk.split('\n');
+        sseBuffer += decoder.decode(value, { stream: true });
+        const lines = sseBuffer.split('\n');
+        
+        // Giữ lại phần text chưa hoàn chỉnh (không có dấu xuống dòng) cho vòng lặp sau
+        sseBuffer = lines.pop() || '';
 
         for (const line of lines) {
           if (line.startsWith('data: ')) {

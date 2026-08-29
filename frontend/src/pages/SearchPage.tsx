@@ -11,6 +11,7 @@ export const SearchPage: React.FC = () => {
   const [mode, setMode] = useState<SearchMode>('hybrid');
   const [response, setResponse] = useState<SearchResponse | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [hasSearched, setHasSearched] = useState(false);
   const [showChat, setShowChat] = useState(true);
   const [showFilters, setShowFilters] = useState(false);
@@ -20,31 +21,57 @@ export const SearchPage: React.FC = () => {
   const [filterField, setFilterField] = useState('');
   const [filterIssuingBody, setFilterIssuingBody] = useState('');
 
-  const handleSearch = useCallback(async (q: string, m: SearchMode) => {
+  const [offset, setOffset] = useState(0);
+  const LIMIT = 20;
+
+  const handleSearch = useCallback(async (q: string, m: SearchMode, currentOffset: number = 0) => {
     setIsLoading(true);
+    setError(null);
     setHasSearched(true);
 
     try {
-      const body: Record<string, unknown> = { query: q, mode: m, limit: 20 };
+      const body: Record<string, unknown> = { query: q, mode: m, limit: LIMIT, offset: currentOffset };
       const filters: Record<string, unknown> = {};
       if (filterStatus) filters.status = filterStatus;
       if (filterDocType) filters.doc_type = filterDocType;
       if (filterYearFrom) filters.year_from = parseInt(filterYearFrom);
       if (filterIssuingBody) filters.issuing_body = filterIssuingBody;
       
-      // Pass the field filter to body.field instead of body.filters.field
       if (filterField) body.field = filterField;
       if (Object.keys(filters).length > 0) body.filters = filters;
 
       const res = await api.post<SearchResponse>('/search', body);
-      setResponse(res.data);
-    } catch (err) {
+      
+      setResponse(prev => {
+        if (currentOffset === 0 || !prev) return res.data;
+        return {
+          ...res.data,
+          results: [...prev.results, ...res.data.results]
+        };
+      });
+    } catch (err: any) {
       console.error('Search failed:', err);
-      setResponse({ results: [], total: 0, query: q, mode: m, duration_ms: 0 });
+      // Hiển thị thông báo lỗi thân thiện thay vì im lặng
+      const errorMsg = err.response?.data?.detail || "Hệ thống đang bận hoặc quá tải, vui lòng thử lại sau.";
+      setError(errorMsg);
+      if (currentOffset === 0) {
+        setResponse({ results: [], total: 0, query: q, mode: m, duration_ms: 0 });
+      }
     } finally {
       setIsLoading(false);
     }
   }, [filterStatus, filterDocType, filterYearFrom, filterField, filterIssuingBody]);
+
+  const onNewSearch = useCallback((q: string, m: SearchMode) => {
+    setOffset(0);
+    handleSearch(q, m, 0);
+  }, [handleSearch]);
+
+  const handleLoadMore = useCallback(() => {
+    const nextOffset = offset + LIMIT;
+    setOffset(nextOffset);
+    handleSearch(query, mode, nextOffset);
+  }, [handleSearch, query, mode, offset]);
 
   const DOC_TYPES = ['Thông tư', 'Nghị định', 'Quyết định', 'Luật', 'Nghị quyết', 'Thông tư liên tịch', 'Pháp lệnh'];
   const FIELDS = ['Lao động', 'Thuế', 'Tài chính', 'Hành chính'];
@@ -67,7 +94,7 @@ export const SearchPage: React.FC = () => {
         <SearchBar
           value={query}
           onChange={setQuery}
-          onSearch={handleSearch}
+          onSearch={onNewSearch}
           mode={mode}
           onModeChange={setMode}
           isLoading={isLoading}
@@ -173,11 +200,26 @@ export const SearchPage: React.FC = () => {
 
         {/* Results (scrollable) */}
         <div style={{ flex: 1, overflowY: 'auto', marginTop: '4px' }}>
+          {error && (
+            <div style={{
+              padding: '12px 16px',
+              backgroundColor: 'rgba(239, 68, 68, 0.1)',
+              border: '1px solid rgba(239, 68, 68, 0.3)',
+              color: 'var(--error, #ef4444)',
+              borderRadius: 'var(--radius-md)',
+              marginBottom: '16px',
+              fontSize: '0.9rem',
+              fontWeight: 500
+            }}>
+              ⚠️ Lỗi: {error}
+            </div>
+          )}
           <SearchResults
             response={response}
             isLoading={isLoading}
             query={query}
             hasSearched={hasSearched}
+            onLoadMore={handleLoadMore}
           />
         </div>
       </div>
