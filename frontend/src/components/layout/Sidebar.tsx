@@ -8,6 +8,7 @@ import {
 
 const NAV_ITEMS = [
   { to: '/search',    icon: <Search size={20} />,     label: 'Tìm kiếm' },
+  { to: '/contract',  icon: <FolderOpen size={20} />, label: 'Hợp đồng' },
   { to: '/workspace', icon: <FolderOpen size={20} />, label: 'Workspace' },
   { to: '/analytics', icon: <BarChart2 size={20} />,  label: 'Thống kê' },
 ];
