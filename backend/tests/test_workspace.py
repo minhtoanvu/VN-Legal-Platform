@@ -4,8 +4,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 import uuid
 from app.models.document import Document
 
+from app.core.database import AsyncSessionLocal
+
 @pytest.fixture
-async def mock_doc(db_session: AsyncSession):
+async def mock_doc():
     """Tạo một văn bản giả để test add to collection và add note."""
     doc_id = uuid.uuid4()
     doc = Document(
@@ -14,9 +16,16 @@ async def mock_doc(db_session: AsyncSession):
         doc_number="123/TEST",
         content="Nội dung test"
     )
-    db_session.add(doc)
-    await db_session.commit()
-    return doc_id
+    async with AsyncSessionLocal() as session:
+        session.add(doc)
+        await session.commit()
+    
+    yield str(doc_id)
+    
+    # Dọn dẹp sau khi test
+    async with AsyncSessionLocal() as session:
+        await session.delete(await session.get(Document, doc_id))
+        await session.commit()
 
 # ---------- Collections ----------
 
@@ -63,9 +72,9 @@ async def test_delete_collection(auth_client: AsyncClient):
 # ---------- Notes ----------
 
 @pytest.mark.anyio
-async def test_create_and_get_note(auth_client: AsyncClient):
+async def test_create_and_get_note(auth_client: AsyncClient, mock_doc):
     """Test tạo và lấy ghi chú."""
-    fake_doc_id = str(uuid.uuid4())
+    fake_doc_id = mock_doc
     
     # Tạo note
     create_resp = await auth_client.post("/workspace/notes", json={
