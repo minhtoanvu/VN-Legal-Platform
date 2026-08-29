@@ -30,7 +30,7 @@ class LegalPlatformUser(HttpUser):
             # Thiết lập Token vào Header mặc định cho mọi Request tiếp theo
             self.client.headers.update({"Authorization": f"Bearer {token}"})
         else:
-            print("Login Failed for Load Testing!")
+            print(f"Login Failed! Status: {response.status_code}, Body: {response.text}")
 
     @task(3)
     def view_documents(self):

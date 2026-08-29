@@ -22,11 +22,18 @@
 - **Scenarios**: Registration -> JWT Login -> Mixed behavior (30% View Docs, 20% Search, 10% Workspace CRUD).
 - **Execution Strategy**:
   - Run Locust locally targeting `http://localhost:8000`
-  - *Metrics to capture (Fill after running):*
-    - Total Requests per Second (RPS): [X]
-    - Average Response Time (Search API): [X] ms
-    - Average Response Time (Document Detail API): [X] ms
-    - Error Rate at 100 Concurrent Users: [X] %
+  - *Metrics Capture (100 Concurrent Users):*
+    - **Total Requests**: 550
+    - **Total Requests per Second (RPS)**: ~2.2
+    - **Average Response Time (Search API)**: ~3400 ms
+    - **Average Response Time (Document Detail API)**: ~4825 ms
+    - **Error Rate**: 46% (255/550) - *Chi tiết xem phân tích bên dưới*
+
+## 4. Performance Analysis & Bottlenecks
+Dựa trên kết quả Load Test, hệ thống lộ ra các điểm thắt cổ chai (bottlenecks) cực kỳ điển hình ở các ứng dụng FastAPI quy mô vừa:
+1. **CPU Bound do thuật toán Hash (Bcrypt)**: API `/auth/register` có Max Response Time lên tới 73.9 giây! Việc băm mật khẩu hàng loạt (100 user cùng lúc) đã làm "nghẽn" hoàn toàn Event Loop của Python (Asyncio), dẫn đến 43% request đăng ký bị Timeout.
+2. **Cascading Failures**: Kéo theo việc 50% request Đăng nhập thất bại (do user chưa đăng ký xong hoặc server đang kẹt cứng).
+3. **Giải pháp kiến nghị**: Đẩy logic hash mật khẩu (Bcrypt) vào ThreadPool (`run_in_threadpool`) hoặc dùng Background Tasks/Celery. Tách DB Replicas cho Read/Write.
 
 ## Conclusion
-The application demonstrates robust API fault tolerance, a functional UI pipeline, and baseline performance stability under simulated load. Ready for CI/CD integration.
+The application demonstrates robust API fault tolerance, a functional UI pipeline, but requires significant architecture tuning for CPU-bound tasks under heavy load. Sẵn sàng tích hợp CI/CD và tối ưu hóa hệ thống.
