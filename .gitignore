@@ -44,4 +44,5 @@ implementation_plan*.md
 backend/scripts/sandbox/
 !backend/requirements.txt
 .agents/
+.ag-kit-backups/
 Agent.md
