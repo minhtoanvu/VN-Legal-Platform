@@ -41,18 +41,18 @@ Depending on your area of expertise, please refer to the deep-dive documentation
 
 ## 🔥 Core Competencies & Technical Highlights
 
-### 1. 🛡️ Enterprise-Grade QA & Automation (Test Pyramid)
+### 1. 🛡️ Comprehensive QA Architecture (Test Pyramid)
 Quality Assurance is built into the DNA of this project, covering every layer of the Software Development Life Cycle (SDLC):
-* **Unit & API Testing:** Built a rigorous `pytest` suite for backend endpoints, utilizing Async Mocking and Database Fixtures (AAA Pattern).
+* **Unit & API Testing:** Built a rigorous `pytest` suite for backend endpoints, utilizing Async Mocking and Database Fixtures (AAA Pattern). **Current Backend Test Coverage: 52%** (Verified via `pytest-cov`).
 * **End-to-End (E2E) Testing:** Implemented automated UI testing using **Playwright** (`tests_e2e/`), simulating real-world user interactions.
 * **Performance & Load Testing:** Utilized **Locust** (`tests/performance/`) to simulate high-concurrency traffic (100+ concurrent users), successfully identifying and optimizing cryptographic bottlenecks (Bcrypt).
 * **AI Evaluation (RAGAs):** Wrote advanced benchmark scripts to mathematically evaluate AI accuracy using `MRR@5`, `Hit@5`, `Faithfulness`, and `Answer Relevancy`.
-* **CI/CD Pipeline:** Fully automated the testing workflow using **GitHub Actions**, ensuring zero regressions on every push/PR.
+* **CI/CD Pipeline:** Automated backend testing, frontend builds, and Playwright E2E verification using **GitHub Actions**.
 
 ### 2. 🧠 Advanced Data Mining & AI
 * **Graph Analytics:** Implemented **PageRank** to identify the most foundational laws and **Louvain Clustering** to group legal documents into legislative communities.
 * **Hybrid Vector Search:** Integrated full-text search (BM25) with semantic embeddings using **pgvector** (HNSW Index).
-* **Anti-Hallucination RAG:** Engineered a strict prompting mechanism forcing the LLM (Gemini) to generate answers with precise **inline citations**, completely eliminating AI hallucination.
+* **Anti-Hallucination RAG:** Engineered a strict prompting mechanism designed to **minimize hallucination risk** by grounding the LLM (Gemini) with precise **inline citations** from retrieved context.
 
 ### 3. ⚡ Backend Architecture & Resilience
 * **Strict Clean Code:** 3-Tier Architecture (Router - Service - Repository) enforcing the Single Responsibility Principle.

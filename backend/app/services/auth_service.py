@@ -50,7 +50,7 @@ async def register_user(
 
     user = User(
         email=email,
-        password_hash=hash_password(password),
+        password_hash=await hash_password(password),
         full_name=full_name,
         organization_id=org_id,
         role="user",
@@ -72,7 +72,7 @@ async def login_user(
     Raises ValueError nếu sai credentials.
     """
     user = await get_user_by_email(session, email)
-    if not user or not verify_password(password, user.password_hash):
+    if not user or not await verify_password(password, user.password_hash):
         raise ValueError("Email hoặc mật khẩu không đúng.")
 
     if not user.is_active:
