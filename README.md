@@ -28,6 +28,17 @@ Beyond its core features, this repository serves as a masterclass in **Software 
 
 ---
 
+## 🎯 Role-Specific Guides
+
+Depending on your area of expertise, please refer to the deep-dive documentation below:
+
+* 🧪 **[QA & Testing Strategy](./docs/TESTING_GUIDE.md)**: Test matrix, E2E Automation, and SLAs.
+* 🤖 **[AI/ML Development Guide](./docs/AI_DEVELOPMENT.md)**: RAG Pipeline, anti-hallucination prompts, and mathematical evaluation.
+* 📊 **[Business & Analytics Guide](./docs/BUSINESS_GUIDE.md)**: Use cases, dataset overview, KPIs, and Graph Data Mining.
+* 🏗️ **[Deployment & Infrastructure](./docs/DEPLOYMENT_GUIDE.md)**: Production checklist, CI/CD, and scaling strategies.
+
+---
+
 ## 🔥 Core Competencies & Technical Highlights
 
 ### 1. 🛡️ Enterprise-Grade QA & Automation (Test Pyramid)
