@@ -24,6 +24,7 @@ langchain-google-genai==2.0.5
 langchain-openai==0.2.9
 langchain-community==0.3.7
 sentence-transformers==3.3.1
+ragas
 
 # Data / ETL
 datasets
