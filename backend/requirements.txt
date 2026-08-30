@@ -33,6 +33,8 @@ beautifulsoup4
 scikit-learn
 scipy
 tqdm
+networkx
+python-louvain
 
 # HTTP
 httpx==0.27.2
