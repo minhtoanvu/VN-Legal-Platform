@@ -1,6 +1,12 @@
+import sys
+import os
 import asyncio
 import json
 import logging
+
+# Đảm bảo Python nhận diện được thư mục gốc 'backend' (chứa thư mục 'app')
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 from datasets import Dataset
 from ragas import evaluate
 from ragas.metrics import faithfulness, answer_relevancy
@@ -105,10 +111,12 @@ async def run_benchmark():
     log.info("\n=== KẾT QUẢ BENCHMARK ===")
     print(json.dumps(result, indent=2))
     
-    with open("ragas_scorecard.json", "w", encoding="utf-8") as f:
+    # Đảm bảo file kết quả được lưu đúng vào thư mục data/outputs/
+    output_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data", "outputs", "ragas_scorecard.json")
+    with open(output_path, "w", encoding="utf-8") as f:
         json.dump(result, f, indent=2, ensure_ascii=False)
         
-    log.info("Đã lưu kết quả vào ragas_scorecard.json")
+    log.info(f"Đã lưu kết quả vào {output_path}")
 
 if __name__ == "__main__":
     asyncio.run(run_benchmark())
