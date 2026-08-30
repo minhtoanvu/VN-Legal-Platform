@@ -106,3 +106,93 @@ async def get_dashboard_metrics(session: AsyncSession) -> dict:
         "top_query_types": top_query_types,
         "top_issuing_bodies": top_issuing_bodies,
     }
+
+
+async def get_advanced_analytics(session: AsyncSession) -> dict:
+    """
+    Khai phá dữ liệu nâng cao (Data Mining):
+    1. PageRank: Tìm các "Văn bản rễ" (được tham chiếu nhiều nhất)
+    2. Louvain Community Detection: Phân cụm các văn bản liên quan
+    3. Heatmap Calendar: Phân phối ban hành theo năm/tháng
+    """
+    import networkx as nx
+    import community as community_louvain
+    from app.models.document import DocumentRelation
+
+    # 1. Lấy dữ liệu quan hệ (Edges)
+    rel_query = await session.execute(
+        select(DocumentRelation.source_doc_id, DocumentRelation.target_doc_id)
+    )
+    edges = [(str(row.source_doc_id), str(row.target_doc_id)) for row in rel_query]
+
+    # Xây dựng đồ thị
+    G_directed = nx.DiGraph()
+    G_directed.add_edges_from(edges)
+
+    # Nếu đồ thị trống (chưa có relation), trả về kết quả rỗng
+    if not edges:
+        return {"pagerank": [], "communities": {}, "heatmap": []}
+
+    # 2. PageRank Algorithm
+    try:
+        pr_scores = nx.pagerank(G_directed, alpha=0.85)
+        top_10_nodes = sorted(pr_scores.items(), key=lambda x: x[1], reverse=True)[:10]
+        top_10_ids = [node for node, score in top_10_nodes]
+
+        # Lấy metadata của Top 10
+        docs_query = await session.execute(
+            select(Document.id, Document.doc_number, Document.title)
+            .where(Document.id.in_(top_10_ids))
+        )
+        doc_dict = {str(row.id): {"doc_number": row.doc_number, "title": row.title} for row in docs_query}
+
+        pagerank_result = [
+            {
+                "doc_id": node,
+                "doc_number": doc_dict.get(node, {}).get("doc_number", "Unknown"),
+                "title": doc_dict.get(node, {}).get("title", "Unknown"),
+                "score": round(score, 6)
+            }
+            for node, score in top_10_nodes
+        ]
+    except Exception as e:
+        pagerank_result = []
+
+    # 3. Louvain Community Detection
+    try:
+        G_undirected = G_directed.to_undirected()
+        partition = community_louvain.best_partition(G_undirected)
+        
+        # Đếm số lượng node trong mỗi community
+        community_counts = {}
+        for node, comm_id in partition.items():
+            community_counts[comm_id] = community_counts.get(comm_id, 0) + 1
+            
+        # Lấy top 5 communities lớn nhất
+        top_communities = sorted(community_counts.items(), key=lambda x: x[1], reverse=True)[:5]
+        communities_result = [{"community_id": c_id, "node_count": count} for c_id, count in top_communities]
+    except Exception as e:
+        communities_result = []
+
+    # 4. Heatmap Calendar (Distribution by Year/Month)
+    heatmap_query = await session.execute(
+        select(
+            extract("year", Document.issue_date).label("year"),
+            extract("month", Document.issue_date).label("month"),
+            func.count().label("count")
+        )
+        .where(Document.issue_date != None)
+        .group_by("year", "month")
+        .order_by(text("year DESC"), text("month DESC"))
+        .limit(120)  # 10 năm gần nhất
+    )
+    heatmap_result = [
+        {"year": int(row.year), "month": int(row.month), "count": row.count}
+        for row in heatmap_query if row.year and row.month
+    ]
+
+    return {
+        "pagerank_top_nodes": pagerank_result,
+        "communities": communities_result,
+        "heatmap": heatmap_result
+    }

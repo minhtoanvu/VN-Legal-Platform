@@ -39,4 +39,4 @@ Write-Host ""
 Write-Host "  Swagger UI: http://localhost:8000/docs" -ForegroundColor Cyan
 Write-Host "  Health:     http://localhost:8000/health" -ForegroundColor Cyan
 Write-Host ""
-uvicorn app.main:app --host 0.0.0.0 --port 8000
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8000

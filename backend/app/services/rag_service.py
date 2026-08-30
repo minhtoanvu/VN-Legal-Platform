@@ -139,9 +139,18 @@ async def rag_generate_stream(
     try:
         from app.core.config import settings
         from google import genai as google_genai
+        from app.core.circuit_breaker import llm_circuit_breaker, CircuitState
 
         if not settings.gemini_api_key:
             yield "⚠️ Chưa cấu hình GEMINI_API_KEY. Vui lòng thêm key vào file .env."
+            return
+
+        # Cập nhật trạng thái cầu dao
+        llm_circuit_breaker._update_state()
+        if llm_circuit_breaker.state == CircuitState.OPEN:
+            yield "⚠️ Hệ thống AI đang tạm gián đoạn (Circuit Breaker OPEN). Đây là kết quả tìm kiếm:\n\n"
+            for i, chunk in enumerate(chunks, 1):
+                yield f"**[{i}] {chunk.get('doc_number', '')}** — {chunk.get('title', '')}\n\n"
             return
 
         client = google_genai.Client(api_key=settings.gemini_api_key)
@@ -170,13 +179,16 @@ async def rag_generate_stream(
             if chunk.text:
                 yield chunk.text
 
+        llm_circuit_breaker.record_success()
         yield f"\n\n__CITATIONS__:{json.dumps(citations, ensure_ascii=False)}"
 
     except asyncio.TimeoutError:
-        yield "⚠️ AI phản hồi chậm, đây là kết quả tìm kiếm:\n\n"
+        llm_circuit_breaker.record_failure()
+        yield "⚠️ AI phản hồi quá 10 giây (Timeout), đây là kết quả tìm kiếm thay thế:\n\n"
         for i, chunk in enumerate(chunks, 1):
             yield f"**[{i}] {chunk.get('doc_number', '')}** — {chunk.get('title', '')}\n\n"
 
     except Exception as e:
+        llm_circuit_breaker.record_failure()
         log.error(f"Generate error: {e}")
         yield f"Lỗi kết nối AI: {type(e).__name__}. Vui lòng thử lại sau."

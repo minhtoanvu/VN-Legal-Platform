@@ -189,3 +189,29 @@ export interface Note {
   content: string;
 }
 
+// ===== Contract Analysis =====
+export interface CitationInfo {
+  doc_number: string;
+  title: string;
+  snippet: string;
+}
+
+export interface ClauseAnalysis {
+  clause_title: string;
+  clause_text: string;
+  step1_identification: string;
+  step2_legal_comparison: string;
+  step3_risk_evaluation: string;
+  step4_suggestion: string;
+  risk_score: number;
+  risk_level: 'low' | 'medium' | 'high';
+  citations: CitationInfo[];
+  is_reflected: boolean;
+}
+
+export interface ContractReport {
+  filename: string;
+  total_clauses: number;
+  analyses: ClauseAnalysis[];
+}
+

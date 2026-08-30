@@ -9,26 +9,12 @@ from httpx import AsyncClient, ASGITransport
 from app.main import app
 
 
-@pytest.fixture(scope="module")
-def anyio_backend():
-    return "asyncio"
-
-
-@pytest_asyncio.fixture(scope="module")
-async def client():
-    async with AsyncClient(
-        transport=ASGITransport(app=app),
-        base_url="http://test"
-    ) as ac:
-        yield ac
-
-
 # ---------- Keyword Search ----------
 
 @pytest.mark.anyio
-async def test_keyword_search_basic(client: AsyncClient):
+async def test_keyword_search_basic(auth_client: AsyncClient):
     """POST /search keyword mode → results + took_ms."""
-    resp = await client.post("/search", json={
+    resp = await auth_client.post("/search", json={
         "query": "lao dong",
         "mode": "keyword",
         "limit": 5,
@@ -41,9 +27,9 @@ async def test_keyword_search_basic(client: AsyncClient):
 
 
 @pytest.mark.anyio
-async def test_keyword_search_performance(client: AsyncClient):
+async def test_keyword_search_performance(auth_client: AsyncClient):
     """Keyword search phải < 2000ms (SLA: <1s, margin x2 cho test)."""
-    resp = await client.post("/search", json={
+    resp = await auth_client.post("/search", json={
         "query": "nghi phep",
         "mode": "keyword",
         "limit": 10,
@@ -53,9 +39,9 @@ async def test_keyword_search_performance(client: AsyncClient):
 
 
 @pytest.mark.anyio
-async def test_keyword_search_empty_results(client: AsyncClient):
+async def test_keyword_search_empty_results(auth_client: AsyncClient):
     """Query không tồn tại → results rỗng, không lỗi."""
-    resp = await client.post("/search", json={
+    resp = await auth_client.post("/search", json={
         "query": "xyzxyzxyz_not_exist_12345",
         "mode": "keyword",
         "limit": 5,
@@ -66,9 +52,9 @@ async def test_keyword_search_empty_results(client: AsyncClient):
 
 
 @pytest.mark.anyio
-async def test_get_search(client: AsyncClient):
+async def test_get_search(auth_client: AsyncClient):
     """GET /search?q=... cũng hoạt động."""
-    resp = await client.get("/search?q=lao+dong&mode=keyword&limit=3")
+    resp = await auth_client.get("/search?q=lao+dong&mode=keyword&limit=3")
     assert resp.status_code == 200
     assert resp.json()["mode"] == "keyword"
 
@@ -76,9 +62,9 @@ async def test_get_search(client: AsyncClient):
 # ---------- Hybrid / Semantic Search ----------
 
 @pytest.mark.anyio
-async def test_hybrid_search(client: AsyncClient):
+async def test_hybrid_search(auth_client: AsyncClient):
     """Hybrid search trả về kết quả (BM25 fallback nếu chưa có HNSW)."""
-    resp = await client.post("/search", json={
+    resp = await auth_client.post("/search", json={
         "query": "thu viec toi da bao nhieu ngay",
         "mode": "hybrid",
         "limit": 5,
@@ -90,9 +76,9 @@ async def test_hybrid_search(client: AsyncClient):
 
 
 @pytest.mark.anyio
-async def test_semantic_search(client: AsyncClient):
+async def test_semantic_search(auth_client: AsyncClient):
     """Semantic search không lỗi (fallback BM25 nếu HNSW chưa ready)."""
-    resp = await client.post("/search", json={
+    resp = await auth_client.post("/search", json={
         "query": "nghi phep nam bao nhieu ngay",
         "mode": "semantic",
         "limit": 5,
@@ -104,9 +90,9 @@ async def test_semantic_search(client: AsyncClient):
 # ---------- Validation ----------
 
 @pytest.mark.anyio
-async def test_invalid_mode(client: AsyncClient):
+async def test_invalid_mode(auth_client: AsyncClient):
     """Mode không hợp lệ → 422."""
-    resp = await client.post("/search", json={
+    resp = await auth_client.post("/search", json={
         "query": "test",
         "mode": "invalid_mode",
     })
@@ -114,9 +100,9 @@ async def test_invalid_mode(client: AsyncClient):
 
 
 @pytest.mark.anyio
-async def test_empty_query(client: AsyncClient):
+async def test_empty_query(auth_client: AsyncClient):
     """Query rỗng → 422."""
-    resp = await client.post("/search", json={
+    resp = await auth_client.post("/search", json={
         "query": "",
         "mode": "keyword",
     })
@@ -126,9 +112,9 @@ async def test_empty_query(client: AsyncClient):
 # ---------- Analytics ----------
 
 @pytest.mark.anyio
-async def test_analytics_dashboard(client: AsyncClient):
+async def test_analytics_dashboard(auth_client: AsyncClient):
     """GET /analytics/dashboard trả về 5 metrics."""
-    resp = await client.get("/analytics/dashboard")
+    resp = await auth_client.get("/analytics/dashboard")
     assert resp.status_code == 200
     data = resp.json()
     assert "kpi" in data

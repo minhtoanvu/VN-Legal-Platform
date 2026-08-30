@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
 from app.services.analytics_service import get_dashboard_metrics
-from app.core.dependencies import require_admin
+from app.core.dependencies import get_current_user
 
 router = APIRouter()
 
@@ -23,12 +23,31 @@ Trả về 5 aggregation metrics cho Dashboard:
 4. **documents_by_year** — Văn bản ban hành theo năm (Line Chart)
 5. **top_query_types** — Loại truy vấn phổ biến nhất (Bar Chart)
 
-🚨 **Yêu cầu Quyền:** Admin
+🚨 **Yêu cầu Quyền:** Mọi User đã đăng nhập
     """,
 )
 async def get_dashboard(
     db: AsyncSession = Depends(get_db),
-    current_user = Depends(require_admin)
+    current_user = Depends(get_current_user)
 ):
     """Tổng hợp metrics cho Dashboard UI."""
     return await get_dashboard_metrics(db)
+
+
+@router.get(
+    "/advanced",
+    summary="Data Mining Nâng cao (UC-11 mở rộng)",
+    description="""
+Trả về các phân tích chuyên sâu:
+1. **PageRank**: Top 10 văn bản rễ
+2. **Louvain**: Top 5 cụm cộng đồng (Community Detection)
+3. **Heatmap Calendar**: Lịch sử ban hành theo tháng/năm
+    """,
+)
+async def get_advanced_dashboard(
+    db: AsyncSession = Depends(get_db),
+    current_user = Depends(get_current_user)
+):
+    """Tổng hợp các chỉ số Data Mining nâng cao."""
+    from app.services.analytics_service import get_advanced_analytics
+    return await get_advanced_analytics(db)

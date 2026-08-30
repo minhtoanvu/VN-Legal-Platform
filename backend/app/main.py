@@ -88,7 +88,7 @@ async def health_check():
     return {"status": "ok", "service": "ai-legal-platform"}
 
 # ── ROUTER MOUNTS ────────────────────────────────────────────────────
-from app.routers import auth, search, documents, ai, graph, analytics, workspace
+from app.routers import auth, search, documents, ai, graph, analytics, workspace, contract
 
 app.include_router(auth.router, prefix="/auth", tags=["Authentication"])
 app.include_router(search.router, prefix="/search", tags=["Search"])
@@ -97,3 +97,4 @@ app.include_router(ai.router, prefix="/ai", tags=["AI Assistant"])
 app.include_router(graph.router, prefix="/graph", tags=["Knowledge Graph"])
 app.include_router(analytics.router, prefix="/analytics", tags=["Analytics"])
 app.include_router(workspace.router, prefix="/workspace", tags=["Workspace"])
+app.include_router(contract.router, prefix="/contract", tags=["Contract Analysis"])

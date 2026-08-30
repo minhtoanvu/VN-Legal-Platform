@@ -4,6 +4,7 @@ import { SearchPage } from './pages/SearchPage';
 import { DocumentPage } from './pages/DocumentPage';
 import { AnalyticsPage } from './pages/AnalyticsPage';
 import { WorkspacePage } from './pages/WorkspacePage';
+import { ContractAnalysisPage } from './pages/ContractAnalysisPage';
 import { AppLayout } from './components/layout/AppLayout';
 
 function App() {
@@ -19,6 +20,7 @@ function App() {
           <Route path="/documents/:id" element={<DocumentPage />} />
           <Route path="/analytics" element={<AnalyticsPage />} />
           <Route path="/workspace" element={<WorkspacePage />} />
+          <Route path="/contract" element={<ContractAnalysisPage />} />
         </Route>
 
         {/* Fallback redirect */}
