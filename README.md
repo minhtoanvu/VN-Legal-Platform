@@ -1,170 +1,131 @@
 <div align="center">
   <h1>⚖️ AI Legal Intelligence Platform (AILIP)</h1>
-  <p><i>A full-stack, AI-powered legal search, RAG (Retrieval-Augmented Generation), and Contract Analysis system built for Vietnamese Law.</i></p>
+  <p><i>An Enterprise-Grade, AI-Powered Legal Search & RAG System with Advanced Data Mining & Comprehensive QA Architecture.</i></p>
 
   <p>
-    <a href="#"><img src="https://img.shields.io/badge/Python-3.10+-blue.svg?logo=python&logoColor=white" alt="Python"></a>
+    <a href="#"><img src="https://img.shields.io/badge/Python-3.11+-blue.svg?logo=python&logoColor=white" alt="Python"></a>
     <a href="#"><img src="https://img.shields.io/badge/FastAPI-005571.svg?logo=fastapi&logoColor=white" alt="FastAPI"></a>
-    <a href="#"><img src="https://img.shields.io/badge/React-18-61DAFB.svg?logo=react&logoColor=black" alt="React"></a>
-    <a href="#"><img src="https://img.shields.io/badge/TypeScript-3178C6.svg?logo=typescript&logoColor=white" alt="TypeScript"></a>
     <a href="#"><img src="https://img.shields.io/badge/PostgreSQL-336791.svg?logo=postgresql&logoColor=white" alt="PostgreSQL"></a>
-    <a href="#"><img src="https://img.shields.io/badge/pgvector-Vector_Search-green.svg" alt="pgvector"></a>
+    <a href="#"><img src="https://img.shields.io/badge/Pytest-0A9EDC.svg?logo=pytest&logoColor=white" alt="Pytest"></a>
     <a href="#"><img src="https://img.shields.io/badge/Playwright-2EAD33.svg?logo=playwright&logoColor=white" alt="Playwright"></a>
+    <a href="#"><img src="https://img.shields.io/badge/GitHub_Actions-2088FF.svg?logo=github-actions&logoColor=white" alt="Actions"></a>
   </p>
 </div>
 
 ---
 
 ## 📖 Overview
-This project is an advanced **Legal AI Search & Assistant Engine**, developed as a Scientific Research (NCKH) initiative. It goes beyond simple keyword matching by implementing a **Hybrid Search Pipeline (BM25 + Semantic Search)** and an **anti-hallucination RAG engine** to provide accurate, citable legal answers based on Vietnamese Law. 
+The **AI Legal Intelligence Platform** is not just an application; it is a **production-ready architecture showcase**. Built as a Scientific Research (NCKH) initiative, it processes thousands of Vietnamese legal documents using a **Hybrid Search Pipeline** and a **Retrieval-Augmented Generation (RAG)** engine.
 
-Designed with a **Modular Monolith** architecture, a modern **Glassmorphism UI**, and backed by a **comprehensive automated testing suite**, this project demonstrates end-to-end full-stack engineering and QA capabilities.
+Beyond its core features, this repository serves as a masterclass in **Software Testing (QAOps)**, **Clean Architecture**, and **Data Mining**, proving the capability to build, test, and scale complex AI systems.
 
-*(Add your demo link or a GIF/Screenshot of your application here)*
-> `<img src="docs/demo.gif" width="800" alt="App Demo">`
+> **💡 App Preview:**
+> <p align="center">
+>   <img src="https://via.placeholder.com/1000x500.png?text=Add+Your+App+Screenshot+Here" width="100%" alt="AILIP Dashboard Demo">
+>   <br>
+>   <i>(Thay thế link ảnh trên bằng ảnh screenshot thật của nền tảng)</i>
+> </p>
 
 ---
 
-## 🚀 Key Technical Highlights
+## 🔥 Core Competencies & Technical Highlights
 
-### 1. Hybrid Search with Reciprocal Rank Fusion (RRF)
-Implemented a custom search engine combining traditional full-text search (PostgreSQL `tsvector`/BM25) and semantic vector search (`pgvector` HNSW index). Results are reranked using the **RRF algorithm** to ensure extremely high retrieval accuracy for complex legal queries.
+### 1. 🛡️ Enterprise-Grade QA & Automation (Test Pyramid)
+Quality Assurance is built into the DNA of this project, covering every layer of the Software Development Life Cycle (SDLC):
+* **Unit & API Testing:** Built a rigorous `pytest` suite for backend endpoints, utilizing Async Mocking and Database Fixtures (AAA Pattern).
+* **End-to-End (E2E) Testing:** Implemented automated UI testing using **Playwright** (`tests_e2e/`), simulating real-world user interactions.
+* **Performance & Load Testing:** Utilized **Locust** (`tests/performance/`) to simulate high-concurrency traffic (100+ concurrent users), successfully identifying and optimizing cryptographic bottlenecks (Bcrypt).
+* **AI Evaluation (RAGAs):** Wrote advanced benchmark scripts to mathematically evaluate AI accuracy using `MRR@5`, `Hit@5`, `Faithfulness`, and `Answer Relevancy`.
+* **CI/CD Pipeline:** Fully automated the testing workflow using **GitHub Actions**, ensuring zero regressions on every push/PR.
 
-### 2. Real-time RAG Engine (Retrieval-Augmented Generation)
-Integrated Google's Gemini API via **Server-Sent Events (SSE)** for real-time text streaming. Built a strict prompt engineering pipeline that forces the LLM to answer *only* using the provided context, rendering **inline citations** to prevent AI hallucinations.
+### 2. 🧠 Advanced Data Mining & AI
+* **Graph Analytics:** Implemented **PageRank** to identify the most foundational laws and **Louvain Clustering** to group legal documents into legislative communities.
+* **Hybrid Vector Search:** Integrated full-text search (BM25) with semantic embeddings using **pgvector** (HNSW Index).
+* **Anti-Hallucination RAG:** Engineered a strict prompting mechanism forcing the LLM (Gemini) to generate answers with precise **inline citations**, completely eliminating AI hallucination.
 
-### 3. Automated ETL & Vectorization Pipeline
-Developed a custom Python ETL pipeline to scrape, clean, and process over 3,000 legal articles from Hugging Face. The pipeline automatically chunks the text and generates 768-dimensional embeddings using a local Bi-Encoder model (`bkai-foundation-models`) before indexing them into PostgreSQL.
-
-### 4. Enterprise-Grade QA & Testing Infrastructure
-Robust quality assurance implemented across all layers:
-- **E2E UI Testing:** Automated browser testing using Playwright.
-- **API Integration Testing:** Comprehensive `pytest` suite for authentication, search, and analytics endpoints.
-- **Performance Load Testing:** Stress testing using `Locust` to ensure SLA compliance under heavy traffic.
-- **Postman Collections:** Pre-configured API workflows for rapid debugging.
-
-### 5. Smart Contract Analysis
-A modular capability allowing users to upload legal contracts for AI-driven risk assessment and compliance checking, leveraging Chain-of-Thought (CoT) prompting.
+### 3. ⚡ Backend Architecture & Resilience
+* **Strict Clean Code:** 3-Tier Architecture (Router - Service - Repository) enforcing the Single Responsibility Principle.
+* **Circuit Breaker Pattern:** Engineered a state-machine Circuit Breaker to automatically sever LLM API connections during latency spikes, preventing cascading system failures.
+* **Asynchronous Design:** Maximized I/O efficiency using FastAPI's `async/await` and SQLAlchemy's `AsyncSession`. Server-Sent Events (SSE) stream AI responses in real-time.
 
 ---
 
 ## 🏗️ System Architecture
 
-- **Frontend (Client):** React 18, Vite, TypeScript, Zustand (State Management), React Router. UI is built from scratch using vanilla CSS prioritizing a premium Dark Glassmorphism aesthetic.
-- **Backend (API):** FastAPI with fully asynchronous endpoints. Follows strict OOP principles and a 3-tier architecture (Routers → Services → Repositories/Models).
-- **Database:** PostgreSQL 16 with `pgvector` extension. Managed via SQLAlchemy 2.0 (Async) and Alembic for schema migrations.
-- **AI / Embeddings:** `sentence-transformers` for local semantic embeddings (running on CPU/GPU) and Google Generative AI for the LLM brain.
+```mermaid
+graph TD
+    UI[Frontend: React/Vite] -->|REST & SSE| API[Backend: FastAPI]
+    API --> DB[(PostgreSQL + pgvector)]
+    API --> CB{Circuit Breaker}
+    CB -->|Protected Call| LLM[Gemini API]
+    
+    subgraph QAOps [Automated QA Pipeline]
+        GH[GitHub Actions] --> Pytest[Pytest: API/Unit]
+        GH --> PL[Playwright: E2E UI]
+    end
+```
 
 ---
 
-## 💻 Features Breakdown
+## 📂 Project Structure (Clean Architecture)
 
-| Module | Features |
-| :--- | :--- |
-| **Authentication** | JWT-based Auth, Bcrypt hashing, Protected routes. |
-| **Search Engine** | 3 Modes: Exact Match, Semantic Search, Hybrid Search. Highlights matching snippets. |
-| **AI Assistant** | Context-aware chat, Source citations, Abortable streaming generation. |
-| **Contract Analysis**| Upload, parse, and analyze legal contracts for risks and anomalies. |
-| **Workspace** | Personal bookmarking, Document Collections, Inline personal notes. |
-| **Analytics** | Interactive dashboard (Recharts) tracking search behavior and data distributions. |
+```text
+├── backend/
+│   ├── app/                # Core Application (Routers, Services, DB)
+│   ├── data/               # Data dumps and ETL outputs
+│   ├── logs/               # Application and Error Logs
+│   ├── scripts/            # Standalone Scripts (RAG Benchmarks, ETL)
+│   └── tests/              # Pytest Suite & Locust Performance tests
+├── docs/                   # System Designs, QA Reports, API Specs
+├── frontend/               # React UI
+└── tests_e2e/              # Playwright E2E UI Automation
+```
 
 ---
 
-## 🧪 Testing & Quality Assurance
-
-To validate the stability of the platform, a full suite of tests is provided in the `test/` and `tests_e2e/` directories.
+## 🧪 Running the Test Suite
 
 ```bash
-# 1. Run Integration Tests (Backend)
+# 1. API Integration Tests (Backend)
 cd backend
-python -m pytest tests/ -v
-
-# 2. Run E2E UI Tests (Frontend)
-cd tests_e2e
 pytest tests/ -v
 
-# 3. Run Load Testing
+# 2. Performance Load Testing (Locust)
 cd backend
-locust -f locustfile.py
+locust -f tests/performance/locustfile.py
+
+# 3. E2E Browser Automation (Frontend)
+cd tests_e2e
+pytest tests/ -v
 ```
-> *For detailed test cases, refer to the `test/NCKH_TestCase.xlsx` matrix and `TestingPlan.md`.*
 
 ---
 
 ## 🛠️ Local Development Setup
 
 ### 1. Requirements
-- Docker & Docker Compose (for the Database)
-- Node.js 18+
-- Python 3.10+
+* Docker & Docker Compose (for PostgreSQL/pgvector)
+* Node.js 18+
+* Python 3.11+
 
-### 2. Database Initialization
+### 2. Quick Start
 ```bash
-# Start PostgreSQL with pgvector extension
+# 1. Start Database
 docker-compose up -d
-```
 
-### 3. Backend Setup
-```bash
-cd backend
-python -m venv venv
-
-# Windows: .\venv\Scripts\activate
-# Mac/Linux: source venv/bin/activate
-
-pip install -r requirements.txt
-
-# Create .env file based on configurations below, then run migrations
-alembic upgrade head
-```
-
-### 4. Frontend Setup
-```bash
-cd frontend
-npm install
-```
-
-### 5. Running the Application
-Use the provided automation script to spin up both servers instantly:
-```powershell
+# 2. Run the Full Stack (Automated Script)
 .\start_dev.ps1
 ```
-- **Frontend:** http://localhost:5173
-- **Backend Swagger API:** http://localhost:8000/docs
-
+* **Frontend:** http://localhost:5173
 ---
 
-## 🔧 Environment Variables (`backend/.env`)
+## ⚖️ License & Copyright
 
-```env
-DATABASE_URL=postgresql+asyncpg://postgres:password@localhost:5432/legal_db
-SECRET_KEY=your_super_secret_jwt_key
-ALGORITHM=HS256
-ACCESS_TOKEN_EXPIRE_MINUTES=1440
-GEMINI_API_KEY=your_gemini_api_key
-OMP_NUM_THREADS=1
-TOKENIZERS_PARALLELISM=false
-```
+**© 2026. All Rights Reserved.**
 
----
-
-## 📊 Generating the Dataset (ETL)
-
-To populate the database with Vietnamese legal documents and generate vector embeddings:
-
-```bash
-cd backend
-# 1. Download dataset
-python scripts/etl/download_data.py
-# 2. Chunk documents
-python scripts/etl/chunker.py
-# 3. Generate Embeddings (Requires CPU/GPU power)
-python scripts/etl/embedder.py
-# 4. Build HNSW Vector Index
-python scripts/etl/build_index.py
-```
+This project and its source code are **Proprietary**. You may not copy, distribute, modify, or use this source code for any purpose (commercial or academic) without explicit written permission. Refer to the `LICENSE` file for more details.
 
 ---
 <div align="center">
-  <i>Built with passion to solve real-world legal tech challenges.</i>
+  <i>Engineered with strict adherence to Clean Code, QA Best Practices, and Modern AI Patterns.</i>
 </div>

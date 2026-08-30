@@ -1,6 +1,11 @@
 import sys
+import os
 import asyncio
 import time
+
+# Đảm bảo Python nhận diện được thư mục gốc 'backend' (chứa thư mục 'app')
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 from app.core.database import AsyncSessionLocal
 from app.services.rag_service import rag_retrieve
 import app.services.rag_service as rag_service
