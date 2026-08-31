@@ -43,6 +43,8 @@ jobs:
     - name: Install and Run Backend
       working-directory: ./backend
       run: |
+        python -m venv venv
+        source venv/bin/activate
         pip install -r requirements.txt
         echo "POSTGRES_USER=postgres" > .env
         echo "POSTGRES_PASSWORD=postgres" >> .env
@@ -74,12 +76,16 @@ jobs:
     - name: Install Playwright Browsers & deps
       working-directory: ./tests_e2e
       run: |
+        python -m venv venv
+        source venv/bin/activate
         pip install pytest pytest-playwright playwright
         playwright install --with-deps chromium
         
     - name: Run E2E Tests
       working-directory: ./tests_e2e
-      run: pytest tests/ -v
+      run: |
+        source venv/bin/activate
+        pytest tests/ -v
       
     - name: Upload Test Results
       if: always()

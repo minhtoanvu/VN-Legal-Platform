@@ -45,6 +45,8 @@ jobs:
         
     - name: Install dependencies
       run: |
+        python -m venv venv
+        source venv/bin/activate
         python -m pip install --upgrade pip
         pip install -r requirements.txt
         
@@ -53,7 +55,7 @@ jobs:
         echo "POSTGRES_USER=postgres" > .env.test
         echo "POSTGRES_PASSWORD=postgres" >> .env.test
         echo "POSTGRES_DB=legal_platform_test" >> .env.test
-        echo "POSTGRES_HOST=localhost" >> .env.test
+        echo "POSTGRES_HOST=127.0.0.1" >> .env.test
         echo "POSTGRES_PORT=5432" >> .env.test
         echo "SECRET_KEY=dummy_secret_key_for_testing_purposes" >> .env.test
         echo "ALGORITHM=HS256" >> .env.test
@@ -61,4 +63,5 @@ jobs:
 
     - name: Run pytest
       run: |
+        source venv/bin/activate
         pytest -v
