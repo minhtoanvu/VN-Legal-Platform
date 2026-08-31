@@ -27,10 +27,11 @@ class Settings(BaseSettings):
     top_k_rerank: int = 5
     rrf_k: int = 60
 
-    class Config:
-        env_file = ".env"
-        env_file_encoding = "utf-8"
-        extra = "ignore"
+    model_config = {
+        "env_file": ".env",
+        "env_file_encoding": "utf-8",
+        "extra": "ignore"
+    }
 
 
 @lru_cache()

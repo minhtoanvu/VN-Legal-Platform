@@ -42,6 +42,11 @@ jobs:
         
     - name: Install and Run Backend
       working-directory: ./backend
+      env:
+        DATABASE_URL: postgresql+asyncpg://postgres:postgres@127.0.0.1:5433/legal_platform_test
+        SECRET_KEY: dummy_secret_key_for_testing_purposes
+        ALGORITHM: HS256
+        GEMINI_API_KEY: dummy_api_key_for_testing
       run: |
         python -m venv venv
         source venv/bin/activate
