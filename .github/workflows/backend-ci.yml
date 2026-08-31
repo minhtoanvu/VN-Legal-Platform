@@ -17,13 +17,13 @@ jobs:
     runs-on: ubuntu-latest
     services:
       postgres:
-        image: ankane/pgvector:latest
+        image: pgvector/pgvector:pg15
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
           POSTGRES_DB: legal_platform_test
         ports:
-          - 5432:5432
+          - 5433:5432
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -52,7 +52,7 @@ jobs:
         
     - name: Setup Dummy Environment Variables for Pytest
       run: |
-        echo "DATABASE_URL=postgresql+asyncpg://postgres:postgres@127.0.0.1:5432/legal_platform_test" > .env
+        echo "DATABASE_URL=postgresql+asyncpg://postgres:postgres@127.0.0.1:5433/legal_platform_test" > .env
         echo "SECRET_KEY=dummy_secret_key_for_testing_purposes" >> .env
         echo "ALGORITHM=HS256" >> .env
         echo "GEMINI_API_KEY=dummy_api_key_for_testing" >> .env
