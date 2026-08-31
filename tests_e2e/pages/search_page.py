@@ -13,7 +13,7 @@ class SearchPage(BasePage):
 
     async def open(self):
         """Mở trang tìm kiếm."""
-        await self.navigate("http://localhost:5173/")
+        await self.navigate("http://127.0.0.1:5173/")
 
     async def search_for(self, keyword: str):
         """Thực hiện hành động gõ phím và bấm tìm kiếm."""

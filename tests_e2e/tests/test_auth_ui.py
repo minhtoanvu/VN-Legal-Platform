@@ -2,7 +2,7 @@ import pytest
 from playwright.sync_api import Page, expect
 
 # Thay đổi URL tùy vào môi trường test của Frontend
-FRONTEND_URL = "http://localhost:5173"
+FRONTEND_URL = "http://127.0.0.1:5173"
 
 @pytest.mark.e2e
 def test_login_success(page: Page):
