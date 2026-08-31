@@ -85,7 +85,7 @@ jobs:
       working-directory: ./tests_e2e
       run: |
         source venv/bin/activate
-        pytest tests/ -v
+        pytest tests/ -v -o asyncio_mode=auto -o asyncio_default_fixture_loop_scope=function
       
     - name: Upload Test Results
       if: always()
