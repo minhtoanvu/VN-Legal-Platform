@@ -47,29 +47,29 @@ jobs:
         echo "POSTGRES_USER=postgres" > .env
         echo "POSTGRES_PASSWORD=postgres" >> .env
         echo "POSTGRES_DB=legal_platform_test" >> .env
-        echo "POSTGRES_HOST=localhost" >> .env
+        echo "POSTGRES_HOST=127.0.0.1" >> .env
         echo "POSTGRES_PORT=5432" >> .env
         echo "SECRET_KEY=dummy_secret_key_for_testing_purposes" >> .env
         echo "ALGORITHM=HS256" >> .env
         echo "GEMINI_API_KEY=dummy_api_key_for_testing" >> .env
         
-        # Chạy migration nếu có
-        alembic upgrade head || true
+        # Chạy migration
+        alembic upgrade head
         
         # Start server background
-        uvicorn app.main:app --host 0.0.0.0 --port 8000 &
+        uvicorn app.main:app --host 127.0.0.1 --port 8000 > backend.log 2>&1 &
         
         # Wait for backend to be ready
-        timeout 60 bash -c 'until curl -s http://localhost:8000 > /dev/null; do sleep 2; done' || true
+        timeout 60 bash -c 'until curl -s http://127.0.0.1:8000/docs > /dev/null; do sleep 2; done' || (cat backend.log && exit 1)
         
     - name: Install and Run Frontend
       working-directory: ./frontend
       run: |
         npm ci || npm install
-        npm run dev &
+        npm run dev -- --host 127.0.0.1 --port 5173 > frontend.log 2>&1 &
         
         # Wait for frontend to be ready
-        timeout 60 bash -c 'until curl -s http://localhost:5173 > /dev/null; do sleep 2; done' || true
+        timeout 60 bash -c 'until curl -s http://127.0.0.1:5173 > /dev/null; do sleep 2; done' || (cat frontend.log && exit 1)
         
     - name: Install Playwright Browsers & deps
       working-directory: ./tests_e2e
