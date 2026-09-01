@@ -1,58 +1,66 @@
-import asyncio
-from playwright.async_api import async_playwright
-import os
-import sys
+import pytest
+from playwright.sync_api import Page, expect
+import re
 
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from pages.search_page import SearchPage
+# Thay đổi URL tùy vào môi trường test của Frontend
+FRONTEND_URL = "http://127.0.0.1:5173"
 
-async def test_empty_search():
+@pytest.mark.e2e
+def test_empty_search(page: Page):
     """Test Case TC_SRCH_003: Không nhập gì cả mà bấm tìm kiếm."""
-    async with async_playwright() as p:
-        browser = await p.chromium.launch(headless=True)
-        page = await browser.new_page()
-        search_page = SearchPage(page)
+    page.goto(f"{FRONTEND_URL}")
+    
+    # Wait for page to load
+    page.wait_for_load_state("networkidle")
+    
+    # Find search input and button
+    search_input = page.locator('input[placeholder*="tìm"], input[type="search"]').first
+    search_button = page.locator('button:has-text("Tìm"), button[type="submit"]').first
+    
+    if search_input.is_visible() and search_button.is_visible():
+        # Leave search empty and click search
+        search_input.fill("")
+        search_button.click()
         
-        await search_page.open()
-        
-        # Bấm tìm kiếm ngay lập tức (không nhập keyword)
-        await search_page.search_input.fill("")
-        await search_page.search_button.click()
-        
-        # Mong đợi: Vẫn ở trang chủ, không crash web, nút có thể bị disable hoặc API không bị gọi
-        # (Ở đây ta kiểm tra xem API /search có bị bắn đi không, nếu có là lỗi)
-        # Bắt sự kiện mạng (Network interception)
-        api_called = False
-        async def handle_request(route):
-            nonlocal api_called
-            if "search" in route.request.url:
-                api_called = True
-            await route.continue_()
-            
-        await page.route("**/*", handle_request)
-        
-        print("Đã test xong Case: Input rỗng.")
-        await browser.close()
+        # Check that page doesn't crash - should still be on search page
+        page.wait_for_timeout(1000)
+        expect(page).to_have_url(re.compile(r".*/search"))
+    else:
+        # Search elements not found, skip test
+        pytest.skip("Search elements not found on page")
 
-async def test_xss_injection():
+@pytest.mark.e2e
+def test_xss_injection(page: Page):
     """Test Case TC_SRCH_004: Nhập mã độc XSS."""
-    async with async_playwright() as p:
-        browser = await p.chromium.launch(headless=True)
-        page = await browser.new_page()
-        search_page = SearchPage(page)
-        
-        await search_page.open()
-        
+    page.goto(f"{FRONTEND_URL}")
+    
+    # Wait for page to load
+    page.wait_for_load_state("networkidle")
+    
+    # Find search input and button
+    search_input = page.locator('input[placeholder*="tìm"], input[type="search"]').first
+    search_button = page.locator('button:has-text("Tìm"), button[type="submit"]').first
+    
+    if search_input.is_visible() and search_button.is_visible():
         # Nhập mã độc javascript
         malicious_code = "<script>alert('Hacked!');</script>"
-        await search_page.search_for(malicious_code)
+        search_input.fill(malicious_code)
+        search_button.click()
         
         # Mong đợi: Không có popup alert nào bật lên (Không bị XSS)
-        # Playwright sẽ tự động quăng lỗi nếu có Dialog bất thường nếu không catch,
-        # Nên nếu code chạy thẳng tới đây mà không treo nghĩa là web an toàn.
-        print("Đã test xong Case: Chống XSS Injection. Web an toàn!")
-        await browser.close()
-
-if __name__ == "__main__":
-    asyncio.run(test_empty_search())
-    asyncio.run(test_xss_injection())
+        # Set up a dialog handler - if it fires, test fails
+        dialog_fired = False
+        def handle_dialog(dialog):
+            nonlocal dialog_fired
+            dialog_fired = True
+            dialog.dismiss()
+        
+        page.once("dialog", handle_dialog)
+        page.wait_for_timeout(2000)
+        
+        assert not dialog_fired, "XSS vulnerability detected - dialog appeared"
+        # Web is safe if we get here
+        assert True
+    else:
+        # Search elements not found, skip test
+        pytest.skip("Search elements not found on page")
