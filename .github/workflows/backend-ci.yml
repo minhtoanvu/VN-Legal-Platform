@@ -17,15 +17,15 @@ jobs:
     runs-on: ubuntu-latest
     services:
       postgres:
-        image: postgres:15
+        image: pgvector/pgvector:pg16
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
           POSTGRES_DB: legal_platform_test
         ports:
-          - 5432:5432
+          - 5433:5432
         options: >-
-          --health-cmd pg_isready
+          --health-cmd "pg_isready -U postgres"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
@@ -52,16 +52,18 @@ jobs:
         
     - name: Setup Dummy Environment Variables for Pytest
       run: |
-        echo "POSTGRES_USER=postgres" > .env.test
-        echo "POSTGRES_PASSWORD=postgres" >> .env.test
-        echo "POSTGRES_DB=legal_platform_test" >> .env.test
-        echo "POSTGRES_HOST=127.0.0.1" >> .env.test
-        echo "POSTGRES_PORT=5432" >> .env.test
-        echo "SECRET_KEY=dummy_secret_key_for_testing_purposes" >> .env.test
-        echo "ALGORITHM=HS256" >> .env.test
-        echo "GEMINI_API_KEY=dummy_api_key_for_testing" >> .env.test
+        echo "DATABASE_URL=postgresql+asyncpg://postgres:postgres@127.0.0.1:5433/legal_platform_test" > .env
+        echo "SECRET_KEY=dummy_secret_key_for_testing_purposes" >> .env
+        echo "ALGORITHM=HS256" >> .env
+        echo "GEMINI_API_KEY=dummy_api_key_for_testing" >> .env
 
     - name: Run pytest
+      env:
+        DATABASE_URL: postgresql+asyncpg://postgres:postgres@127.0.0.1:5433/legal_platform_test
+        SECRET_KEY: dummy_secret_key_for_testing_purposes
+        ALGORITHM: HS256
+        GEMINI_API_KEY: dummy_api_key_for_testing
       run: |
         source venv/bin/activate
+        alembic upgrade head
         pytest -v

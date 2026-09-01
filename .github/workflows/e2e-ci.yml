@@ -12,15 +12,15 @@ jobs:
     runs-on: ubuntu-latest
     services:
       postgres:
-        image: postgres:15
+        image: pgvector/pgvector:pg16
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
           POSTGRES_DB: legal_platform_test
         ports:
-          - 5432:5432
+          - 5433:5432
         options: >-
-          --health-cmd pg_isready
+          --health-cmd "pg_isready -U postgres"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
@@ -42,15 +42,16 @@ jobs:
         
     - name: Install and Run Backend
       working-directory: ./backend
+      env:
+        DATABASE_URL: postgresql+asyncpg://postgres:postgres@127.0.0.1:5433/legal_platform_test
+        SECRET_KEY: dummy_secret_key_for_testing_purposes
+        ALGORITHM: HS256
+        GEMINI_API_KEY: dummy_api_key_for_testing
       run: |
         python -m venv venv
         source venv/bin/activate
         pip install -r requirements.txt
-        echo "POSTGRES_USER=postgres" > .env
-        echo "POSTGRES_PASSWORD=postgres" >> .env
-        echo "POSTGRES_DB=legal_platform_test" >> .env
-        echo "POSTGRES_HOST=127.0.0.1" >> .env
-        echo "POSTGRES_PORT=5432" >> .env
+        echo "DATABASE_URL=postgresql+asyncpg://postgres:postgres@127.0.0.1:5433/legal_platform_test" > .env
         echo "SECRET_KEY=dummy_secret_key_for_testing_purposes" >> .env
         echo "ALGORITHM=HS256" >> .env
         echo "GEMINI_API_KEY=dummy_api_key_for_testing" >> .env

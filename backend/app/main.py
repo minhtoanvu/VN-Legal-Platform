@@ -63,6 +63,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:5173",   # Vite dev server
+        "http://127.0.0.1:5173",   # Vite dev server (IPv4/CI)
         "http://localhost:3000",   # React CRA (fallback)
         "http://localhost:8080",   # Docker frontend
     ],
