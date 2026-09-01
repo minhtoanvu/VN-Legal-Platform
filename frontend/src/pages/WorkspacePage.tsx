@@ -3,7 +3,7 @@ import type { Collection, DocInCollection } from '../types';
 import { api } from '../services/api';
 import {
   FolderOpen, Plus, Trash2, FileText, ExternalLink,
-  BookMarked, Loader2, AlertTriangle, FolderX, X, Check,
+  BookMarked, Loader2, FolderX, X, Check,
   StickyNote,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';

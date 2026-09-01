@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import type { AnalyticsDashboard } from '../types';
 import { api } from '../services/api';
-import { Loader2, Database, FileSearch, Zap, Clock, TrendingUp, Activity, FilePlus } from 'lucide-react';
+import { Loader2, Database, Zap, Clock, Activity, FilePlus } from 'lucide-react';
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
 
 const STATUS_COLORS = { active: '#10b981', expired: '#ef4444', amended: '#f97316' };

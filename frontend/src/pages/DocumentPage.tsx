@@ -8,7 +8,7 @@ import { api } from '../services/api';
 import {
   ArrowLeft, Calendar, Building2, FileText, GitBranch,
   Layers, Loader2, AlertTriangle, ExternalLink,
-  BookmarkPlus, StickyNote, BookMarked, Trash2, Plus, Check, X,
+  BookmarkPlus, StickyNote, BookMarked, Trash2, Plus, Check,
 } from 'lucide-react';
 
 const RELATION_LABELS: Record<string, string> = {
@@ -414,7 +414,7 @@ export const DocumentPage: React.FC = () => {
                 </div>
               )}
 
-              {doc.content && (
+              {doc.content_full && (
                 <div className="glass-card" style={{ padding: '24px' }}>
                   <h2 style={{ fontSize: '1rem', fontWeight: 700, marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <FileText size={16} color="var(--primary)" /> Nội dung văn bản
@@ -427,7 +427,7 @@ export const DocumentPage: React.FC = () => {
                       paddingRight: '12px',
                       whiteSpace: 'pre-wrap'
                     }}
-                    dangerouslySetInnerHTML={{ __html: doc.content }}
+                    dangerouslySetInnerHTML={{ __html: doc.content_full }}
                   />
                 </div>
               )}
@@ -437,16 +437,18 @@ export const DocumentPage: React.FC = () => {
               <h2 style={{ fontSize: '0.9rem', fontWeight: 700, marginBottom: '18px', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-muted)' }}>
                 Thông tin văn bản
               </h2>
-              {[
-                ['Số hiệu', doc.doc_number],
-                ['Loại văn bản', doc.doc_type],
-                ['Cơ quan ban hành', doc.issuing_body],
-                ['Ngày ban hành', formatDate(doc.issue_date)],
-                ['Ngày có hiệu lực', formatDate(doc.effective_date)],
-                ['Ngày hết hiệu lực', formatDate(doc.expiry_date)],
-                doc.chunks_count !== undefined ? ['Số đoạn văn bản', `${doc.chunks_count} đoạn`] : null,
-              ].filter(Boolean).map(([k, v]) => (
-                <div key={k as string} style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 0', borderBottom: '1px solid var(--border-light)', gap: '12px' }}>
+              {(
+                [
+                  ['Số hiệu', doc.doc_number],
+                  ['Loại văn bản', doc.doc_type],
+                  ['Cơ quan ban hành', doc.issuing_body],
+                  ['Ngày ban hành', formatDate(doc.issue_date)],
+                  ['Ngày có hiệu lực', formatDate(doc.effective_date)],
+                  ['Ngày hết hiệu lực', formatDate(doc.expiry_date)],
+                  doc.chunks_count !== undefined ? ['Số đoạn văn bản', `${doc.chunks_count} đoạn`] : null,
+                ] as ([string, string | number | null] | null)[]
+              ).filter((item): item is [string, string | number | null] => item !== null).map(([k, v]) => (
+                <div key={k} style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 0', borderBottom: '1px solid var(--border-light)', gap: '12px' }}>
                   <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', flexShrink: 0 }}>{k}</span>
                   <span style={{ fontSize: '0.82rem', color: 'var(--text-primary)', textAlign: 'right', wordBreak: 'break-word' }}>{v || '—'}</span>
                 </div>
