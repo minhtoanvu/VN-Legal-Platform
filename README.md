@@ -21,9 +21,9 @@ Beyond its core features, this repository serves as a masterclass in **Software 
 
 > **💡 App Preview:**
 > <p align="center">
->   <img src="./docs/image.png" width="100%" alt="AILIP Search Demo">
+>   <img src="./docs/image copy 2.png" width="100%" alt="AILIP Search Demo">
 >   <br>
->   <i>Giao diện Tìm kiếm Văn bản Pháp luật tích hợp RAG (Hybrid Search)</i>
+>   <i>Giao diện màn hình chính</i>
 > </p>
 
 ---
