@@ -11,7 +11,7 @@ def test_login_success(page: Page):
     Test kịch bản đăng nhập thành công.
     Yêu cầu: Frontend đang chạy ở localhost:5173 và Backend đang chạy.
     """
-    page.goto(f"{FRONTEND_URL}/login")
+    page.goto(f"{FRONTEND_URL}/auth")
     
     # Assert tiêu đề trang - chấp nhận nhiều tiêu đề có thể
     expect(page).to_have_title(re.compile(r"Login|Đăng nhập|frontend|Vite \+ React", re.IGNORECASE))
@@ -25,14 +25,14 @@ def test_login_success(page: Page):
     page.click('button[type="submit"]')
     
     # Chờ redirect sang trang dashboard/search
-    page.wait_for_url(re.compile(r".*/（search|dashboard)"), timeout=10000)
+    page.wait_for_url(re.compile(r".*(search|dashboard)"), timeout=10000)
     
 @pytest.mark.e2e
 def test_login_failure_wrong_password(page: Page):
     """
     Test kịch bản đăng nhập thất bại (Negative Test).
     """
-    page.goto(f"{FRONTEND_URL}/login")
+    page.goto(f"{FRONTEND_URL}/auth")
     
     page.fill('input[type="email"]', "test_e2e@example.com")
     page.fill('input[type="password"]', "WRONG_PASSWORD")
@@ -46,5 +46,5 @@ def test_login_failure_wrong_password(page: Page):
     if error_message.count() > 0:
         expect(error_message.first).to_be_visible()
     else:
-        # If no error message found, check if we stayed on login page
-        expect(page).to_have_url(re.compile(r".*/login"))
+        # If no error message found, check if we stayed on auth page
+        expect(page).to_have_url(re.compile(r".*/auth"))
