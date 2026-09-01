@@ -414,7 +414,7 @@ export const DocumentPage: React.FC = () => {
                 </div>
               )}
 
-              {doc.content_full && (
+              {doc.content && (
                 <div className="glass-card" style={{ padding: '24px' }}>
                   <h2 style={{ fontSize: '1rem', fontWeight: 700, marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <FileText size={16} color="var(--primary)" /> Nội dung văn bản
@@ -427,7 +427,7 @@ export const DocumentPage: React.FC = () => {
                       paddingRight: '12px',
                       whiteSpace: 'pre-wrap'
                     }}
-                    dangerouslySetInnerHTML={{ __html: doc.content_full }}
+                    dangerouslySetInnerHTML={{ __html: doc.content }}
                   />
                 </div>
               )}

@@ -33,9 +33,14 @@ export const ClauseCard: React.FC<ClauseCardProps> = ({ analysis }) => {
         <div className="flex-1">
           <div className="flex items-center gap-3 mb-2">
             <h3 className="font-semibold text-white">{analysis.clause_title}</h3>
-            <span className={`px-2 py-0.5 rounded text-xs font-semibold ${style.bg} ${style.text}`}>
-              {style.label} ({analysis.risk_score}/10)
-            </span>
+            <div className="flex items-center gap-2">
+              <span className={`px-2 py-0.5 rounded text-xs font-semibold ${style.bg} ${style.text}`}>
+                {style.label}
+              </span>
+              <span className="text-xs text-gray-500">
+                (Điểm rủi ro: {analysis.risk_score}/10)
+              </span>
+            </div>
           </div>
           <p className="text-sm text-gray-400 line-clamp-2">{analysis.clause_text}</p>
         </div>
@@ -57,7 +62,7 @@ export const ClauseCard: React.FC<ClauseCardProps> = ({ analysis }) => {
         <div className="p-4 pt-0 border-t border-gray-800/50 mt-2 fade-in">
           <div className="bg-[#080c14] p-3 rounded text-sm text-gray-300 mb-4 border border-gray-800">
             <strong>Nguyên văn:</strong>
-            <p className="mt-1">{analysis.clause_text}</p>
+            <p className="mt-1 whitespace-pre-wrap">{analysis.clause_text}</p>
           </div>
           
           <CoTPanel analysis={analysis} />

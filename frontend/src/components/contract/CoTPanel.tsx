@@ -19,22 +19,22 @@ export const CoTPanel: React.FC<CoTPanelProps> = ({ analysis }) => {
       <div className="space-y-4 text-sm">
         <div>
           <strong className="text-gray-300 block mb-1">1. Bản chất điều khoản:</strong>
-          <p className="text-gray-400">{analysis.step1_identification}</p>
+          <p className="text-gray-400 whitespace-pre-wrap leading-relaxed">{analysis.step1_identification}</p>
         </div>
         
         <div>
           <strong className="text-gray-300 block mb-1">2. Đối chiếu pháp luật:</strong>
-          <p className="text-gray-400">{analysis.step2_legal_comparison}</p>
+          <p className="text-gray-400 whitespace-pre-wrap leading-relaxed">{analysis.step2_legal_comparison}</p>
         </div>
         
         <div>
           <strong className="text-gray-300 block mb-1">3. Đánh giá rủi ro:</strong>
-          <p className="text-gray-400">{analysis.step3_risk_evaluation}</p>
+          <p className="text-gray-400 whitespace-pre-wrap leading-relaxed">{analysis.step3_risk_evaluation}</p>
         </div>
         
         <div>
           <strong className="text-gray-300 block mb-1">4. Đề xuất:</strong>
-          <p className="text-gray-400">{analysis.step4_suggestion}</p>
+          <p className="text-gray-400 whitespace-pre-wrap leading-relaxed">{analysis.step4_suggestion}</p>
         </div>
       </div>
 

@@ -21,10 +21,17 @@ if ($LASTEXITCODE -ne 0) {
 # 2. Khởi động PostgreSQL container
 Write-Host "[2/4] Khoi dong PostgreSQL container..." -ForegroundColor Yellow
 docker-compose up -d 2>$null
-Start-Sleep -Seconds 8
+
+Write-Host "      Cho PostgreSQL san sang..."
+$retry = 0
+do {
+    Start-Sleep -Seconds 2
+    $health = docker inspect --format="{{if .State.Health}}{{.State.Health.Status}}{{end}}" legal_pgvector 2>$null
+    $retry++
+} while ($health -ne "healthy" -and $retry -lt 20)
 
 # Kiểm tra container healthy
-$status = docker ps --format "{{.Names}}\t{{.Status}}" | Select-String "legal_pgvector"
+$status = docker ps --format "{{.Names}}`t{{.Status}}" | Select-String "legal_pgvector"
 Write-Host "      $status" -ForegroundColor Green
 
 # 3. Apply migrations

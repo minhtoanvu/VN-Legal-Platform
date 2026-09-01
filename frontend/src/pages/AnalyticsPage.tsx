@@ -53,10 +53,26 @@ export const AnalyticsPage: React.FC = () => {
     .slice(0, 8)
     .map((item: any) => ({ name: item.issuing_body.length > 20 ? item.issuing_body.slice(0, 20) + '…' : item.issuing_body, value: item.count }));
 
+  const FIELD_TRANSLATIONS: Record<string, string> = {
+    tax: 'Thuế, phí, lệ phí',
+    labor: 'Lao động',
+    civil: 'Dân sự',
+    criminal: 'Hình sự',
+    enterprise: 'Doanh nghiệp',
+    investment: 'Đầu tư',
+    commercial: 'Thương mại',
+  };
+
   const fieldData = (data.documents_by_field || [])
     .sort((a: any, b: any) => b.count - a.count)
     .slice(0, 8)
-    .map((item: any) => ({ name: item.field.length > 20 ? item.field.slice(0, 20) + '…' : item.field, value: item.count }));
+    .map((item: any) => {
+      const translated = FIELD_TRANSLATIONS[item.field] || item.field;
+      return { 
+        name: translated.length > 20 ? translated.slice(0, 20) + '…' : translated, 
+        value: item.count 
+      };
+    });
 
   const STAT_CARDS = [
     {
@@ -174,7 +190,7 @@ export const AnalyticsPage: React.FC = () => {
                 contentStyle={{ background: 'var(--bg-surface)', border: '1px solid var(--border-light)', borderRadius: '8px', fontSize: '0.82rem' }}
                 formatter={(v) => [Number(v).toLocaleString('vi-VN'), 'Văn bản']}
               />
-              <Bar dataKey="value" fill="var(--primary)" radius={[0, 4, 4, 0]} />
+              <Bar dataKey="value" fill="var(--primary)" radius={[0, 4, 4, 0]} maxBarSize={40} />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -194,7 +210,7 @@ export const AnalyticsPage: React.FC = () => {
                 contentStyle={{ background: 'var(--bg-surface)', border: '1px solid var(--border-light)', borderRadius: '8px', fontSize: '0.82rem' }}
                 formatter={(v) => [Number(v).toLocaleString('vi-VN'), 'Văn bản']}
               />
-              <Bar dataKey="value" fill="var(--accent-purple)" radius={[0, 4, 4, 0]} />
+              <Bar dataKey="value" fill="var(--accent-purple)" radius={[0, 4, 4, 0]} maxBarSize={40} />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -211,7 +227,7 @@ export const AnalyticsPage: React.FC = () => {
                 contentStyle={{ background: 'var(--bg-surface)', border: '1px solid var(--border-light)', borderRadius: '8px', fontSize: '0.82rem' }}
                 formatter={(v) => [Number(v).toLocaleString('vi-VN'), 'Văn bản']}
               />
-              <Bar dataKey="value" fill="var(--accent-cyan)" radius={[0, 4, 4, 0]} />
+              <Bar dataKey="value" fill="var(--accent-cyan)" radius={[0, 4, 4, 0]} maxBarSize={40} />
             </BarChart>
           </ResponsiveContainer>
         </div>

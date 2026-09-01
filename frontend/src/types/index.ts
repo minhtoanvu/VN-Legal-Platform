@@ -52,7 +52,7 @@ export interface DocumentRelation {
 
 export interface DocumentDetail extends DocumentListItem {
   content_summary: string | null;
-  content_full: string | null;
+  content: string | null;
   expiry_date: string | null;
   relations: DocumentRelation[];
   chunks_count: number;

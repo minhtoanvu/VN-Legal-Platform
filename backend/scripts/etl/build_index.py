@@ -29,52 +29,48 @@ from app.core.database import AsyncSessionLocal
 async def main():
     print("=== Tạo HNSW Index trên document_chunks ===")
 
-    async with AsyncSessionLocal() as session:
-        # Kiểm tra số chunks đã có embedding
-        result = await session.execute(
-            text("SELECT COUNT(*) FROM document_chunks WHERE embedding IS NOT NULL")
-        )
-        count = result.scalar()
-        print(f"Chunks có embedding: {count}")
+    import asyncpg
+    conn = await asyncpg.connect("postgres://postgres:password@localhost:5432/legal_db")
+    
+    count = await conn.fetchval("SELECT COUNT(*) FROM document_chunks WHERE embedding IS NOT NULL")
+    print(f"Chunks có embedding: {count}")
+    
+    if count == 0:
+        print("Chưa có embedding nào! Hãy chạy embedder.py trước.")
+        await conn.close()
+        return
 
-        if count == 0:
-            print("Chưa có embedding nào! Hãy chạy embedder.py trước.")
-            return
+    print("Xóa index cũ nếu có...")
+    await conn.execute("DROP INDEX IF EXISTS idx_chunks_embedding_hnsw")
 
-        # Xóa index cũ nếu tồn tại
-        print("Xóa index cũ nếu có...")
-        await session.execute(text(
-            "DROP INDEX IF EXISTS idx_chunks_embedding_hnsw"
-        ))
-        await session.commit()
+    print("Đang tạo HNSW index (có thể mất 1-5 phút)...")
+    print("  m=16, ef_construction=128, operator=vector_cosine_ops")
+    
+    await conn.execute(
+        """
+        CREATE INDEX idx_chunks_embedding_hnsw
+        ON document_chunks
+        USING hnsw (embedding vector_cosine_ops)
+        WITH (m = 16, ef_construction = 128)
+        """,
+        timeout=1000
+    )
 
-        # Tạo HNSW index với cấu hình theo thiết kế
-        print("Đang tạo HNSW index (có thể mất 1-5 phút)...")
-        print("  m=16, ef_construction=128, operator=vector_cosine_ops")
-
-        await session.execute(text("""
-            CREATE INDEX idx_chunks_embedding_hnsw
-            ON document_chunks
-            USING hnsw (embedding vector_cosine_ops)
-            WITH (m = 16, ef_construction = 128)
-        """))
-        await session.commit()
-
-        # Verify
-        result = await session.execute(text("""
-            SELECT indexname, indexdef
-            FROM pg_indexes
-            WHERE tablename = 'document_chunks'
-            AND indexname = 'idx_chunks_embedding_hnsw'
-        """))
-        idx = result.one_or_none()
-        if idx:
-            print(f"✓ Index tạo thành công: {idx.indexname}")
-        else:
-            print("✗ Lỗi: Không tìm thấy index sau khi tạo!")
-
+    idx = await conn.fetchrow("""
+        SELECT indexname, indexdef
+        FROM pg_indexes
+        WHERE tablename = 'document_chunks'
+        AND indexname = 'idx_chunks_embedding_hnsw'
+    """)
+    
+    if idx:
+        print(f"✓ Index tạo thành công: {idx['indexname']}")
+    else:
+        print("✗ Lỗi: Không tìm thấy index sau khi tạo!")
+        
+    await conn.close()
+    
     print("=== Xong! Semantic Search đã sẵn sàng ===")
-
 
 if __name__ == "__main__":
     asyncio.run(main())

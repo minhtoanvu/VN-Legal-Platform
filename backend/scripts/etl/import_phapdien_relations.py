@@ -1,26 +1,29 @@
-import psycopg2
+import asyncio
 import uuid
 import re
+import sys
+sys.path.insert(0, ".")
+if hasattr(sys.stdout, "reconfigure"): sys.stdout.reconfigure(encoding="utf-8")
+if hasattr(sys.stderr, "reconfigure"): sys.stderr.reconfigure(encoding="utf-8")
 from datasets import load_dataset
+from app.core.database import AsyncSessionLocal
+from sqlalchemy import text
 
-DB_URL = "host=localhost port=5432 dbname=legal_db user=postgres password=password"
-
-def main():
+async def main():
     print("=== TRÍCH XUẤT QUAN HỆ TỪ PHÁP ĐIỂN (REAL DATA) ===")
     try:
-        conn = psycopg2.connect(DB_URL)
+        db = AsyncSessionLocal()
     except Exception as e:
         print("Lỗi kết nối DB:", e)
         return
         
-    cur = conn.cursor()
-
     print("1. Lấy danh sách ID các Điều luật trong DB...")
-    cur.execute("SELECT id, doc_number FROM documents")
-    db_docs = {row[1]: str(row[0]) for row in cur.fetchall()}  # doc_number (e.g. Điều 20.2.LQ.1) -> UUID
+    result = await db.execute(text("SELECT id, doc_number FROM documents"))
+    db_docs = {row[1]: str(row[0]) for row in result.fetchall()}  # doc_number (e.g. Điều 20.2.LQ.1) -> UUID
     print(f"   -> Đã tải {len(db_docs)} Điều luật từ DB.")
 
-    cur.execute("TRUNCATE TABLE document_relations CASCADE")
+    await db.execute(text("TRUNCATE TABLE document_relations CASCADE"))
+    await db.commit()
 
     print("2. Quét file main_dataset.json để trích xuất related_note_text...")
     import json
@@ -61,28 +64,36 @@ def main():
                     ))
                 
         if len(batch) >= 500:
-            cur.executemany("""
+            params = []
+            for b in batch:
+                params.append({"p_id": b[0], "p_src": b[1], "p_tgt": b[2], "p_rel": b[3], "p_desc": b[4]})
+            
+            await db.execute(text("""
             INSERT INTO document_relations (id, source_doc_id, target_doc_id, relation_type, description)
-            VALUES (%s, %s, %s, %s, %s)
+            VALUES (:p_id, :p_src, :p_tgt, :p_rel, :p_desc)
             ON CONFLICT (source_doc_id, target_doc_id, relation_type) DO NOTHING
-            """, batch)
-            conn.commit()
+            """), params)
+            await db.commit()
             inserted_count += len(batch)
             batch = []
             print(f"   ...đã trích xuất {inserted_count} quan hệ thật")
             
     if batch:
-        cur.executemany("""
+        params = []
+        for b in batch:
+            params.append({"p_id": b[0], "p_src": b[1], "p_tgt": b[2], "p_rel": b[3], "p_desc": b[4]})
+            
+        await db.execute(text("""
         INSERT INTO document_relations (id, source_doc_id, target_doc_id, relation_type, description)
-        VALUES (%s, %s, %s, %s, %s)
+        VALUES (:p_id, :p_src, :p_tgt, :p_rel, :p_desc)
         ON CONFLICT (source_doc_id, target_doc_id, relation_type) DO NOTHING
-        """, batch)
-        conn.commit()
+        """), params)
+        await db.commit()
         inserted_count += len(batch)
 
     print(f"\nHoàn tất! Đã trích xuất thành công {inserted_count} quan hệ DẪN CHIẾU THẬT từ Pháp điển.")
-    cur.close()
-    conn.close()
+    await db.close()
 
 if __name__ == "__main__":
-    main()
+    import asyncio
+    asyncio.run(main())

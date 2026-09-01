@@ -45,7 +45,7 @@ Mọi đoạn code phải bám sát 100% vào file thiết kế: `PhanTichHeThon
 - [x] `app/routers/analytics.py` — GET /analytics/dashboard.
 
 ### 🔄 Phase 2 Tuần 2 — Embedding Pipeline (ĐANG LÀM)
-- [x] `scripts/etl/chunker.py` — **3,402 chunks đã tạo** trong document_chunks.
+- [x] `scripts/etl/chunker.py` — **17,346 chunks đã tạo** trong document_chunks.
 - [x] `scripts/etl/embedder.py` — Script sẵn sàng (chờ sentence-transformers cài xong).
 - [x] `scripts/etl/build_index.py` — Script tạo HNSW index sẵn sàng.
 - [ ] **⏳ Đang cài `sentence-transformers` (torch CPU ~200MB đang tải)**.

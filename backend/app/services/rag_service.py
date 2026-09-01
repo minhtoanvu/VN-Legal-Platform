@@ -100,6 +100,7 @@ def _build_context(chunks: list[dict]) -> tuple[str, list[dict]]:
             "doc_id": str(chunk.get("doc_id") or chunk.get("id", "")),
             "doc_number": doc_number,
             "title": title,
+            "snippet": snippet,
         })
 
     return "\n\n---\n\n".join(context_parts), citations
