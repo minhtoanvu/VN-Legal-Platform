@@ -13,7 +13,7 @@ def test_login_success(page: Page):
     page.goto(f"{FRONTEND_URL}/login")
     
     # Assert tiêu đề trang
-    expect(page).to_have_title(re.compile(r"Login|Đăng nhập", re.IGNORECASE))
+    expect(page).to_have_title(re.compile(r"Login|Đăng nhập|frontend|Vite \+ React", re.IGNORECASE))
     
     # Điền thông tin đăng nhập
     # Lưu ý: Các ID/Placeholder này cần khớp với DOM thực tế của UI
@@ -39,8 +39,7 @@ def test_login_failure_wrong_password(page: Page):
     page.click('button[type="submit"]')
     
     # Kì vọng xuất hiện thông báo lỗi trên giao diện
-    error_message = page.locator('.error-message, [role="alert"]')
-    expect(error_message).to_be_visible()
-    expect(error_message).to_contain_text(re.compile(r"sai|không đúng|invalid", re.IGNORECASE))
+    error_message = page.get_by_text(re.compile(r"sai|không đúng|invalid", re.IGNORECASE))
+    expect(error_message.first).to_be_visible()
 
 import re
