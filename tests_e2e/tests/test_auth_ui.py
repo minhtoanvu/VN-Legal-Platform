@@ -16,16 +16,32 @@ def test_login_success(page: Page):
     # Assert tiêu đề trang - chấp nhận nhiều tiêu đề có thể
     expect(page).to_have_title(re.compile(r"Login|Đăng nhập|frontend|Vite \+ React", re.IGNORECASE))
     
+    # Đăng ký tài khoản trước vì DB trong CI hoàn toàn trống
+    page.click('button:has-text("Đăng ký ngay")')
+    
+    # Scope to the register form to avoid strict mode violations
+    register_form = page.locator('form').filter(has_text="Đăng ký")
+    register_form.locator('input[type="text"]').fill("User E2E")
+    register_form.locator('input[type="email"]').fill("test_e2e@example.com")
+    register_form.locator('input[type="password"]').nth(0).fill("password123")
+    register_form.locator('input[type="password"]').nth(1).fill("password123")
+    register_form.locator('button[type="submit"]').click()
+    
+    # Chờ redirect tự động hoặc click lại nút Đăng nhập nếu email đã tồn tại
+    page.wait_for_timeout(2000)
+    if page.locator('button:has-text("Đăng nhập")').is_visible():
+        page.locator('button:has-text("Đăng nhập")').click()
+    
     # Điền thông tin đăng nhập
-    # Lưu ý: Các ID/Placeholder này cần khớp với DOM thực tế của UI
-    page.fill('input[type="email"]', "test_e2e@example.com")
-    page.fill('input[type="password"]', "password123")
+    login_form = page.locator('form').filter(has_text="Đăng nhập")
+    login_form.locator('input[type="email"]').fill("test_e2e@example.com")
+    login_form.locator('input[type="password"]').fill("password123")
     
     # Click nút đăng nhập
-    page.click('button[type="submit"]')
+    login_form.locator('button[type="submit"]').click()
     
     # Chờ redirect sang trang dashboard/search
-    page.wait_for_url(re.compile(r".*(search|dashboard)"), timeout=10000)
+    page.wait_for_url(re.compile(r".*(search|dashboard)"), timeout=15000)
     
 @pytest.mark.e2e
 def test_login_failure_wrong_password(page: Page):
@@ -34,13 +50,12 @@ def test_login_failure_wrong_password(page: Page):
     """
     page.goto(f"{FRONTEND_URL}/auth")
     
-    page.fill('input[type="email"]', "test_e2e@example.com")
-    page.fill('input[type="password"]', "WRONG_PASSWORD")
-    
-    page.click('button[type="submit"]')
+    login_form = page.locator('form').filter(has_text="Đăng nhập")
+    login_form.locator('input[type="email"]').fill("test_e2e@example.com")
+    login_form.locator('input[type="password"]').fill("WRONG_PASSWORD")
+    login_form.locator('button[type="submit"]').click()
     
     # Kì vọng xuất hiện thông báo lỗi trên giao diện
-    # Try multiple selectors for error message
     page.wait_for_timeout(2000)  # Wait for error to appear
     error_message = page.locator('[role="alert"], .error-message, .alert, .error')
     if error_message.count() > 0:
