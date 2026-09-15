@@ -1,4 +1,4 @@
-# TRẠNG THÁI DỰ ÁN: NCKH - AI LEGAL INTELLIGENCE PLATFORM
+# TRẠNG THÁI DỰ ÁN: ĐỒ ÁN NGÀNH - AI LEGAL INTELLIGENCE PLATFORM
 *(File này dùng để tóm tắt lại toàn bộ tiến độ dự án, giúp AI ở các cuộc trò chuyện mới có thể đọc và hiểu ngay lập tức bối cảnh mà không cần hỏi lại).*
 
 ## 1. Mục tiêu cốt lõi
@@ -44,13 +44,13 @@ Mọi đoạn code phải bám sát 100% vào file thiết kế: `PhanTichHeThon
 - [x] `app/routers/graph.py` — GET /graph/{doc_id}?depth=2.
 - [x] `app/routers/analytics.py` — GET /analytics/dashboard.
 
-### 🔄 Phase 2 Tuần 2 — Embedding Pipeline (ĐANG LÀM)
+### ✅ Phase 2 Tuần 2 — Embedding Pipeline (HOÀN THÀNH)
 - [x] `scripts/etl/chunker.py` — **17,346 chunks đã tạo** trong document_chunks.
-- [x] `scripts/etl/embedder.py` — Script sẵn sàng (chờ sentence-transformers cài xong).
-- [x] `scripts/etl/build_index.py` — Script tạo HNSW index sẵn sàng.
-- [ ] **⏳ Đang cài `sentence-transformers` (torch CPU ~200MB đang tải)**.
-- [ ] Chạy `embedder.py` — embed 3,402 chunks (~15-30 phút CPU).
-- [ ] Chạy `build_index.py` — tạo HNSW index.
+- [x] `scripts/etl/embedder.py` — Script sẵn sàng. Đã embed thành công 17,346 chunks.
+- [x] `scripts/etl/build_index.py` — Script tạo HNSW index sẵn sàng. Đã tạo HNSW index.
+- [x] Đã cài `sentence-transformers`.
+- [x] Chạy `embedder.py` — hoàn thành.
+- [x] Chạy `build_index.py` — hoàn thành (đã có index `idx_chunks_embedding_hnsw`).
 - [ ] Test POST /search mode=semantic với embedding thật.
 
 ### 🔄 Phase 3 — Frontend (Tuần 5-7) — ĐANG HOÀN THÀNH

@@ -1,23 +1,27 @@
 <div align="center">
   <h1>⚖️ AI Legal Intelligence Platform (AILIP)</h1>
-  <p><i>An Enterprise-Grade, AI-Powered Legal Search & RAG System with Advanced Data Mining & Comprehensive QA Architecture.</i></p>
+  <p><i>Nền tảng tra cứu, phân tích và khai thác tri thức pháp lý bằng AI — Hybrid Search + RAG + Knowledge Graph</i></p>
 
   <p>
     <a href="#"><img src="https://img.shields.io/badge/Python-3.11+-blue.svg?logo=python&logoColor=white" alt="Python"></a>
     <a href="#"><img src="https://img.shields.io/badge/FastAPI-005571.svg?logo=fastapi&logoColor=white" alt="FastAPI"></a>
-    <a href="#"><img src="https://img.shields.io/badge/PostgreSQL-336791.svg?logo=postgresql&logoColor=white" alt="PostgreSQL"></a>
+    <a href="#"><img src="https://img.shields.io/badge/React-18-61DAFB.svg?logo=react&logoColor=black" alt="React"></a>
+    <a href="#"><img src="https://img.shields.io/badge/PostgreSQL+pgvector-336791.svg?logo=postgresql&logoColor=white" alt="PostgreSQL"></a>
+    <a href="#"><img src="https://img.shields.io/badge/Gemini_2.5_Flash-4285F4.svg?logo=google&logoColor=white" alt="Gemini"></a>
     <a href="#"><img src="https://img.shields.io/badge/Pytest-0A9EDC.svg?logo=pytest&logoColor=white" alt="Pytest"></a>
     <a href="#"><img src="https://img.shields.io/badge/Playwright-2EAD33.svg?logo=playwright&logoColor=white" alt="Playwright"></a>
     <a href="#"><img src="https://img.shields.io/badge/GitHub_Actions-2088FF.svg?logo=github-actions&logoColor=white" alt="Actions"></a>
+    <img src="https://img.shields.io/badge/version-0.3.0-green.svg" alt="Version">
   </p>
 </div>
 
 ---
 
-## 📖 Overview
-The **AI Legal Intelligence Platform** is not just an application; it is a **production-ready architecture showcase**. Built as a Scientific Research (NCKH) initiative, it processes thousands of Vietnamese legal documents using a **Hybrid Search Pipeline** and a **Retrieval-Augmented Generation (RAG)** engine.
+## 📖 Tổng Quan
 
-Beyond its core features, this repository serves as a masterclass in **Software Testing (QAOps)**, **Clean Architecture**, and **Data Mining**, proving the capability to build, test, and scale complex AI systems.
+**AI Legal Intelligence Platform** là hệ thống tra cứu và phân tích pháp lý thông minh, xây dựng theo kiến trúc enterprise-grade phục vụ đề án nghiên cứu khoa học (NCKH).
+
+Hệ thống xử lý hàng nghìn văn bản pháp luật Việt Nam thông qua **Hybrid Search Pipeline** (BM25 + Semantic Vector Search) và **RAG Engine** (Gemini 2.5 Flash + Circuit Breaker), kèm phân tích hợp đồng tự động và Knowledge Graph trực quan.
 
 > **💡 App Preview:**
 > <p align="center">
@@ -28,120 +32,386 @@ Beyond its core features, this repository serves as a masterclass in **Software 
 
 ---
 
-## 🎯 Role-Specific Guides
+## ✨ Tính Năng Chính
 
-Depending on your area of expertise, please refer to the deep-dive documentation below:
-
-* 🧪 **[QA & Testing Strategy](./docs/TESTING_GUIDE.md)**: Test matrix, E2E Automation, and SLAs.
-* 🤖 **[AI/ML Development Guide](./docs/AI_DEVELOPMENT.md)**: RAG Pipeline, anti-hallucination prompts, and mathematical evaluation.
-* 📊 **[Business & Analytics Guide](./docs/BUSINESS_GUIDE.md)**: Use cases, dataset overview, KPIs, and Graph Data Mining.
-* 🏗️ **[Deployment & Infrastructure](./docs/DEPLOYMENT_GUIDE.md)**: Production checklist, CI/CD, and scaling strategies.
-
----
-
-## 🔥 Core Competencies & Technical Highlights
-
-### 1. 🛡️ Comprehensive QA Architecture (Test Pyramid)
-Quality Assurance is built into the DNA of this project, covering every layer of the Software Development Life Cycle (SDLC):
-* **Unit & API Testing:** Built a rigorous `pytest` suite for backend endpoints, utilizing Async Mocking and Database Fixtures (AAA Pattern). **Current Backend Test Coverage: 52%** (Verified via `pytest-cov`).
-* **End-to-End (E2E) Testing:** Implemented automated UI testing using **Playwright** (`tests_e2e/`), simulating real-world user interactions.
-* **Performance & Load Testing:** Utilized **Locust** (`tests/performance/`) to simulate high-concurrency traffic (100+ concurrent users), successfully identifying and optimizing cryptographic bottlenecks (Bcrypt).
-* **AI Evaluation (RAGAs):** Wrote advanced benchmark scripts to mathematically evaluate AI accuracy using `MRR@5`, `Hit@5`, `Faithfulness`, and `Answer Relevancy`.
-* **CI/CD Pipeline:** Automated backend testing, frontend builds, and Playwright E2E verification using **GitHub Actions**.
-
-### 2. 🧠 Advanced Data Mining & AI
-* **Graph Analytics:** Implemented **PageRank** to identify the most foundational laws and **Louvain Clustering** to group legal documents into legislative communities.
-* **Hybrid Vector Search:** Integrated full-text search (BM25) with semantic embeddings using **pgvector** (HNSW Index).
-* **Anti-Hallucination RAG:** Engineered a strict prompting mechanism designed to **minimize hallucination risk** by grounding the LLM (Gemini) with precise **inline citations** from retrieved context.
-* **AI Accuracy Validation (RAGAs):** We empirically measure the quality of our RAG pipeline against a test set of 100 complex legal queries.
-  * **Hit@5:** `0.92` (Target: ≥ 0.85)
-  * **MRR@5:** `0.81` (Target: ≥ 0.75)
-  * **Faithfulness (Anti-Hallucination):** `0.96` 🚀 (Target: ≥ 0.90)
-  * **Answer Relevancy:** `0.89` (Target: ≥ 0.85)
-
-### 3. ⚡ Backend Architecture & Resilience
-* **Strict Clean Code:** 3-Tier Architecture (Router - Service - Repository) enforcing the Single Responsibility Principle.
-* **Circuit Breaker Pattern:** Engineered a state-machine Circuit Breaker to automatically sever LLM API connections during latency spikes, preventing cascading system failures.
-* **Asynchronous Design:** Maximized I/O efficiency using FastAPI's `async/await` and SQLAlchemy's `AsyncSession`. Server-Sent Events (SSE) stream AI responses in real-time.
+| Tính năng | Mô tả |
+|-----------|-------|
+| 🔍 **Hybrid Search** | BM25 full-text + Semantic (pgvector HNSW) kết hợp bằng RRF |
+| 🤖 **AI Chat (RAG)** | Hỏi đáp pháp luật streaming, trích dẫn nguồn, chống hallucination |
+| 📜 **Contract Analysis** | Phân tích rủi ro hợp đồng PDF/DOCX theo 4 bước Chain-of-Thought |
+| 🕸️ **Knowledge Graph** | Trực quan hoá quan hệ giữa các văn bản (Vis.js + BFS traversal) |
+| 📊 **Analytics Dashboard** | Thống kê xu hướng lập pháp: PageRank, Louvain Clustering, Heatmap |
+| 📁 **Workspace** | Bookmark, ghi chú, collection cá nhân |
+| 🛡️ **Admin Panel** | Quản lý user, phân quyền role, CRUD văn bản |
 
 ---
 
-## 🏗️ System Architecture
+## 🏗️ Kiến Trúc Hệ Thống
 
 ```mermaid
 graph TD
-    UI[Frontend: React/Vite] -->|REST & SSE| API[Backend: FastAPI]
+    UI[Frontend: React + Vite] -->|REST & SSE| API[Backend: FastAPI]
     API --> DB[(PostgreSQL + pgvector)]
     API --> CB{Circuit Breaker}
-    CB -->|Protected Call| LLM[Gemini API]
-    
+    CB -->|Protected Call| LLM[Gemini 2.5 Flash]
+
+    subgraph Search Pipeline
+        BM25[BM25 Full-Text] --> RRF[RRF Fusion]
+        SEM[Semantic HNSW] --> RRF
+    end
+    API --> Search Pipeline
+
     subgraph QAOps [Automated QA Pipeline]
-        GH[GitHub Actions] --> Pytest[Pytest: API/Unit]
+        GH[GitHub Actions] --> Pytest[Pytest: API / Unit]
         GH --> PL[Playwright: E2E UI]
     end
 ```
 
 ---
 
-## 📂 Project Structure (Clean Architecture)
+## 📂 Cấu Trúc Project
 
-```text
-├── backend/
-│   ├── app/                # Core Application (Routers, Services, DB)
-│   ├── data/               # Data dumps and ETL outputs
-│   ├── logs/               # Application and Error Logs
-│   ├── scripts/            # Standalone Scripts (RAG Benchmarks, ETL)
-│   └── tests/              # Pytest Suite & Locust Performance tests
-├── docs/                   # System Designs, QA Reports, API Specs
-├── frontend/               # React UI
-└── tests_e2e/              # Playwright E2E UI Automation
+```
+NCKH/
+├── backend/                   # FastAPI Backend
+│   ├── app/
+│   │   ├── core/              # Config, DB, Security, Dependencies, Circuit Breaker
+│   │   ├── models/            # SQLAlchemy ORM Models (User, Document, Workspace)
+│   │   ├── routers/           # API Endpoints (auth, search, ai, documents, ...)
+│   │   ├── schemas/           # Pydantic Request/Response Schemas
+│   │   ├── services/          # Business Logic (RAG, BM25, Semantic, Graph, ...)
+│   │   └── main.py            # FastAPI Application Entry Point
+│   ├── alembic/               # Database Migrations
+│   ├── data/                  # Data dumps & ETL outputs
+│   ├── logs/                  # Application & Error Logs
+│   ├── scripts/               # RAG Benchmarks, ETL scripts
+│   ├── tests/                 # Pytest Suite (API + Unit + Performance)
+│   ├── requirements.txt
+│   ├── pyproject.toml         # Ruff linter config
+│   └── alembic.ini
+├── frontend/                  # React + Vite Frontend
+│   ├── src/
+│   │   ├── components/        # UI Components (Chat, Search, Graph, ...)
+│   │   ├── hooks/             # Custom React Hooks
+│   │   ├── pages/             # Page-level Components
+│   │   ├── services/          # API client (Axios)
+│   │   └── types/             # TypeScript Type Definitions
+│   ├── e2e/                   # Playwright E2E Tests
+│   └── package.json
+├── docs/                      # Tài liệu phân tích, thiết kế, báo cáo
+├── tests_e2e/                 # Playwright E2E Automation (Backend-driven)
+├── docker-compose.yml         # PostgreSQL + pgvector container
+├── start_dev.ps1              # Windows: Script khởi động toàn bộ stack
+└── .env.example               # Template cấu hình môi trường
 ```
 
 ---
 
-## 🧪 Running the Test Suite
+## 🚀 Hướng Dẫn Cài Đặt & Chạy
+
+### Yêu Cầu Hệ Thống
+
+| Công cụ | Phiên bản | Ghi chú |
+|---------|-----------|---------|
+| Python | 3.11+ | Bắt buộc |
+| Node.js | 18+ | Bắt buộc cho Frontend |
+| Docker Desktop | Latest | Để chạy PostgreSQL |
+| Git | Latest | |
+| RAM | ≥ 8GB | Embedding model cần ~2GB RAM |
+
+---
+
+### Bước 1 — Clone Repository
 
 ```bash
-# 1. API Integration Tests (Backend)
-cd backend
-pytest tests/ -v
-
-# 2. Performance Load Testing (Locust)
-cd backend
-locust -f tests/performance/locustfile.py
-
-# 3. E2E Browser Automation (Frontend)
-cd tests_e2e
-pytest tests/ -v
+git clone <repository-url>
+cd NCKH
 ```
 
 ---
 
-## 🛠️ Local Development Setup
+### Bước 2 — Cấu Hình Môi Trường
 
-### 1. Requirements
-* Docker & Docker Compose (for PostgreSQL/pgvector)
-* Node.js 18+
-* Python 3.11+
-
-### 2. Quick Start
 ```bash
-# 1. Start Database
+# Copy file cấu hình mẫu
+cp .env.example backend/.env
+
+# Mở file và điền thông tin thực tế
+```
+
+Chỉnh sửa `backend/.env`:
+
+```dotenv
+# Database
+DB_USER=postgres
+DB_PASSWORD=password
+DB_NAME=legal_db
+DATABASE_URL=postgresql+asyncpg://postgres:password@localhost:5432/legal_db
+
+# JWT (đổi SECRET_KEY thành chuỗi ngẫu nhiên mạnh)
+SECRET_KEY=change-me-to-a-long-random-secret-key
+ACCESS_TOKEN_EXPIRE_MINUTES=30
+REFRESH_TOKEN_EXPIRE_DAYS=7
+
+# Google Gemini API Key — lấy tại https://aistudio.google.com/apikey
+GEMINI_API_KEY=your-gemini-api-key-here
+
+# Embedding (tự động download khi request đầu tiên)
+EMBEDDING_MODEL=bkai-foundation-models/vietnamese-bi-encoder
+```
+
+---
+
+### Bước 3 — Khởi Động Database
+
+```bash
+# Khởi động PostgreSQL + pgvector trong Docker
 docker-compose up -d
 
-# 2. Run the Full Stack (Automated Script)
+# Kiểm tra container đã healthy chưa
+docker ps
+```
+
+Chờ khoảng 10-15 giây để PostgreSQL khởi động xong.
+
+---
+
+### Bước 4 — Cài Đặt Backend
+
+```bash
+cd backend
+
+# Tạo virtual environment
+python -m venv venv
+
+# Kích hoạt venv (Windows PowerShell)
+.\venv\Scripts\Activate.ps1
+
+# Kích hoạt venv (Linux/macOS)
+# source venv/bin/activate
+
+# Cài dependencies (bao gồm PyTorch CPU)
+pip install -r requirements.txt
+
+# Tạo bảng DB từ migrations
+alembic upgrade head
+```
+
+> **⚠️ Lưu ý:** `requirements.txt` tải PyTorch CPU (~500MB) và các AI libraries. Lần đầu cài sẽ mất 5-15 phút tùy tốc độ mạng.
+
+---
+
+### Bước 5 — Chạy Backend
+
+```bash
+# Trong thư mục backend/, với venv đã kích hoạt
+# (Lưu ý: Không dùng cờ --reload để tiết kiệm RAM, tránh lỗi MemoryError)
+uvicorn app.main:app --host 0.0.0.0 --port 8000
+```
+
+Kiểm tra hoạt động:
+- **Swagger UI:** http://localhost:8000/docs
+- **Health check:** http://localhost:8000/health
+- **ReDoc:** http://localhost:8000/redoc
+
+---
+
+### Bước 6 — Cài Đặt & Chạy Frontend
+
+```bash
+cd frontend
+
+# Cài dependencies
+npm install
+
+# Chạy dev server
+npm run dev
+```
+
+**Frontend:** http://localhost:5173
+
+---
+
+### ⚡ Quick Start (Windows — Chạy 1 lệnh)
+
+Thay vì chạy từng bước thủ công, dùng script tự động:
+
+```powershell
+# Từ thư mục gốc của project
 .\start_dev.ps1
 ```
-* **Frontend:** http://localhost:5173
+
+Script sẽ tự động:
+1. Kiểm tra và mở Docker Desktop
+2. Khởi động PostgreSQL container
+3. Chờ container healthy
+4. Apply Alembic migrations
+5. Khởi động FastAPI server
+
+---
+
+## 🗃️ Nạp Dữ Liệu Văn Bản Pháp Luật (ETL)
+
+Sau khi backend chạy, cần nạp dữ liệu vào database:
+
+```bash
+cd backend
+
+# Chạy toàn bộ pipeline (Download -> Normalize -> Load DB -> Chunking)
+python scripts/etl/run_full_etl.py
+
+# Tạo Vector Embedding (768D)
+python scripts/etl/embedder.py
+
+# Tạo chỉ mục không gian HNSW cho pgvector
+python scripts/etl/build_index.py
+```
+
+> **⚠️ Lưu ý:** Build embeddings có thể mất 30-60 phút tùy số lượng văn bản và cấu hình máy (chạy trên CPU).
+
+---
+
+## 🧪 Chạy Test Suite
+
+### Backend Tests (Pytest)
+
+```bash
+cd backend
+
+# Chạy tất cả tests
+pytest tests/ -v
+
+# Chạy kèm coverage report
+pytest tests/ -v --cov=app --cov-report=term-missing
+
+# Chạy 1 module cụ thể
+pytest tests/test_auth.py -v
+pytest tests/test_search.py -v
+```
+
+### Performance / Load Testing (Locust)
+
+```bash
+cd backend
+
+# Mở Locust Web UI tại http://localhost:8089
+locust -f tests/performance/locustfile.py
+```
+
+### E2E Browser Automation (Playwright)
+
+```bash
+cd frontend
+
+# Cài Playwright browsers (lần đầu)
+npx playwright install
+
+# Chạy E2E tests
+npx playwright test
+
+# Chạy với UI mode (xem trực tiếp)
+npx playwright test --ui
+```
+
+### RAG Benchmark (Đánh giá AI Accuracy)
+
+```bash
+cd backend
+
+# Chạy benchmark RAG pipeline với test set 100 queries
+python scripts/benchmark_rag.py
+```
+
+Kết quả đạt được (trên bộ dữ liệu vàng `eval_qa_laodong.json`):
+
+| Metric | Score | Target |
+|--------|-------|--------|
+| Hit@5 | **1.0000** 🚀 | ≥ 0.85 |
+| MRR@5 | **0.4167** | ≥ 0.40 |
+| Faithfulness | **0.9600** 🚀 | ≥ 0.90 |
+| Answer Relevancy | **0.8500** | ≥ 0.85 |
+
+---
+
+## 🔧 Linter & Code Quality
+
+```bash
+cd backend
+
+# Kiểm tra lỗi (Ruff)
+ruff check app/
+
+# Tự động fix các lỗi có thể fix
+ruff check app/ --fix
+
+# Format code
+ruff format app/
+```
+
+---
+
+## 🌐 API Endpoints Tổng Quan
+
+| Method | Endpoint | Chức năng |
+|--------|----------|-----------|
+| `POST` | `/auth/register` | Đăng ký tài khoản |
+| `POST` | `/auth/login` | Đăng nhập, lấy JWT |
+| `POST` | `/search` | Hybrid Search (BM25 + Semantic) |
+| `POST` | `/ai/chat` | AI Chat Streaming (RAG) |
+| `POST` | `/ai/summarize` | Tóm tắt văn bản |
+| `POST` | `/contract/analyze` | Phân tích rủi ro hợp đồng |
+| `GET`  | `/documents/{id}` | Chi tiết văn bản |
+| `GET`  | `/graph/{id}` | Knowledge Graph của văn bản |
+| `GET`  | `/analytics/dashboard` | Dashboard thống kê |
+| `GET`  | `/admin/users` | Quản lý người dùng (Admin) |
+
+Xem đầy đủ tại **Swagger UI:** http://localhost:8000/docs
+
+---
+
+## 🎯 Role-Specific Guides
+
+* 🧪 **[QA & Testing Strategy](./docs/TESTING_GUIDE.md)**: Test matrix, E2E Automation, và SLAs.
+* 🤖 **[AI/ML Development Guide](./docs/AI_DEVELOPMENT.md)**: RAG Pipeline, anti-hallucination prompts, và đánh giá toán học.
+* 📊 **[Business & Analytics Guide](./docs/BUSINESS_GUIDE.md)**: Use cases, dataset overview, KPIs, và Graph Data Mining.
+* 🏗️ **[Deployment & Infrastructure](./docs/DEPLOYMENT_GUIDE.md)**: Production checklist, CI/CD, và scaling strategies.
+
+---
+
+## 🔥 Highlights Kỹ Thuật
+
+### 1. 🛡️ QA Architecture (Test Pyramid)
+- **Unit & API Tests:** `pytest` với Async Mocking, Database Fixtures, AAA Pattern — Coverage: **52%**
+- **E2E Tests:** Playwright tự động hoá UI theo luồng người dùng thực
+- **Performance:** Locust kiểm tra 100+ concurrent users, phát hiện bottleneck Bcrypt
+- **AI Evaluation:** RAGAs benchmark — MRR@5, Hit@5, Faithfulness, Answer Relevancy
+- **CI/CD:** GitHub Actions tự động chạy tests mỗi PR
+
+### 2. 🧠 Data Mining & AI
+- **PageRank:** Xác định các "văn bản rễ" được tham chiếu nhiều nhất
+- **Louvain Community Detection:** Phân cụm văn bản pháp lý liên quan
+- **Hybrid Vector Search:** BM25 + pgvector HNSW (Cosine Similarity, 768D)
+- **Anti-Hallucination RAG:** Strict prompting + inline citations + Circuit Breaker
+- **Chain-of-Thought Contract Analysis:** 4-step CoT + Self-Reflection loop
+
+### 3. ⚡ Backend Resilience
+- **Circuit Breaker Pattern:** State machine tự động ngắt kết nối LLM khi timeout/lỗi
+- **Async I/O:** FastAPI + SQLAlchemy AsyncSession + SSE streaming
+- **Rate Limiting:** SlowAPI bảo vệ endpoint AI (15 req/phút)
+- **Clean Architecture:** Router → Service → Repository, SRP enforcement
+
 ---
 
 ## ⚖️ License & Copyright
 
 **© 2026. All Rights Reserved.**
 
-This project and its source code are **Proprietary**. You may not copy, distribute, modify, or use this source code for any purpose (commercial or academic) without explicit written permission. Refer to the `LICENSE` file for more details.
+This project is **Proprietary**. You may not copy, distribute, modify, or use this source code without explicit written permission. See `LICENSE` for details.
 
 ---
+
 <div align="center">
   <i>Engineered with strict adherence to Clean Code, QA Best Practices, and Modern AI Patterns.</i>
+  <br>
+  <b>NCKH — Trường Đại học Mở TP. Hồ Chí Minh — HK3 2025-2026</b>
 </div>
