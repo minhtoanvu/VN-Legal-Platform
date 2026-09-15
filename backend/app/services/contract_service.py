@@ -3,16 +3,15 @@ import io
 import json
 import logging
 import re
-from typing import List
 
 import pdfplumber
 from docx import Document as DocxDocument
-from sqlalchemy.ext.asyncio import AsyncSession
 from google import genai as google_genai
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
 from app.schemas.contract import ClauseAnalysis, ContractReport, RiskLevel
-from app.services.rag_service import rag_retrieve, _build_context
+from app.services.rag_service import _build_context, rag_retrieve
 
 log = logging.getLogger(__name__)
 
@@ -56,24 +55,24 @@ def parse_document(file_bytes: bytes, filename: str) -> str:
         text = file_bytes.decode("utf-8", errors="ignore")
     return text
 
-def segment_contract(text: str) -> List[dict]:
+def segment_contract(text: str) -> list[dict]:
     """Chia văn bản thành các điều khoản dựa trên regex."""
     # Pattern tìm "Điều X." hoặc "Điều X:"
     pattern = r"(?i)(Điều\s+\d+[\.:])"
     parts = re.split(pattern, text)
-    
+
     clauses = []
     # Nếu file không có "Điều", coi như là 1 đoạn lớn
     if len(parts) <= 1:
         return [{"title": "Nội dung hợp đồng", "text": text[:2000]}] # Giới hạn 2000 ký tự để tránh lỗi
-        
+
     # parts[0] thường là phần mở đầu (Cộng hòa xã hội..., Căn cứ...)
     if parts[0].strip():
         clauses.append({
             "title": "Phần mở đầu",
             "text": parts[0].strip()
         })
-        
+
     for i in range(1, len(parts), 2):
         title = parts[i].strip()
         content = parts[i+1].strip() if i+1 < len(parts) else ""
@@ -81,7 +80,7 @@ def segment_contract(text: str) -> List[dict]:
             "title": title,
             "text": f"{title} {content}"
         })
-        
+
     return clauses
 
 async def analyze_clause_cot(session: AsyncSession, clause_title: str, clause_text: str) -> ClauseAnalysis:
@@ -103,7 +102,7 @@ async def analyze_clause_cot(session: AsyncSession, clause_title: str, clause_te
     # BƯỚC 2: Gọi Gemini với CoT Prompt
     system_prompt = SYSTEM_COT_PROMPT.replace("{context}", context).replace("{clause_text}", clause_text)
     client = google_genai.Client(api_key=settings.gemini_api_key)
-    
+
     try:
         response = await client.aio.models.generate_content(
             model="gemini-2.5-flash",
@@ -114,9 +113,9 @@ async def analyze_clause_cot(session: AsyncSession, clause_title: str, clause_te
                 system_instruction=system_prompt,
             )
         )
-        
+
         result = json.loads(response.text)
-        
+
         # Self-Reflection (Bản 1 implementation plan)
         risk_score = result.get("risk_score", 1)
         is_reflected = False
@@ -134,7 +133,7 @@ async def analyze_clause_cot(session: AsyncSession, clause_title: str, clause_te
             )
             result = json.loads(response2.text)
             is_reflected = True
-            
+
         return ClauseAnalysis(
             clause_title=clause_title,
             clause_text=clause_text,
@@ -166,18 +165,18 @@ async def process_contract(session: AsyncSession, file_bytes: bytes, filename: s
     """Luồng chính: Nhận file, parse, chia đoạn và phân tích toàn bộ."""
     text = parse_document(file_bytes, filename)
     clauses = segment_contract(text)
-    
+
     # Phân tích song song nhiều điều khoản cùng lúc để tiết kiệm thời gian
     # Tuy nhiên, để tránh limit API, có thể dùng semaphore. Ở đây giả định limit cho 5 request đồng thời.
     sem = asyncio.Semaphore(5)
-    
+
     async def analyze_with_sem(clause):
         async with sem:
             return await analyze_clause_cot(session, clause["title"], clause["text"])
-            
+
     tasks = [analyze_with_sem(clause) for clause in clauses if len(clause["text"]) > 50] # Bỏ qua đoạn quá ngắn
     analyses = await asyncio.gather(*tasks)
-    
+
     return ContractReport(
         filename=filename,
         total_clauses=len(analyses),

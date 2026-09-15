@@ -15,21 +15,17 @@ from fastapi.middleware.cors import CORSMiddleware
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 
-from app.core.config import settings
 from app.core.dependencies import limiter
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Lifecycle events: startup và shutdown."""
     # Startup
     print("[START] AI Legal Intelligence Platform dang khoi dong...")
-    # Khởi động embedding model ngay lập tức để warm-up, tránh độ trễ cho request đầu tiên
-    try:
-        from app.services.semantic_service import _get_model
-        _get_model()
-        print("[OK] Embedding model da duoc nap vao RAM san sang!")
-    except Exception as e:
-        print(f"[ERROR] Khong the nap embedding model: {e}")
+    # Model embedding sẽ được lazy-load khi có request đầu tiên.
+    # Không warm-up lúc startup để tránh OOM trên máy RAM thấp (8GB).
+    print("[OK] Server khoi dong thanh cong. Embedding model se duoc nap khi can.")
     yield
     # Shutdown
     print("[STOP] Server dang tat...")
@@ -48,7 +44,7 @@ app = FastAPI(
 
 ### Phiên bản: v0.2.0 (Phase 2 — Auth + Search API)
     """,
-    version="0.2.0",
+    version="0.3.0",
     docs_url="/docs",
     redoc_url="/redoc",
     lifespan=lifespan,
@@ -89,7 +85,17 @@ async def health_check():
     return {"status": "ok", "service": "ai-legal-platform"}
 
 # ── ROUTER MOUNTS ────────────────────────────────────────────────────
-from app.routers import auth, search, documents, ai, graph, analytics, workspace, contract
+from app.routers import (
+    admin,
+    ai,
+    analytics,
+    auth,
+    contract,
+    documents,
+    graph,
+    search,
+    workspace,
+)
 
 app.include_router(auth.router, prefix="/auth", tags=["Authentication"])
 app.include_router(search.router, prefix="/search", tags=["Search"])
@@ -99,3 +105,4 @@ app.include_router(graph.router, prefix="/graph", tags=["Knowledge Graph"])
 app.include_router(analytics.router, prefix="/analytics", tags=["Analytics"])
 app.include_router(workspace.router, prefix="/workspace", tags=["Workspace"])
 app.include_router(contract.router, prefix="/contract", tags=["Contract Analysis"])
+app.include_router(admin.router, prefix="/admin", tags=["Admin Panel"])

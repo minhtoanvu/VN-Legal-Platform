@@ -14,17 +14,15 @@ Endpoints:
   POST   /workspace/notes                          — Tạo ghi chú
   DELETE /workspace/notes/{note_id}                — Xóa ghi chú
 """
-import uuid
-from typing import Optional
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
-from sqlalchemy import select, delete, func
+from sqlalchemy import delete, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
-from app.core.dependencies import get_current_active_user
+from app.core.dependencies import get_current_active_user, require_enterprise
 from app.models.document import Document
 from app.models.user import User
 from app.models.workspace import Collection, CollectionDocument, Note
@@ -36,16 +34,16 @@ router = APIRouter()
 
 class CollectionCreate(BaseModel):
     name: str = Field(..., min_length=1, max_length=255)
-    description: Optional[str] = None
+    description: str | None = None
     is_shared: bool = False
 
 
 class CollectionOut(BaseModel):
     id: UUID
     name: str
-    description: Optional[str]
+    description: str | None
     is_shared: bool
-    doc_count: Optional[int] = 0
+    doc_count: int | None = 0
     model_config = {"from_attributes": True}
 
 
@@ -69,9 +67,9 @@ class DocInCollectionOut(BaseModel):
     id: UUID
     title: str
     doc_number: str
-    doc_type: Optional[str] = None
-    issuing_body: Optional[str] = None
-    status: Optional[str] = None
+    doc_type: str | None = None
+    issuing_body: str | None = None
+    status: str | None = None
     model_config = {"from_attributes": True}
 
 
@@ -296,6 +294,94 @@ async def delete_note(
     await db.delete(note)
     await db.commit()
     return {"message": "Đã xóa ghi chú."}
+
+
+# ── Enterprise: Shared Collections UC-18 ──────────────────────────────
+
+
+class NoteUpdateRequest(BaseModel):
+    content: str = Field(..., min_length=1)
+
+
+@router.put("/notes/{note_id}", response_model=NoteOut)
+async def update_note(
+    note_id: UUID,
+    body: NoteUpdateRequest,
+    current_user: User = Depends(get_current_active_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Cập nhật nội dung ghi chú."""
+    result = await db.execute(
+        select(Note).where(
+            Note.id == note_id,
+            Note.user_id == current_user.id,
+        )
+    )
+    note = result.scalar_one_or_none()
+    if not note:
+        raise HTTPException(status_code=404, detail="Ghi chú không tồn tại.")
+    note.content = body.content
+    await db.commit()
+    await db.refresh(note)
+    return note
+
+
+@router.get(
+    "/shared-collections",
+    response_model=list[CollectionOut],
+    summary="[Enterprise] Collections chia sẻ trong tổ chức - UC-18",
+)
+async def list_shared_collections(
+    current_user: User = Depends(require_enterprise),
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Lấy danh sách Collections đã được chia sẻ (is_shared=True)
+    trong cùng organization của user.
+    Yêu cầu gói Enterprise hoặc Admin (UC-18).
+    """
+    if not current_user.organization_id:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Tài khoản Enterprise của bạn chưa được liên kết với tổ chức nào."
+        )
+
+    # Dùng trực tiếp model import đã có
+    from app.models.user import User as UserModel
+    org_users_result = await db.execute(
+        select(UserModel.id).where(
+            UserModel.organization_id == current_user.organization_id
+        )
+    )
+    org_user_ids = [row[0] for row in org_users_result.all()]
+
+    if not org_user_ids:
+        return []
+
+    result = await db.execute(
+        select(Collection).where(
+            Collection.is_shared.is_(True),
+            Collection.owner_id.in_(org_user_ids),
+        ).order_by(Collection.created_at.desc())
+    )
+    collections = result.scalars().all()
+
+    out = []
+    for col in collections:
+        count_result = await db.execute(
+            select(func.count()).select_from(CollectionDocument).where(
+                CollectionDocument.collection_id == col.id
+            )
+        )
+        doc_count = count_result.scalar() or 0
+        out.append(CollectionOut(
+            id=col.id,
+            name=col.name,
+            description=col.description,
+            is_shared=col.is_shared,
+            doc_count=doc_count,
+        ))
+    return out
 
 
 

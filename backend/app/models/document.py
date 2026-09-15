@@ -8,13 +8,11 @@ Bảng:
 """
 
 import uuid
-from datetime import date, datetime, timezone
-from typing import List, Optional
+from datetime import UTC, date, datetime
 
 from pgvector.sqlalchemy import Vector
 from sqlalchemy import (
     UUID,
-    Boolean,
     Date,
     DateTime,
     ForeignKey,
@@ -38,38 +36,38 @@ class Document(Base):
     )
     doc_number: Mapped[str] = mapped_column(String(100), nullable=False, index=True)
     title: Mapped[str] = mapped_column(Text, nullable=False)
-    doc_type: Mapped[Optional[str]] = mapped_column(
+    doc_type: Mapped[str | None] = mapped_column(
         String(50), nullable=True
     )  # Luật / Nghị định / Thông tư / Quyết định / Công văn
-    issuing_body: Mapped[Optional[str]] = mapped_column(String(200), nullable=True)
-    field: Mapped[Optional[str]] = mapped_column(
+    issuing_body: Mapped[str | None] = mapped_column(String(200), nullable=True)
+    field: Mapped[str | None] = mapped_column(
         String(100), nullable=True, index=True
     )  # labor / tax / enterprise / ...
-    issue_date: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
-    effective_date: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
-    expired_date: Mapped[Optional[date]] = mapped_column(
+    issue_date: Mapped[date | None] = mapped_column(Date, nullable=True)
+    effective_date: Mapped[date | None] = mapped_column(Date, nullable=True)
+    expired_date: Mapped[date | None] = mapped_column(
         Date, nullable=True
     )  # NULL = còn hiệu lực
     status: Mapped[str] = mapped_column(
         String(20), default="active", index=True
     )  # active / expired / amended
-    content: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    source_url: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    content: Mapped[str | None] = mapped_column(Text, nullable=True)
+    source_url: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
+        DateTime(timezone=True), default=lambda: datetime.now(UTC)
     )
-    search_vector: Mapped[Optional[str]] = mapped_column(TSVECTOR, nullable=True)
+    search_vector: Mapped[str | None] = mapped_column(TSVECTOR, nullable=True)
 
     # Relationships
-    chunks: Mapped[List["DocumentChunk"]] = relationship(
+    chunks: Mapped[list["DocumentChunk"]] = relationship(
         "DocumentChunk", back_populates="document", cascade="all, delete-orphan"
     )
-    source_relations: Mapped[List["DocumentRelation"]] = relationship(
+    source_relations: Mapped[list["DocumentRelation"]] = relationship(
         "DocumentRelation",
         foreign_keys="DocumentRelation.source_doc_id",
         back_populates="source_document",
     )
-    target_relations: Mapped[List["DocumentRelation"]] = relationship(
+    target_relations: Mapped[list["DocumentRelation"]] = relationship(
         "DocumentRelation",
         foreign_keys="DocumentRelation.target_doc_id",
         back_populates="target_document",
@@ -91,8 +89,8 @@ class DocumentChunk(Base):
     chunk_index: Mapped[int] = mapped_column(Integer, nullable=False)
     content_chunk: Mapped[str] = mapped_column(Text, nullable=False)
     # Vector 768D — output của bkai-foundation-models/vietnamese-bi-encoder
-    embedding: Mapped[Optional[list]] = mapped_column(Vector(768), nullable=True)
-    token_count: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    embedding: Mapped[list | None] = mapped_column(Vector(768), nullable=True)
+    token_count: Mapped[int | None] = mapped_column(Integer, nullable=True)
 
     # Relationships
     document: Mapped["Document"] = relationship("Document", back_populates="chunks")
@@ -133,7 +131,7 @@ class DocumentRelation(Base):
         UUID(as_uuid=True), ForeignKey("documents.id", ondelete="CASCADE"), nullable=False
     )
     relation_type: Mapped[str] = mapped_column(String(50), nullable=False)
-    description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    description: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     # Relationships
     source_document: Mapped["Document"] = relationship(

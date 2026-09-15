@@ -1,5 +1,6 @@
-from pydantic_settings import BaseSettings
 from functools import lru_cache
+
+from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
@@ -27,6 +28,10 @@ class Settings(BaseSettings):
     top_k_rerank: int = 5
     rrf_k: int = 60
 
+    # Security: cho phép tự nâng cấp tài khoản lên Admin (chỉ dùng khi seed lần đầu)
+    # Đặt ALLOW_PROMOTE_ADMIN=true trong .env, nhớ tắt lại sau khi tạo xong Admin
+    allow_promote_admin: bool = False
+
     model_config = {
         "env_file": ".env",
         "env_file_encoding": "utf-8",
@@ -34,7 +39,7 @@ class Settings(BaseSettings):
     }
 
 
-@lru_cache()
+@lru_cache
 def get_settings() -> Settings:
     return Settings()
 

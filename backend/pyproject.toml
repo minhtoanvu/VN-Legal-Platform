@@ -1,0 +1,46 @@
+[tool.ruff]
+# Target Python version
+target-version = "py311"
+
+# Include app and tests
+include = ["app/**/*.py", "tests/**/*.py", "scripts/**/*.py"]
+
+[tool.ruff.lint]
+# Các rule bật: F=Pyflakes, I=isort, UP=pyupgrade, E=pycodestyle, W=warnings, PERF=performance
+select = ["F", "I", "UP", "E", "W", "PERF", "F841"]
+
+# Ignore các false-positive đã được phân tích kỹ:
+ignore = [
+    # B008: FastAPI Depends() trong function signature — đây là pattern chính thức của FastAPI.
+    # Xem: https://fastapi.tiangolo.com/tutorial/dependencies/
+    "B008",
+
+    # BLE001: Bắt `Exception` rộng — trong các service RAG/AI, không thể enumerate tất cả
+    # exception type (network, GPU OOM, model error...). Cần fallback chung.
+    "BLE001",
+
+    # ASYNC230: test script ghi file sync trong async context — chấp nhận được trong test-only code.
+    "ASYNC230",
+
+    # PERF102: Dùng .items() thay .values() — trong trường hợp này vẫn cần cả key lẫn value.
+    "PERF102",
+
+    # PERF401: append trong async for loop — không thể dùng list comprehension với async generator.
+    "PERF401",
+
+    # E501: Line too long — không enforce, formatter lo việc này.
+    "E501",
+
+    # F821: "Undefined name" — SQLAlchemy dùng string forward-reference cho relationship,
+    # đây là pattern bắt buộc khi có circular dependency giữa các model.
+    # Xem: https://docs.sqlalchemy.org/en/20/orm/basic_relationships.html#late-evaluation
+    "F821",
+
+    # E402: Import không ở đầu file — FastAPI buộc phải lazy-import routers sau khi
+    # khởi tạo `app` để tránh circular import. Đây là convention chuẩn của FastAPI.
+    "E402",
+]
+
+[tool.ruff.lint.per-file-ignores]
+# Test files được phép có thêm một số pattern đặc biệt
+"tests/**/*.py" = ["F401", "E402"]

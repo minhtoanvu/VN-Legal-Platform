@@ -3,20 +3,21 @@ from uuid import UUID
 
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-
-from app.core.security import decode_token
-from app.core.database import get_db, AsyncSession
 from slowapi import Limiter
 from slowapi.util import get_remote_address
 
-security = HTTPBearer()
+from app.core.database import AsyncSession, get_db
+from app.core.security import decode_token
+
+# auto_error=False: tự xử lý missing token → trả 401 đúng chuẩn RFC 7235
+security = HTTPBearer(auto_error=False)
 
 # Khởi tạo Rate Limiter
 limiter = Limiter(key_func=get_remote_address)
 
 
 async def get_current_user(
-    credentials: Annotated[HTTPAuthorizationCredentials, Depends(security)],
+    credentials: Annotated[HTTPAuthorizationCredentials | None, Depends(security)],
     db: Annotated[AsyncSession, Depends(get_db)],
 ):
     """
@@ -30,6 +31,9 @@ async def get_current_user(
         detail="Token không hợp lệ hoặc đã hết hạn",
         headers={"WWW-Authenticate": "Bearer"},
     )
+
+    if not credentials:
+        raise credentials_exception
 
     payload = decode_token(credentials.credentials)
     if not payload or payload.get("type") != "access":
