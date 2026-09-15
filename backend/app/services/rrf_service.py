@@ -4,17 +4,15 @@ RRF (Reciprocal Rank Fusion) Service — Kết hợp BM25 và Semantic ranks.
 Công thức: RRF_score(d) = Σ 1 / (k + rank_i)
 với k = 60 (constant để giảm ảnh hưởng của outlier rank cao)
 """
-from typing import List, Dict
-
 
 RRF_K = 60
 
 
 def reciprocal_rank_fusion(
-    bm25_results: List[dict],
-    semantic_results: List[dict],
+    bm25_results: list[dict],
+    semantic_results: list[dict],
     top_k: int = 10,
-) -> List[dict]:
+) -> list[dict]:
     """
     Merge 2 ranked lists bằng Reciprocal Rank Fusion.
 
@@ -27,8 +25,8 @@ def reciprocal_rank_fusion(
         List đã merge và sắp xếp theo RRF score giảm dần
     """
     # Build lookup dict: id → full document info
-    doc_info: Dict[str, dict] = {}
-    rrf_scores: Dict[str, float] = {}
+    doc_info: dict[str, dict] = {}
+    rrf_scores: dict[str, float] = {}
 
     # Xử lý BM25 results
     for item in bm25_results:
@@ -58,7 +56,7 @@ def reciprocal_rank_fusion(
     return results
 
 
-def merge_by_score(results_list: List[List[dict]], top_k: int = 10) -> List[dict]:
+def merge_by_score(results_list: list[list[dict]], top_k: int = 10) -> list[dict]:
     """
     Fallback: merge nhiều result lists bằng score trực tiếp (khi chỉ có 1 source).
     """

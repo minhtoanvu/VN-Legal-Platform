@@ -8,41 +8,39 @@ Endpoints:
   POST /ai/summarize — Tóm tắt toàn văn một văn bản
 """
 import json
-from typing import Optional
+import time
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.responses import StreamingResponse
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
+from app.core.dependencies import get_current_active_user, limiter
 from app.models.document import Document
 from app.models.workspace import QueryLog
 from app.services.rag_service import rag_generate_stream
-from app.core.dependencies import get_current_active_user, limiter
-from fastapi import Request
-import time
 
 router = APIRouter()
 
 class AIChatRequest:
-    def __init__(self, question: str, field: Optional[str] = None):
+    def __init__(self, question: str, field: str | None = None):
         self.question = question
         self.field = field
 
 
-from typing import List
+
 from pydantic import BaseModel, model_validator
 
 
 class ChatRequest(BaseModel):
-    question: Optional[str] = None
-    query: Optional[str] = None
-    field: Optional[str] = None
-    session_id: Optional[str] = None
-    context_doc_ids: Optional[List[str]] = None
-    history: Optional[List[dict]] = None
+    question: str | None = None
+    query: str | None = None
+    field: str | None = None
+    session_id: str | None = None
+    context_doc_ids: list[str] | None = None
+    history: list[dict] | None = None
 
     @model_validator(mode="after")
     def resolve_question(self):
@@ -70,7 +68,7 @@ class SummarizeRequest(BaseModel):
 Gửi câu hỏi, nhận câu trả lời streaming kèm Citations. Đã bật tính năng chống Spam (Rate Limiter).
 """,
 )
-@limiter.limit("5/minute")
+@limiter.limit("15/minute")
 async def ai_chat(
     request: Request,
     body: ChatRequest,
@@ -126,11 +124,13 @@ async def ai_chat(
 
 @router.post(
     "/summarize",
-    summary="Tóm tắt văn bản pháp luật - UC-12",
+    summary="Tóm tắt văn bản pháp luật - UC-11",
+    description="Yêu cầu đăng nhập (UC-11: Actor = User, Enterprise).",
 )
 async def summarize_document(
     body: SummarizeRequest,
     db: AsyncSession = Depends(get_db),
+    current_user = Depends(get_current_active_user),
 ):
     result = await db.execute(select(Document).where(Document.id == body.doc_id))
     doc = result.scalar_one_or_none()

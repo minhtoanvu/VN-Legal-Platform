@@ -1,16 +1,25 @@
 """
-RAG Service Module
+RAG Service Module — Custom Implementation (No LangChain)
+
+Luồng xử lý:
+  1. Retrieve  : BM25 (Full-text) + Semantic HNSW search (song song)
+  2. Rerank    : Reciprocal Rank Fusion (RRF, k=60) để kết hợp 2 danh sách
+  3. Augment   : Xây dựng System Prompt với ngữ cảnh Top-K chunks
+  4. Generate  : Gọi Gemini 2.5 Flash (SSE streaming)
+  5. Fallback  : Circuit Breaker → trả về Semantic results nếu LLM lỗi/timeout
+
+Không dùng LangChain — toàn bộ pipeline được viết thuần Python
+để kiểm soát từng bước và tối ưu hiệu năng cho bài toán pháp lý tiếng Việt.
 """
 
 import asyncio
 import time
-from typing import AsyncGenerator, Optional
-from uuid import UUID
+from collections.abc import AsyncGenerator
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.services.bm25_service import bm25_search
 from app.services import semantic_service
+from app.services.bm25_service import bm25_search
 from app.services.rrf_service import reciprocal_rank_fusion
 
 TOP_K_RETRIEVE = 20
@@ -34,7 +43,7 @@ QUY TẮC BẮT BUỘC:
 async def rag_retrieve(
     session: AsyncSession,
     question: str,
-    field: Optional[str] = None,
+    field: str | None = None,
 ) -> list[dict]:
     import logging
     log = logging.getLogger(__name__)
@@ -109,10 +118,11 @@ def _build_context(chunks: list[dict]) -> tuple[str, list[dict]]:
 async def rag_generate_stream(
     session: AsyncSession,
     question: str,
-    field: Optional[str] = None,
-    history: Optional[list[dict]] = None
+    field: str | None = None,
+    history: list[dict] | None = None
 ) -> AsyncGenerator[str, None]:
-    import logging, json
+    import json
+    import logging
     log = logging.getLogger(__name__)
 
     yield "*(⏳ Đang tra cứu cơ sở dữ liệu pháp luật...)*\n\n"
@@ -134,13 +144,14 @@ async def rag_generate_stream(
         for msg in history:
             role = "user" if msg.get("role") == "user" else "model"
             contents.append({"role": role, "parts": [{"text": msg.get("content", "")}]})
-    
+
     contents.append({"role": "user", "parts": [{"text": question}]})
 
     try:
-        from app.core.config import settings
         from google import genai as google_genai
-        from app.core.circuit_breaker import llm_circuit_breaker, CircuitState
+
+        from app.core.circuit_breaker import CircuitState, llm_circuit_breaker
+        from app.core.config import settings
 
         if not settings.gemini_api_key:
             yield "⚠️ Chưa cấu hình GEMINI_API_KEY. Vui lòng thêm key vào file .env."
@@ -183,7 +194,7 @@ async def rag_generate_stream(
         llm_circuit_breaker.record_success()
         yield f"\n\n__CITATIONS__:{json.dumps(citations, ensure_ascii=False)}"
 
-    except asyncio.TimeoutError:
+    except TimeoutError:
         llm_circuit_breaker.record_failure()
         yield "⚠️ AI phản hồi quá 10 giây (Timeout), đây là kết quả tìm kiếm thay thế:\n\n"
         for i, chunk in enumerate(chunks, 1):
