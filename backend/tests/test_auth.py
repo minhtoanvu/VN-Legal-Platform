@@ -3,12 +3,7 @@ Tests cho Auth API — pytest-asyncio
 Chạy: cd backend && pytest tests/test_auth.py -v
 """
 import pytest
-import pytest_asyncio
-import httpx
-from httpx import AsyncClient, ASGITransport
-
-from app.main import app
-
+from httpx import AsyncClient
 
 # ---------- Register ----------
 
@@ -31,7 +26,7 @@ async def test_register_success(client: AsyncClient):
     assert "refresh_token" in data
     assert data["user"]["email"] == test_email
 
-  
+
 @pytest.mark.anyio
 async def test_register_duplicate_email(client: AsyncClient):
     """Đăng ký email trùng → 409 hoặc 400."""

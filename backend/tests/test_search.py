@@ -3,11 +3,7 @@ Tests cho Search API — pytest-asyncio
 Chạy: cd backend && pytest tests/test_search.py -v
 """
 import pytest
-import pytest_asyncio
-from httpx import AsyncClient, ASGITransport
-
-from app.main import app
-
+from httpx import AsyncClient
 
 # ---------- Keyword Search ----------
 

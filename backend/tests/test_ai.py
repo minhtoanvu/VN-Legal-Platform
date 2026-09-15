@@ -1,6 +1,8 @@
+import uuid
+
 import pytest
 from httpx import AsyncClient
-import uuid
+
 
 # Mock the rag_generate_stream to avoid hitting real Gemini API
 async def mock_rag_generate_stream(*args, **kwargs):
@@ -22,10 +24,10 @@ async def test_ai_chat_success(auth_client: AsyncClient):
     resp = await auth_client.post("/ai/chat", json={
         "question": "Thử việc tối đa bao nhiêu ngày?"
     })
-    
+
     assert resp.status_code == 200
     assert resp.headers["content-type"] == "text/event-stream; charset=utf-8"
-    
+
     # Đọc stream data
     content = resp.text
     assert "Đây là" in content
@@ -38,7 +40,7 @@ async def test_ai_chat_empty_question(auth_client: AsyncClient):
     resp = await auth_client.post("/ai/chat", json={
         "question": "   "
     })
-    
+
     assert resp.status_code == 422
     assert "không được để trống" in resp.json()["detail"]
 
@@ -48,7 +50,7 @@ async def test_ai_chat_unauthorized(client: AsyncClient):
     resp = await client.post("/ai/chat", json={
         "question": "Luật lao động"
     })
-    
+
     assert resp.status_code in (401, 403)
 
 
@@ -61,5 +63,5 @@ async def test_ai_summarize_not_found(client: AsyncClient):
     resp = await client.post("/ai/summarize", json={
         "doc_id": fake_uuid
     })
-    
+
     assert resp.status_code == 404

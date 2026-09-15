@@ -12,19 +12,27 @@ import app.services.rag_service as rag_service
 
 sys.stdout.reconfigure(encoding='utf-8')
 
-# Bộ câu hỏi có thật trong DB
+# Bộ câu hỏi có thật trong DB — 5 câu đại diện 2 lĩnh vực Lao động & Thuế
 TEST_SAMPLES = [
     {
         "question": "Người lao động có quyền đơn phương chấm dứt hợp đồng lao động không?",
-        "expected_doc_number": "Điều 20.2.LQ.35"
+        "expected_doc_number": "Điều 20.2.LQ.35"  # Điều 35 BLLĐ - quyền đơn phương chấm dứt
     },
     {
         "question": "Tuổi nghỉ hưu của người lao động trong điều kiện bình thường là bao nhiêu?",
-        "expected_doc_number": "Điều 20.2.LQ.169"
+        "expected_doc_number": "Điều 20.2.LQ.169"  # Điều 169 BLLĐ - tuổi nghỉ hưu
     },
     {
-        "question": "Thử việc tối đa bao nhiêu tháng đối với công việc cần trình độ cao đẳng?",
-        "expected_doc_number": "Điều 20.2.LQ.24"
+        "question": "Thời gian thử việc tối đa là bao nhiêu ngày đối với công việc cần trình độ cao đẳng?",
+        "expected_doc_number": "Điều 20.2.LQ.25"  # Điều 25 BLLĐ - thời gian thử việc
+    },
+    {
+        "question": "Người lao động nghỉ thai sản được hưởng bao nhiêu tháng?",
+        "expected_doc_number": "Điều 20.2.LQ.139"  # Điều 139 BLLĐ - nghỉ thai sản
+    },
+    {
+        "question": "Thời giờ làm việc bình thường của người lao động tối đa bao nhiêu giờ một ngày?",
+        "expected_doc_number": "Điều 20.2.LQ.105"  # Điều 105 BLLĐ - thời giờ làm việc
     }
 ]
 

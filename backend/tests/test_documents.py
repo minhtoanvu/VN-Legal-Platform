@@ -1,17 +1,19 @@
+import datetime
+import uuid
+
 import pytest
 from httpx import AsyncClient
-from sqlalchemy.ext.asyncio import AsyncSession
-import uuid
-import datetime
-from app.models.document import Document, DocumentRelation
+
 from app.core.database import AsyncSessionLocal
+from app.models.document import Document, DocumentRelation
+
 
 @pytest.fixture
 async def mock_docs_and_relations():
     """Tạo mock documents và relations để test get/list."""
     doc_1_id = uuid.uuid4()
     doc_2_id = uuid.uuid4()
-    
+
     doc1 = Document(
         id=doc_1_id,
         title="Luật Test 1",
@@ -23,7 +25,7 @@ async def mock_docs_and_relations():
         effective_date=datetime.date(2020, 2, 1),
         content="Nội dung luật 1"
     )
-    
+
     doc2 = Document(
         id=doc_2_id,
         title="Nghị định Test 2",
@@ -35,7 +37,7 @@ async def mock_docs_and_relations():
         expired_date=datetime.date(2023, 1, 1),
         content="Nội dung luật 2"
     )
-    
+
     relation = DocumentRelation(
         id=uuid.uuid4(),
         source_doc_id=doc_2_id,
@@ -43,13 +45,13 @@ async def mock_docs_and_relations():
         relation_type="AMENDS",
         description="Nghị định 02 sửa đổi Luật 01"
     )
-    
+
     async with AsyncSessionLocal() as session:
         session.add_all([doc1, doc2, relation])
         await session.commit()
-    
+
     yield {"doc1": str(doc_1_id), "doc2": str(doc_2_id)}
-    
+
     # Dọn dẹp
     async with AsyncSessionLocal() as session:
         await session.delete(await session.get(DocumentRelation, relation.id))
@@ -66,12 +68,12 @@ async def test_list_documents(client: AsyncClient, mock_docs_and_relations):
     assert resp.status_code == 200
     data = resp.json()
     assert len(data) >= 2
-    
+
     # Test filter status
     resp_active = await client.get("/documents?status=active")
     assert resp_active.status_code == 200
     assert all(d["status"] == "active" for d in resp_active.json())
-    
+
     # Test filter field
     resp_field = await client.get("/documents?field=Hình sự")
     assert resp_field.status_code == 200
@@ -81,14 +83,14 @@ async def test_list_documents(client: AsyncClient, mock_docs_and_relations):
 async def test_get_document_detail_and_timeline(client: AsyncClient, mock_docs_and_relations):
     """Test lấy chi tiết, timeline và relations của văn bản."""
     doc1_id = mock_docs_and_relations["doc1"]
-    
+
     resp = await client.get(f"/documents/{doc1_id}")
     assert resp.status_code == 200
     data = resp.json()
-    
+
     assert data["id"] == doc1_id
     assert data["title"] == "Luật Test 1"
-    
+
     # Kiểm tra timeline
     timeline = data.get("timeline", [])
     assert len(timeline) >= 2
@@ -97,7 +99,7 @@ async def test_get_document_detail_and_timeline(client: AsyncClient, mock_docs_a
     assert "issued" in event_types
     assert "effective" in event_types
     assert "amended" in event_types
-    
+
     # Kiểm tra relations
     relations = data.get("relations", [])
     assert len(relations) == 1

@@ -1,6 +1,7 @@
-import pytest
-from httpx import AsyncClient, ASGITransport
 import uuid
+
+import pytest
+from httpx import ASGITransport, AsyncClient
 
 from app.main import app
 
@@ -39,12 +40,12 @@ async def auth_client(client: AsyncClient):
         "password": "password123",
         "full_name": f"Test User {uid}"
     })
-    
+
     resp = await client.post("/auth/login", json={
         "email": f"test_user_{uid}@test.com",
         "password": "password123"
     })
     token = resp.json().get("access_token")
-    
+
     client.headers.update({"Authorization": f"Bearer {token}"})
     yield client
