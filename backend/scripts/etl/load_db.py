@@ -1,9 +1,5 @@
-"""
-ETL Step 3: Load dữ liệu đã normalize vào PostgreSQL.
-
-Chạy: python scripts/etl/load_db.py
-Hoặc: python scripts/etl/load_db.py --batch-size 100 --limit 1000
-"""
+# Bước 3 ETL: load dữ liệu đã normalize vào PostgreSQL
+# Đọc documents_normalized.jsonl, insert từng batch vào bảng documents
 
 import argparse
 import asyncio
@@ -13,7 +9,6 @@ from pathlib import Path
 from typing import Optional
 from uuid import uuid4
 
-# Thêm backend root vào path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from sqlalchemy import text
@@ -27,10 +22,10 @@ PROCESSED_DIR = Path(__file__).parent.parent.parent / "data" / "processed"
 
 
 async def ensure_extension(session: AsyncSession):
-    """Bật pgvector extension nếu chưa có."""
+    # Bật pgvector nếu chưa có
     await session.execute(text("CREATE EXTENSION IF NOT EXISTS vector;"))
     await session.commit()
-    print("✅ pgvector extension đã được bật")
+    print("pgvector extension OK")
 
 
 async def load_documents(
@@ -38,8 +33,7 @@ async def load_documents(
     batch_size: int = 100,
     limit: Optional[int] = None,
 ):
-    """Load documents từ JSONL file vào DB theo batch."""
-    print(f"📂 Đọc file: {input_file}")
+    print(f"Doc file: {input_file}")
 
     records = []
     with open(input_file, "r", encoding="utf-8") as f:
@@ -51,7 +45,7 @@ async def load_documents(
             if limit and len(records) >= limit:
                 break
 
-    print(f"   Tổng: {len(records):,} records cần insert")
+    print(f"  Tong: {len(records):,} records can insert")
 
     inserted = 0
     skipped = 0
@@ -59,7 +53,6 @@ async def load_documents(
     async with AsyncSessionLocal() as session:
         await ensure_extension(session)
 
-        # Insert theo batch
         for i in range(0, len(records), batch_size):
             batch = records[i : i + batch_size]
             doc_objects = []
@@ -89,16 +82,14 @@ async def load_documents(
                 await session.commit()
                 inserted += len(doc_objects)
 
-            # Progress
             pct = min((i + batch_size) / len(records) * 100, 100)
-            print(f"   [{pct:5.1f}%] Đã insert {inserted:,} / {len(records):,}", end="\r")
+            print(f"  [{pct:5.1f}%] Da insert {inserted:,} / {len(records):,}", end="\r")
 
-    print(f"\n✅ Hoàn thành: {inserted:,} inserted | {skipped:,} skipped")
+    print(f"\nHoan thanh: {inserted:,} inserted | {skipped:,} skipped")
     return inserted
 
 
 def _parse_date_str(date_str: Optional[str]):
-    """Parse 'YYYY-MM-DD' string → date object, None nếu invalid."""
     if not date_str:
         return None
     try:
@@ -110,26 +101,25 @@ def _parse_date_str(date_str: Optional[str]):
 
 
 async def verify_load():
-    """Kiểm tra kết quả sau khi load."""
     async with AsyncSessionLocal() as session:
         result = await session.execute(
             text("SELECT field, COUNT(*) as cnt FROM documents GROUP BY field ORDER BY cnt DESC")
         )
         rows = result.fetchall()
-        print("\n📊 Thống kê sau khi load:")
+        print("\nThong ke sau khi load:")
         total = 0
         for row in rows:
-            print(f"   {row[0]:20s}: {row[1]:,} documents")
+            print(f"  {row[0]:20s}: {row[1]:,} documents")
             total += row[1]
-        print(f"   {'TOTAL':20s}: {total:,} documents")
+        print(f"  {'TOTAL':20s}: {total:,} documents")
 
 
 async def main(batch_size: int, limit: Optional[int]):
     input_file = PROCESSED_DIR / "documents_normalized.jsonl"
 
     if not input_file.exists():
-        print(f"❌ Không tìm thấy {input_file}")
-        print("   Chạy normalize.py trước!")
+        print(f"Khong tim thay {input_file}")
+        print("Chay normalize.py truoc!")
         return
 
     await load_documents(input_file, batch_size=batch_size, limit=limit)
@@ -137,9 +127,9 @@ async def main(batch_size: int, limit: Optional[int]):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Load documents vào PostgreSQL")
-    parser.add_argument("--batch-size", type=int, default=100, help="Số records mỗi batch")
-    parser.add_argument("--limit", type=int, default=None, help="Giới hạn số records (test nhanh)")
+    parser = argparse.ArgumentParser(description="Load documents vao PostgreSQL")
+    parser.add_argument("--batch-size", type=int, default=100, help="So records moi batch")
+    parser.add_argument("--limit", type=int, default=None, help="Gioi han so records (test nhanh)")
     args = parser.parse_args()
 
     asyncio.run(main(batch_size=args.batch_size, limit=args.limit))

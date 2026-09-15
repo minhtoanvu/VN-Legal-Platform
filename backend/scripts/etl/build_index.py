@@ -1,13 +1,6 @@
-"""
-ETL Pipeline - Bước 5: HNSW Index Builder
-Tạo chỉ mục HNSW trên cột embedding trong document_chunks.
-
-Theo PhanTichHeThong_v2_Fixed.docx:
-  - m=16, ef_construction=128
-  - distance_function=cosine (phù hợp với bi-encoder normalize=True)
-
-Chú ý: Phải chạy sau khi embedder.py hoàn thành.
-"""
+# Bước 6 ETL: tạo HNSW index trên cột embedding
+# Phải chạy SAU khi embedder.py xong hết
+# Tham số: m=16, ef_construction=128, cosine distance
 
 import sys
 import asyncio
@@ -27,25 +20,25 @@ from app.core.database import AsyncSessionLocal
 
 
 async def main():
-    print("=== Tạo HNSW Index trên document_chunks ===")
+    print("=== Tao HNSW Index tren document_chunks ===")
 
     import asyncpg
     conn = await asyncpg.connect("postgres://postgres:password@localhost:5432/legal_db")
-    
+
     count = await conn.fetchval("SELECT COUNT(*) FROM document_chunks WHERE embedding IS NOT NULL")
-    print(f"Chunks có embedding: {count}")
-    
+    print(f"Chunks co embedding: {count}")
+
     if count == 0:
-        print("Chưa có embedding nào! Hãy chạy embedder.py trước.")
+        print("Chua co embedding nao! Hay chay embedder.py truoc.")
         await conn.close()
         return
 
-    print("Xóa index cũ nếu có...")
+    print("Xoa index cu neu co...")
     await conn.execute("DROP INDEX IF EXISTS idx_chunks_embedding_hnsw")
 
-    print("Đang tạo HNSW index (có thể mất 1-5 phút)...")
-    print("  m=16, ef_construction=128, operator=vector_cosine_ops")
-    
+    print("Dang tao HNSW index (co the mat 1-5 phut)...")
+    print("  m=16, ef_construction=128, cosine")
+
     await conn.execute(
         """
         CREATE INDEX idx_chunks_embedding_hnsw
@@ -62,15 +55,15 @@ async def main():
         WHERE tablename = 'document_chunks'
         AND indexname = 'idx_chunks_embedding_hnsw'
     """)
-    
+
     if idx:
-        print(f"✓ Index tạo thành công: {idx['indexname']}")
+        print(f"Index tao thanh cong: {idx['indexname']}")
     else:
-        print("✗ Lỗi: Không tìm thấy index sau khi tạo!")
-        
+        print("Loi: khong tim thay index sau khi tao!")
+
     await conn.close()
-    
-    print("=== Xong! Semantic Search đã sẵn sàng ===")
+    print("=== Xong! Semantic Search san sang ===")
+
 
 if __name__ == "__main__":
     asyncio.run(main())
