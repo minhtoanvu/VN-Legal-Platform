@@ -4,6 +4,7 @@ import type { DocumentDetail, GraphData, Collection, Note } from '../types';
 import { StatusBadge } from '../components/document/StatusBadge';
 import { AIChatPanel } from '../components/chat/AIChatPanel';
 import { KnowledgeGraph } from '../components/graph/KnowledgeGraph';
+import { DocumentTimeline } from '../components/document/DocumentTimeline';
 import { api } from '../services/api';
 import {
   ArrowLeft, Calendar, Building2, FileText, GitBranch,
@@ -372,6 +373,15 @@ export const DocumentPage: React.FC = () => {
                   <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', lineHeight: 1.75 }}>
                     {doc.content_summary}
                   </p>
+                </div>
+              )}
+
+              {doc.timeline && doc.timeline.length > 0 && (
+                <div className="glass-card" style={{ padding: '24px' }}>
+                  <h2 style={{ fontSize: '1rem', fontWeight: 700, marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <Calendar size={16} color="var(--primary)" /> Lịch sử vòng đời văn bản (Timeline)
+                  </h2>
+                  <DocumentTimeline timeline={doc.timeline} />
                 </div>
               )}
 

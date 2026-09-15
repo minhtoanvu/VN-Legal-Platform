@@ -108,7 +108,7 @@ export const useAuth = create<AuthState>((set) => {
       try {
         const response = await api.get('/auth/me');
         set({ user: response.data, isAuthenticated: true, isLoading: false });
-      } catch (err) {
+      } catch {
         // Token có thể hết hạn và tự động refresh thất bại
         localStorage.removeItem('access_token');
         localStorage.removeItem('refresh_token');

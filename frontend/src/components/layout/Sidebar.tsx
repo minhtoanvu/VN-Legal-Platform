@@ -7,10 +7,11 @@ import {
 } from 'lucide-react';
 
 const NAV_ITEMS = [
-  { to: '/search',    icon: <Search size={20} />,     label: 'Tìm kiếm' },
-  { to: '/contract',  icon: <FolderOpen size={20} />, label: 'Hợp đồng' },
-  { to: '/workspace', icon: <FolderOpen size={20} />, label: 'Workspace' },
-  { to: '/analytics', icon: <BarChart2 size={20} />,  label: 'Thống kê' },
+  { to: '/search',    icon: <Search size={20} />,     label: 'Tìm kiếm',   role: 'all' },
+  { to: '/contract',  icon: <FolderOpen size={20} />, label: 'Hợp đồng',   role: 'all' },
+  { to: '/workspace', icon: <FolderOpen size={20} />, label: 'Workspace',  role: 'all' },
+  { to: '/analytics', icon: <BarChart2 size={20} />,  label: 'Thống kê',   role: 'all' },
+  { to: '/admin',     icon: <Shield size={20} />,     label: 'Quản trị',   role: 'admin' },
 ];
 
 export const Sidebar: React.FC = () => {
@@ -60,7 +61,7 @@ export const Sidebar: React.FC = () => {
 
       {/* Nav */}
       <nav style={{ flex: 1, padding: '16px 8px' }}>
-        {NAV_ITEMS.map(({ to, icon, label }) => (
+        {NAV_ITEMS.filter(item => item.role === 'all' || (item.role === 'admin' && user?.role === 'admin')).map(({ to, icon, label }) => (
           <NavLink
             key={to}
             to={to}
@@ -109,11 +110,19 @@ export const Sidebar: React.FC = () => {
       {/* User info + Logout */}
       <div style={{ padding: collapsed ? '12px 4px' : '12px 10px', borderTop: '1px solid var(--border-light)' }}>
         {!collapsed && user && (
-          <div style={{
-            padding: '10px 12px', borderRadius: 'var(--radius-sm)',
-            background: 'rgba(255,255,255,0.02)', marginBottom: '8px',
-            display: 'flex', alignItems: 'center', gap: '10px',
-          }}>
+          <NavLink
+            to="/profile"
+            style={{
+              padding: '10px 12px', borderRadius: 'var(--radius-sm)',
+              background: 'rgba(255,255,255,0.02)', marginBottom: '8px',
+              display: 'flex', alignItems: 'center', gap: '10px',
+              textDecoration: 'none', color: 'inherit',
+              transition: 'background 0.2s ease',
+              border: '1px solid transparent'
+            }}
+            onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.05)')}
+            onMouseLeave={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.02)')}
+          >
             <div style={{
               width: '32px', height: '32px', borderRadius: '50%', flexShrink: 0,
               background: 'linear-gradient(135deg, var(--primary), var(--accent-purple))',
@@ -129,7 +138,19 @@ export const Sidebar: React.FC = () => {
                 {user.email}
               </p>
             </div>
-          </div>
+          </NavLink>
+        )}
+        {collapsed && user && (
+           <NavLink to="/profile" title="Hồ sơ">
+              <div style={{
+                width: '32px', height: '32px', borderRadius: '50%',
+                background: 'linear-gradient(135deg, var(--primary), var(--accent-purple))',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                margin: '0 auto 8px', cursor: 'pointer'
+              }}>
+                 {user.role === 'admin' ? <Shield size={15} color="#fff" /> : <User size={15} color="#fff" />}
+              </div>
+           </NavLink>
         )}
         <button
           onClick={handleLogout}

@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test } from '@playwright/test';
 
 test.describe('Search Document Flow', () => {
   test('User can search for a legal document', async ({ page }) => {

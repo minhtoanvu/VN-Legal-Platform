@@ -55,13 +55,15 @@ export interface DocumentDetail extends DocumentListItem {
   content: string | null;
   expiry_date: string | null;
   relations: DocumentRelation[];
+  timeline?: TimelineEvent[];
   chunks_count: number;
 }
 
 export interface TimelineEvent {
-  date: string;
+  date?: string;
   event_type: string;
-  description: string;
+  description?: string;
+  label?: string;
   related_doc_id?: string;
   related_doc_title?: string;
 }
@@ -157,6 +159,7 @@ export interface AnalyticsDashboard {
     created_at: string;
   }[];
   avg_query_duration_ms?: number;
+  heatmap?: { year: number; month: number; count: number }[];
 }
 
 // ===== Workspace =====
