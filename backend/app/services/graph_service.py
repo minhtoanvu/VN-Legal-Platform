@@ -10,7 +10,8 @@ Output format tương thích Vis.js Network:
 """
 
 from uuid import UUID
-from sqlalchemy import select, or_
+
+from sqlalchemy import or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.document import Document, DocumentRelation
@@ -105,7 +106,6 @@ async def build_graph(
             relations = rel_result.scalars().all()
 
             for rel in relations:
-                edge_key = (str(rel.source_doc_id), str(rel.target_doc_id), rel.relation_type)
                 edge = {
                     "id": str(rel.id),
                     "from": str(rel.source_doc_id),

@@ -6,8 +6,8 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
-from app.services.analytics_service import get_dashboard_metrics
 from app.core.dependencies import get_current_user
+from app.services.analytics_service import get_dashboard_metrics
 
 router = APIRouter()
 
@@ -27,11 +27,14 @@ Trả về 5 aggregation metrics cho Dashboard:
     """,
 )
 async def get_dashboard(
+    field: str | None = None,
+    start_date: str | None = None,
+    end_date: str | None = None,
     db: AsyncSession = Depends(get_db),
     current_user = Depends(get_current_user)
 ):
     """Tổng hợp metrics cho Dashboard UI."""
-    return await get_dashboard_metrics(db)
+    return await get_dashboard_metrics(db, field, start_date, end_date)
 
 
 @router.get(

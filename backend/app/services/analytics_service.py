@@ -10,63 +10,65 @@ UC-11: Dashboard thống kê hệ thống
   5. top_queried_fields    — Lĩnh vực được tìm kiếm nhiều nhất (Bar Chart)
 """
 
-from sqlalchemy import text, func, extract, select
+from sqlalchemy import extract, func, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.document import Document
 from app.models.workspace import QueryLog
 
 
-async def get_dashboard_metrics(session: AsyncSession) -> dict:
-    """Tổng hợp 5 metrics cho Dashboard."""
+async def get_dashboard_metrics(
+    session: AsyncSession,
+    field: str | None = None,
+    start_date: str | None = None,
+    end_date: str | None = None
+) -> dict:
+    """Tổng hợp metrics cho Dashboard có hỗ trợ lọc."""
+
+    doc_filters = []
+    if field:
+        doc_filters.append(Document.field == field)
+    if start_date:
+        doc_filters.append(Document.issue_date >= start_date)
+    if end_date:
+        doc_filters.append(Document.issue_date <= end_date)
+
+    def apply_doc_filters(stmt):
+        for f in doc_filters:
+            stmt = stmt.where(f)
+        return stmt
 
     # 1. Phân bổ theo lĩnh vực
-    r1 = await session.execute(
-        select(Document.field, func.count().label("count"))
-        .where(Document.field != None)
-        .group_by(Document.field)
-        .order_by(func.count().desc())
-        .limit(10)
-    )
+    stmt1 = select(Document.field, func.count().label("count")).where(Document.field.is_not(None))
+    stmt1 = apply_doc_filters(stmt1).group_by(Document.field).order_by(func.count().desc()).limit(10)
+    r1 = await session.execute(stmt1)
     documents_by_field = [{"field": row.field, "count": row.count} for row in r1]
 
     # 2. Phân bổ theo loại văn bản
-    r2 = await session.execute(
-        select(Document.doc_type, func.count().label("count"))
-        .where(Document.doc_type != None)
-        .group_by(Document.doc_type)
-        .order_by(func.count().desc())
-        .limit(10)
-    )
+    stmt2 = select(Document.doc_type, func.count().label("count")).where(Document.doc_type.is_not(None))
+    stmt2 = apply_doc_filters(stmt2).group_by(Document.doc_type).order_by(func.count().desc()).limit(10)
+    r2 = await session.execute(stmt2)
     documents_by_type = [{"doc_type": row.doc_type, "count": row.count} for row in r2]
 
     # 3. Phân bổ theo trạng thái
-    r3 = await session.execute(
-        select(Document.status, func.count().label("count"))
-        .group_by(Document.status)
-    )
+    stmt3 = select(Document.status, func.count().label("count"))
+    stmt3 = apply_doc_filters(stmt3).group_by(Document.status)
+    r3 = await session.execute(stmt3)
     documents_by_status = [{"status": row.status, "count": row.count} for row in r3]
 
     # 4. Văn bản theo năm ban hành (10 năm gần nhất)
-    r4 = await session.execute(
-        select(
-            extract("year", Document.issue_date).label("year"),
-            func.count().label("count")
-        )
-        .where(Document.issue_date != None)
-        .group_by("year")
-        .order_by("year")
-        .limit(20)
-    )
-    documents_by_year = [
-        {"year": int(row.year), "count": row.count}
-        for row in r4 if row.year
-    ]
+    stmt4 = select(
+        extract("year", Document.issue_date).label("year"),
+        func.count().label("count")
+    ).where(Document.issue_date.is_not(None))
+    stmt4 = apply_doc_filters(stmt4).group_by("year").order_by("year").limit(20)
+    r4 = await session.execute(stmt4)
+    documents_by_year = [{"year": int(row.year), "count": row.count} for row in r4 if row.year]
 
     # 5. Top lĩnh vực được truy vấn nhiều nhất (từ query_logs)
     r5 = await session.execute(
         select(QueryLog.query_type, func.count().label("count"))
-        .where(QueryLog.query_type != None)
+        .where(QueryLog.query_type.is_not(None))
         .group_by(QueryLog.query_type)
         .order_by(func.count().desc())
         .limit(5)
@@ -74,24 +76,33 @@ async def get_dashboard_metrics(session: AsyncSession) -> dict:
     top_query_types = [{"query_type": row.query_type, "count": row.count} for row in r5]
 
     # KPI tổng quan
-    total_docs = await session.execute(select(func.count()).select_from(Document))
+    stmt_total = select(func.count()).select_from(Document)
+    stmt_total = apply_doc_filters(stmt_total)
+    total_docs = await session.execute(stmt_total)
+    
     total_queries = await session.execute(select(func.count()).select_from(QueryLog))
-    
+
     # KPI mới trong 30 ngày
-    docs_30d_query = await session.execute(
-        select(func.count()).select_from(Document).where(Document.created_at >= text("NOW() - INTERVAL '30 days'"))
-    )
+    stmt_30d = select(func.count()).select_from(Document).where(Document.created_at >= text("NOW() - INTERVAL '30 days'"))
+    stmt_30d = apply_doc_filters(stmt_30d)
+    docs_30d_query = await session.execute(stmt_30d)
     docs_30d = docs_30d_query.scalar() or 0
-    
+
     # 6. Top cơ quan ban hành
-    r6 = await session.execute(
-        select(Document.issuing_body, func.count().label("count"))
-        .where(Document.issuing_body != None)
-        .group_by(Document.issuing_body)
-        .order_by(func.count().desc())
-        .limit(10)
-    )
+    stmt6 = select(Document.issuing_body, func.count().label("count")).where(Document.issuing_body.is_not(None))
+    stmt6 = apply_doc_filters(stmt6).group_by(Document.issuing_body).order_by(func.count().desc()).limit(10)
+    r6 = await session.execute(stmt6)
     top_issuing_bodies = [{"issuing_body": row.issuing_body, "count": row.count} for row in r6]
+
+    # 7. Heatmap Calendar (Distribution by Year/Month)
+    stmt_heatmap = select(
+        extract("year", Document.issue_date).label("year"),
+        extract("month", Document.issue_date).label("month"),
+        func.count().label("count")
+    ).where(Document.issue_date.is_not(None))
+    stmt_heatmap = apply_doc_filters(stmt_heatmap).group_by("year", "month").order_by(text("year DESC"), text("month DESC")).limit(120)
+    r_heatmap = await session.execute(stmt_heatmap)
+    heatmap_result = [{"year": int(row.year), "month": int(row.month), "count": row.count} for row in r_heatmap if row.year and row.month]
 
     return {
         "kpi": {
@@ -105,6 +116,7 @@ async def get_dashboard_metrics(session: AsyncSession) -> dict:
         "documents_by_year": documents_by_year,
         "top_query_types": top_query_types,
         "top_issuing_bodies": top_issuing_bodies,
+        "heatmap": heatmap_result,
     }
 
 
@@ -115,8 +127,9 @@ async def get_advanced_analytics(session: AsyncSession) -> dict:
     2. Louvain Community Detection: Phân cụm các văn bản liên quan
     3. Heatmap Calendar: Phân phối ban hành theo năm/tháng
     """
-    import networkx as nx
     import community as community_louvain
+    import networkx as nx
+
     from app.models.document import DocumentRelation
 
     # 1. Lấy dữ liệu quan hệ (Edges)
@@ -155,23 +168,23 @@ async def get_advanced_analytics(session: AsyncSession) -> dict:
             }
             for node, score in top_10_nodes
         ]
-    except Exception as e:
+    except Exception:
         pagerank_result = []
 
     # 3. Louvain Community Detection
     try:
         G_undirected = G_directed.to_undirected()
         partition = community_louvain.best_partition(G_undirected)
-        
+
         # Đếm số lượng node trong mỗi community
         community_counts = {}
         for node, comm_id in partition.items():
             community_counts[comm_id] = community_counts.get(comm_id, 0) + 1
-            
+
         # Lấy top 5 communities lớn nhất
         top_communities = sorted(community_counts.items(), key=lambda x: x[1], reverse=True)[:5]
         communities_result = [{"community_id": c_id, "node_count": count} for c_id, count in top_communities]
-    except Exception as e:
+    except Exception:
         communities_result = []
 
     # 4. Heatmap Calendar (Distribution by Year/Month)
@@ -181,7 +194,7 @@ async def get_advanced_analytics(session: AsyncSession) -> dict:
             extract("month", Document.issue_date).label("month"),
             func.count().label("count")
         )
-        .where(Document.issue_date != None)
+        .where(Document.issue_date.is_not(None))
         .group_by("year", "month")
         .order_by(text("year DESC"), text("month DESC"))
         .limit(120)  # 10 năm gần nhất
