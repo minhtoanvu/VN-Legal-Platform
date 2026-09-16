@@ -55,11 +55,11 @@ graph TD
     API --> CB{Circuit Breaker}
     CB -->|Protected Call| LLM[Gemini 2.5 Flash]
 
-    subgraph Search Pipeline
+    subgraph SearchPipeline [Search Pipeline]
         BM25[BM25 Full-Text] --> RRF[RRF Fusion]
         SEM[Semantic HNSW] --> RRF
     end
-    API --> Search Pipeline
+    API --> SearchPipeline
 
     subgraph QAOps [Automated QA Pipeline]
         GH[GitHub Actions] --> Pytest[Pytest: API / Unit]
