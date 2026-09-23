@@ -25,9 +25,14 @@ Hệ thống xử lý hàng nghìn văn bản pháp luật Việt Nam thông qua
 
 > **💡 App Preview:**
 > <p align="center">
->   <img src="./docs/image copy 2.png" width="100%" alt="AILIP Search Demo">
+>   <img src="./docs/AI search.png" width="100%" alt="AILIP Search Demo">
 >   <br>
->   <i>Giao diện màn hình chính</i>
+>   <i>Giao diện Tìm Kiếm Hybrid</i>
+> </p>
+> <p align="center">
+>   <img src="./docs/Login.png" width="60%" alt="AILIP Login">
+>   <br>
+>   <i>Giao diện Đăng Nhập</i>
 > </p>
 
 ---
@@ -366,6 +371,26 @@ ruff format app/
 | `GET`  | `/admin/users` | Quản lý người dùng (Admin) |
 
 Xem đầy đủ tại **Swagger UI:** http://localhost:8000/docs
+
+---
+
+## 📮 Postman Collection
+
+Project đính kèm Postman Collection đầy đủ để test API một cách có tổ chức:
+
+```
+backend/postman/
+├── collections/VN_Legal_Platform.postman_collection.json  ← Import vào Postman
+└── environments/local.postman_environment.json             ← Import environment
+```
+
+### Cách dùng:
+1. Mở Postman → **Import** cả 2 file trên
+2. Chọn environment **"VN Legal — Local Dev"** (góc trên phải)
+3. Chạy `🔐 Auth > Đăng nhập (Login)` — `access_token` tự động lưu
+4. Tất cả request có 🔒 sẽ tự gắn Bearer token, không cần cấu hình thêm
+
+> **💡 Tip:** Các Pre-request Scripts tự động lưu `access_token`, `collection_id`, `note_id` sau mỗi request tương ứng.
 
 ---
 
