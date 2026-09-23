@@ -1,0 +1,573 @@
+{
+  "info": {
+    "name": "VN Legal Platform — Full API",
+    "description": "Collection đầy đủ cho toàn bộ API của dự án VN Legal Platform.\n\n## Cách dùng:\n1. Import collection + environment 'VN Legal — Local Dev'\n2. Chọn environment 'VN Legal — Local Dev'\n3. Chạy '🔐 Auth > Login' trước → access_token tự động lưu\n4. Các request có 🔒 sẽ tự dùng token đó\n\n## Base URL: http://localhost:8000",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_postman_id": "vn-legal-platform-collection-v1"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{access_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [""]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8000"
+    }
+  ],
+  "item": [
+    {
+      "name": "🔐 Auth",
+      "description": "Đăng ký, đăng nhập, quản lý token và hồ sơ cá nhân.",
+      "item": [
+        {
+          "name": "Đăng ký tài khoản mới",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.access_token) {",
+                  "    pm.environment.set('access_token', res.access_token);",
+                  "    pm.environment.set('refresh_token', res.refresh_token);",
+                  "    console.log('✅ Token đã được lưu vào Environment!');",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"StrongPass123!\",\n  \"full_name\": \"Nguyễn Văn A\",\n  \"organization\": \"Công ty Luật ABC\"\n}"
+            },
+            "url": {"raw": "{{base_url}}/auth/register", "host": ["{{base_url}}"], "path": ["auth", "register"]}
+          },
+          "response": []
+        },
+        {
+          "name": "Đăng nhập (Login) 🔑",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.access_token) {",
+                  "    pm.environment.set('access_token', res.access_token);",
+                  "    pm.environment.set('refresh_token', res.refresh_token);",
+                  "    console.log('✅ Đăng nhập thành công! Token đã lưu.');",
+                  "} else {",
+                  "    console.error('❌ Đăng nhập thất bại:', JSON.stringify(res));",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {"type": "noauth"},
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"StrongPass123!\"\n}"
+            },
+            "url": {"raw": "{{base_url}}/auth/login", "host": ["{{base_url}}"], "path": ["auth", "login"]}
+          },
+          "response": []
+        },
+        {
+          "name": "Làm mới Access Token (Refresh)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.access_token) {",
+                  "    pm.environment.set('access_token', res.access_token);",
+                  "    pm.environment.set('refresh_token', res.refresh_token);",
+                  "    console.log('✅ Token đã được làm mới!');",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {"type": "noauth"},
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refresh_token\": \"{{refresh_token}}\"\n}"
+            },
+            "url": {"raw": "{{base_url}}/auth/refresh", "host": ["{{base_url}}"], "path": ["auth", "refresh"]}
+          },
+          "response": []
+        },
+        {
+          "name": "Xem thông tin tài khoản hiện tại 🔒",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {"raw": "{{base_url}}/auth/me", "host": ["{{base_url}}"], "path": ["auth", "me"]}
+          },
+          "response": []
+        },
+        {
+          "name": "Cập nhật hồ sơ cá nhân 🔒",
+          "request": {
+            "method": "PATCH",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"full_name\": \"Nguyễn Văn B (Đã cập nhật)\"\n}"
+            },
+            "url": {"raw": "{{base_url}}/auth/me", "host": ["{{base_url}}"], "path": ["auth", "me"]}
+          },
+          "response": []
+        },
+        {
+          "name": "Đổi mật khẩu 🔒",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"current_password\": \"StrongPass123!\",\n  \"new_password\": \"NewStrongPass456!\"\n}"
+            },
+            "url": {"raw": "{{base_url}}/auth/change-password", "host": ["{{base_url}}"], "path": ["auth", "change-password"]}
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "🔍 Search — Tìm kiếm văn bản",
+      "description": "Keyword (không cần đăng nhập), Semantic và Hybrid (cần đăng nhập).",
+      "item": [
+        {
+          "name": "Tìm kiếm từ khóa (Keyword) — Không cần login",
+          "request": {
+            "auth": {"type": "noauth"},
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"hợp đồng lao động\",\n  \"mode\": \"keyword\",\n  \"limit\": 10,\n  \"offset\": 0,\n  \"filters\": {}\n}"
+            },
+            "url": {"raw": "{{base_url}}/search", "host": ["{{base_url}}"], "path": ["search"]}
+          },
+          "response": []
+        },
+        {
+          "name": "Tìm kiếm từ khóa (GET nhanh) — Không cần login",
+          "request": {
+            "auth": {"type": "noauth"},
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/search?q=hợp đồng lao động&mode=keyword&limit=10",
+              "host": ["{{base_url}}"],
+              "path": ["search"],
+              "query": [
+                {"key": "q", "value": "hợp đồng lao động"},
+                {"key": "mode", "value": "keyword"},
+                {"key": "limit", "value": "10"}
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Tìm kiếm ngữ nghĩa (Semantic) 🔒",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"quy định về bảo hiểm xã hội cho người lao động\",\n  \"mode\": \"semantic\",\n  \"limit\": 10,\n  \"offset\": 0,\n  \"filters\": {}\n}"
+            },
+            "url": {"raw": "{{base_url}}/search", "host": ["{{base_url}}"], "path": ["search"]}
+          },
+          "response": []
+        },
+        {
+          "name": "Tìm kiếm Hybrid (BM25 + Semantic) 🔒",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"thuế thu nhập cá nhân 2024\",\n  \"mode\": \"hybrid\",\n  \"limit\": 10,\n  \"offset\": 0,\n  \"filters\": {\n    \"doc_type\": \"Thông tư\"\n  }\n}"
+            },
+            "url": {"raw": "{{base_url}}/search", "host": ["{{base_url}}"], "path": ["search"]}
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "📄 Documents — Văn bản pháp lý",
+      "description": "CRUD và xem chi tiết văn bản pháp lý.",
+      "item": [
+        {
+          "name": "Danh sách văn bản (có phân trang)",
+          "request": {
+            "auth": {"type": "noauth"},
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/documents?limit=20&offset=0",
+              "host": ["{{base_url}}"],
+              "path": ["documents"],
+              "query": [
+                {"key": "limit", "value": "20"},
+                {"key": "offset", "value": "0"},
+                {"key": "doc_type", "value": "", "disabled": true, "description": "Lọc theo loại: Luật, Nghị định, Thông tư..."},
+                {"key": "issuing_body", "value": "", "disabled": true, "description": "Cơ quan ban hành"},
+                {"key": "status", "value": "", "disabled": true, "description": "Trạng thái: Còn hiệu lực, Hết hiệu lực..."}
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Xem chi tiết 1 văn bản",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.id) {",
+                  "    pm.environment.set('doc_id', res.id);",
+                  "    console.log('✅ doc_id đã được lưu:', res.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {"type": "noauth"},
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/documents/{{doc_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["documents", "{{doc_id}}"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "🤖 AI Assistant — Chat & Q&A",
+      "description": "Chat hỏi đáp pháp lý với AI (Gemini).",
+      "item": [
+        {
+          "name": "Hỏi AI về pháp luật (Q&A) 🔒",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"Người lao động có được từ chối làm thêm giờ không?\",\n  \"doc_id\": null,\n  \"conversation_history\": []\n}"
+            },
+            "url": {"raw": "{{base_url}}/ai/chat", "host": ["{{base_url}}"], "path": ["ai", "chat"]}
+          },
+          "response": []
+        },
+        {
+          "name": "Tóm tắt văn bản pháp lý 🔒",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"doc_id\": \"{{doc_id}}\"\n}"
+            },
+            "url": {"raw": "{{base_url}}/ai/summarize", "host": ["{{base_url}}"], "path": ["ai", "summarize"]}
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "📁 Workspace — Collections & Ghi chú",
+      "description": "Quản lý collections (bookmark) và ghi chú cá nhân trên văn bản.",
+      "item": [
+        {
+          "name": "Danh sách collections của tôi 🔒",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {"raw": "{{base_url}}/workspace/collections", "host": ["{{base_url}}"], "path": ["workspace", "collections"]}
+          },
+          "response": []
+        },
+        {
+          "name": "Tạo Collection mới 🔒",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.id) {",
+                  "    pm.environment.set('collection_id', res.id);",
+                  "    console.log('✅ collection_id đã được lưu:', res.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Luật Lao động 2024\",\n  \"description\": \"Các văn bản quan trọng về luật lao động\",\n  \"is_shared\": false\n}"
+            },
+            "url": {"raw": "{{base_url}}/workspace/collections", "host": ["{{base_url}}"], "path": ["workspace", "collections"]}
+          },
+          "response": []
+        },
+        {
+          "name": "Thêm văn bản vào Collection 🔒",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"doc_id\": \"{{doc_id}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/workspace/collections/{{collection_id}}/docs",
+              "host": ["{{base_url}}"],
+              "path": ["workspace", "collections", "{{collection_id}}", "docs"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Xem văn bản trong Collection 🔒",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/workspace/collections/{{collection_id}}/docs",
+              "host": ["{{base_url}}"],
+              "path": ["workspace", "collections", "{{collection_id}}", "docs"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Xóa văn bản khỏi Collection 🔒",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/workspace/collections/{{collection_id}}/docs/{{doc_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["workspace", "collections", "{{collection_id}}", "docs", "{{doc_id}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Xóa Collection 🔒",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/workspace/collections/{{collection_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["workspace", "collections", "{{collection_id}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Tạo Ghi chú trên văn bản 🔒",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.id) {",
+                  "    pm.environment.set('note_id', res.id);",
+                  "    console.log('✅ note_id đã được lưu:', res.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"doc_id\": \"{{doc_id}}\",\n  \"content\": \"Điều 35 quan trọng, cần xem lại phần phụ lục.\"\n}"
+            },
+            "url": {"raw": "{{base_url}}/workspace/notes", "host": ["{{base_url}}"], "path": ["workspace", "notes"]}
+          },
+          "response": []
+        },
+        {
+          "name": "Xem ghi chú trên văn bản 🔒",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/workspace/notes/{{doc_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["workspace", "notes", "{{doc_id}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Cập nhật Ghi chú 🔒",
+          "request": {
+            "method": "PUT",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"Nội dung ghi chú đã được cập nhật.\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/workspace/notes/{{note_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["workspace", "notes", "{{note_id}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Xóa Ghi chú 🔒",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/workspace/notes/{{note_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["workspace", "notes", "{{note_id}}"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "📊 Analytics — Thống kê",
+      "description": "Dashboard thống kê sử dụng hệ thống.",
+      "item": [
+        {
+          "name": "Thống kê tổng quan 🔒",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {"raw": "{{base_url}}/analytics/overview", "host": ["{{base_url}}"], "path": ["analytics", "overview"]}
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "🕸️ Knowledge Graph",
+      "description": "Truy vấn đồ thị tri thức pháp lý.",
+      "item": [
+        {
+          "name": "Xem quan hệ giữa các văn bản",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/graph/relations?doc_id={{doc_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["graph", "relations"],
+              "query": [{"key": "doc_id", "value": "{{doc_id}}"}]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "🛡️ Admin Panel",
+      "description": "Quản trị hệ thống — Yêu cầu role Admin.",
+      "item": [
+        {
+          "name": "Danh sách người dùng 🔒 [Admin]",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/admin/users?limit=20&offset=0",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "users"],
+              "query": [
+                {"key": "limit", "value": "20"},
+                {"key": "offset", "value": "0"}
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "❤️ Health Check",
+      "item": [
+        {
+          "name": "Kiểm tra server còn sống không",
+          "request": {
+            "auth": {"type": "noauth"},
+            "method": "GET",
+            "header": [],
+            "url": {"raw": "{{base_url}}/health", "host": ["{{base_url}}"], "path": ["health"]}
+          },
+          "response": []
+        },
+        {
+          "name": "Docs Swagger UI (mở trên browser)",
+          "request": {
+            "auth": {"type": "noauth"},
+            "method": "GET",
+            "header": [],
+            "url": {"raw": "{{base_url}}/docs", "host": ["{{base_url}}"], "path": ["docs"]}
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

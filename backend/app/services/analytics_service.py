@@ -82,6 +82,12 @@ async def get_dashboard_metrics(
     
     total_queries = await session.execute(select(func.count()).select_from(QueryLog))
 
+    # KPI thời gian phản hồi trung bình (ms)
+    avg_duration_query = await session.execute(
+        select(func.avg(QueryLog.duration_ms)).where(QueryLog.duration_ms.is_not(None))
+    )
+    avg_duration_ms = avg_duration_query.scalar() or 0
+
     # KPI mới trong 30 ngày
     stmt_30d = select(func.count()).select_from(Document).where(Document.created_at >= text("NOW() - INTERVAL '30 days'"))
     stmt_30d = apply_doc_filters(stmt_30d)
@@ -109,6 +115,7 @@ async def get_dashboard_metrics(
             "total_documents": total_docs.scalar() or 0,
             "total_queries": total_queries.scalar() or 0,
             "new_docs_30d": docs_30d,
+            "avg_query_duration_ms": round(float(avg_duration_ms), 1),
         },
         "documents_by_field": documents_by_field,
         "documents_by_type": documents_by_type,
