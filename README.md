@@ -55,21 +55,29 @@ Hệ thống xử lý hàng nghìn văn bản pháp luật Việt Nam thông qua
 
 ```mermaid
 graph TD
-    UI["Frontend: React + Vite"] -->|"REST + SSE"| API["Backend: FastAPI"]
-    API --> DB[("PostgreSQL + pgvector")]
-    API --> CB{"Circuit Breaker"}
-    CB -->|"Protected Call"| LLM["Gemini 2.5 Flash"]
+    UI["⚛️ Frontend\nReact + Vite + TypeScript"]
+    API["⚡ Backend\nFastAPI Python 3.11"]
+    DB[("🐘 Database\nPostgreSQL + pgvector")]
+    CB{"🔌 Circuit Breaker"}
+    LLM["🤖 Gemini 2.5 Flash"]
+    BM25["📝 BM25 Full-Text"]
+    SEM["🔢 Semantic HNSW"]
+    RRF["🔀 RRF Fusion"]
+    GH["🔧 GitHub Actions"]
+    Pytest["🧪 Pytest"]
+    PW["🎭 Playwright E2E"]
 
-    subgraph SearchPipeline ["Search Pipeline"]
-        BM25["BM25 Full-Text"] --> RRF["RRF Fusion"]
-        SEM["Semantic HNSW"] --> RRF
-    end
-    API --> SearchPipeline
-
-    subgraph QAOps ["Automated QA Pipeline"]
-        GH["GitHub Actions"] --> Pytest["Pytest: API / Unit"]
-        GH --> PL["Playwright: E2E UI"]
-    end
+    UI -->|REST + SSE| API
+    API --> DB
+    API --> CB
+    CB -->|Protected| LLM
+    API --> BM25
+    API --> SEM
+    BM25 --> RRF
+    SEM --> RRF
+    RRF --> API
+    GH --> Pytest
+    GH --> PW
 ```
 
 ---
