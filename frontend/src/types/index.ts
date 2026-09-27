@@ -162,6 +162,19 @@ export interface AnalyticsDashboard {
   heatmap?: { year: number; month: number; count: number }[];
 }
 
+export interface AdvancedAnalytics {
+  pagerank_top_nodes: {
+    doc_id: string;
+    doc_number: string;
+    title: string;
+    score: number;
+  }[];
+  communities: {
+    community_id: number;
+    node_count: number;
+  }[];
+}
+
 // ===== Workspace =====
 export interface Collection {
   id: string;
