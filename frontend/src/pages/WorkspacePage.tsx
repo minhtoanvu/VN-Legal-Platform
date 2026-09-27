@@ -117,8 +117,17 @@ export const WorkspacePage: React.FC = () => {
   const fetchCollections = useCallback(async () => {
     setLoadingCols(true);
     try {
-      const res = await api.get<Collection[]>('/workspace/collections');
-      setCollections(res.data);
+      // Gọi song song 2 API: lấy thư mục cá nhân và thư mục chia sẻ chung
+      const [ownRes, sharedRes] = await Promise.all([
+        api.get<Collection[]>('/workspace/collections'),
+        api.get<Collection[]>('/workspace/shared-collections').catch(() => ({ data: [] })) // Bỏ qua nếu user không phải Enterprise
+      ]);
+
+      // Lọc bỏ các thư mục shared mà bản thân user đã tạo (vì nó đã nằm trong ownRes)
+      const ownIds = new Set(ownRes.data.map(c => c.id));
+      const otherShared = sharedRes.data.filter(c => !ownIds.has(c.id));
+
+      setCollections([...ownRes.data, ...otherShared]);
     } catch { /* ignore */ }
     finally { setLoadingCols(false); }
   }, []);
