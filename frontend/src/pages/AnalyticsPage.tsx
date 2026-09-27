@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import type { AnalyticsDashboard } from '../types';
+import type { AnalyticsDashboard, AdvancedAnalytics } from '../types';
 import { api } from '../services/api';
-import { Loader2, Database, Zap, Clock, Activity, FilePlus, Filter } from 'lucide-react';
+import { Loader2, Database, Zap, Clock, Activity, FilePlus, Filter, Network, GitMerge } from 'lucide-react';
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, LineChart, Line } from 'recharts';
 
 const STATUS_COLORS = { active: '#10b981', expired: '#ef4444', amended: '#f97316' };
@@ -11,6 +11,7 @@ const MODE_LABELS: Record<string, string> = { hybrid: 'Hybrid', semantic: 'Seman
 
 export const AnalyticsPage: React.FC = () => {
   const [data, setData] = useState<AnalyticsDashboard | null>(null);
+  const [advancedData, setAdvancedData] = useState<AdvancedAnalytics | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   
   // Filters
@@ -30,6 +31,10 @@ export const AnalyticsPage: React.FC = () => {
       .then(r => setData(r.data))
       .catch(console.error)
       .finally(() => setIsLoading(false));
+      
+    api.get<AdvancedAnalytics>('/analytics/advanced')
+      .then(r => setAdvancedData(r.data))
+      .catch(console.error);
   }, [field, startDate, endDate]);
 
   const HeatmapCalendar = ({ data }: { data: { year: number, month: number, count: number }[] }) => {
@@ -361,6 +366,67 @@ export const AnalyticsPage: React.FC = () => {
               <HeatmapCalendar data={data.heatmap || []} />
             </div>
           </div>
+
+          {/* Advanced Analytics (Data Mining) */}
+          {advancedData && advancedData.pagerank_top_nodes && advancedData.pagerank_top_nodes.length > 0 && (
+            <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: '20px', marginBottom: '32px' }}>
+              {/* PageRank Card */}
+              <div className="glass-card" style={{ padding: '24px' }}>
+                <h2 style={{ fontSize: '0.95rem', fontWeight: 700, marginBottom: '18px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <Network size={16} color="var(--primary)" /> Top 10 Văn bản Rễ (PageRank)
+                </h2>
+                <div style={{ overflowX: 'auto' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                    <thead>
+                      <tr style={{ borderBottom: '1px solid var(--border-light)' }}>
+                        {['Số hiệu', 'Trích yếu', 'Điểm ảnh hưởng'].map(h => (
+                          <th key={h} style={{ padding: '10px 14px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{h}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {advancedData.pagerank_top_nodes.map((node, i) => (
+                        <tr key={i} style={{ borderBottom: '1px solid var(--border-light)', transition: 'background 0.1s' }} onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.02)'} onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'transparent'}>
+                          <td style={{ padding: '12px 14px', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)', whiteSpace: 'nowrap' }}>{node.doc_number}</td>
+                          <td style={{ padding: '12px 14px', fontSize: '0.82rem', maxWidth: '250px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: 'var(--text-secondary)' }} title={node.title}>{node.title}</td>
+                          <td style={{ padding: '12px 14px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                              <div style={{ width: '100%', maxWidth: '100px', height: '6px', background: 'var(--border-light)', borderRadius: '3px', overflow: 'hidden' }}>
+                                <div style={{ height: '100%', background: 'var(--primary)', width: `${Math.min(100, node.score * 5000)}%` }} />
+                              </div>
+                              <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{node.score.toFixed(4)}</span>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* Louvain Communities Card */}
+              <div className="glass-card" style={{ padding: '24px' }}>
+                <h2 style={{ fontSize: '0.95rem', fontWeight: 700, marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <GitMerge size={16} color="var(--accent)" /> Phân cụm cộng đồng (Louvain)
+                </h2>
+                <ResponsiveContainer width="100%" height={260}>
+                  <BarChart data={advancedData.communities.map((c, i) => ({ name: `Cụm ${i+1}`, value: c.node_count }))} margin={{ left: -20, right: 16, top: 20 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" vertical={false} />
+                    <XAxis dataKey="name" tick={{ fill: 'var(--text-muted)', fontSize: 11 }} axisLine={false} tickLine={false} />
+                    <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} axisLine={false} tickLine={false} />
+                    <Tooltip contentStyle={{ background: 'var(--bg-surface)', border: '1px solid var(--border-light)', borderRadius: '8px', fontSize: '0.82rem' }} formatter={(v) => [Number(v).toLocaleString('vi-VN'), 'Văn bản']} />
+                    <Bar dataKey="value" radius={[4, 4, 0, 0]} maxBarSize={40}>
+                      {
+                        advancedData.communities.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={['#6366f1', '#14b8a6', '#f97316', '#a855f7', '#ec4899'][index % 5]} />
+                        ))
+                      }
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          )}
 
           {/* Recent queries */}
           {data.recent_queries && data.recent_queries.length > 0 && (
