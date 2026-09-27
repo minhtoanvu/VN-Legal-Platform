@@ -7,6 +7,7 @@ class RiskLevel(StrEnum):
     LOW = "low"
     MEDIUM = "medium"
     HIGH = "high"
+    UNKNOWN = "unknown"
 
 class CitationInfo(BaseModel):
     doc_number: str
@@ -29,6 +30,7 @@ class ClauseAnalysis(BaseModel):
     citations: list[CitationInfo] = Field(default_factory=list)
 
     is_reflected: bool = Field(default=False, description="True nếu đã qua vòng Reflection")
+    analysis_failed: bool = Field(default=False, description="True nếu phân tích bị lỗi")
 
 class ContractReport(BaseModel):
     filename: str
