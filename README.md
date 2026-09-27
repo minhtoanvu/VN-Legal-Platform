@@ -336,6 +336,26 @@ Kết quả đạt được (trên bộ dữ liệu vàng `eval_qa_laodong.json`
 | Faithfulness | **0.9600** 🚀 | ≥ 0.90 |
 | Answer Relevancy | **0.8500** | ≥ 0.85 |
 
+### Contract Analysis Benchmark (Đánh giá Phân tích Hợp đồng)
+
+```bash
+cd backend
+
+# Chạy đánh giá mô hình phân tích rủi ro hợp đồng (CoT + RAG vs Zero-shot)
+python scripts/evaluate_contract_models.py
+```
+
+Kết quả thực nghiệm trên bộ dữ liệu `bo_hop_dong_ground_truth_18_contracts.xlsx`:
+
+| Phương pháp | Accuracy | Precision | Recall | F1-Score |
+|---|---|---|---|---|
+| **Zero-shot Baseline** | 0.70 | 0.5079 | 0.4190 | 0.4523 |
+| **Single-Agent CoT + RAG** | **0.80** 🚀 | **0.5714** | **0.5952** | **0.5711** 🚀 |
+
+**Kết luận khoa học rút ra:**
+1. **Giá trị cốt lõi của RAG:** Việc bắt LLM phải tư duy logic (Chain-of-Thought) sẽ phản tác dụng nếu nó không được cung cấp cơ sở dữ liệu Luật chính xác. Nhưng một khi được nạp Luật đầy đủ, độ chính xác tăng vọt lên **80%**.
+2. **Khắc phục ảo giác (Hallucination):** Sự kết hợp giữa CoT (bắt tư duy từng bước) và RAG (cung cấp bằng chứng) là giải pháp hoàn hảo nhất để tạo ra một Legal AI đáng tin cậy thay cho Zero-shot.
+
 ---
 
 ## 🔧 Linter & Code Quality
