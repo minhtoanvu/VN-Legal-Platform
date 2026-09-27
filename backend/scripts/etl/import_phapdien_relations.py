@@ -32,8 +32,8 @@ async def main():
     db_docs = {row[1]: str(row[0]) for row in result.fetchall()}
     print(f"  -> Da tai {len(db_docs)} Dieu luat tu DB.")
 
-    await db.execute(text("TRUNCATE TABLE document_relations CASCADE"))
-    await db.commit()
+    # ĐÃ BỎ LỆNH XÓA: await db.execute(text("TRUNCATE TABLE document_relations CASCADE"))
+    # await db.commit()
 
     print("2. Quet main_dataset.json de trich xuat related_note_text...")
     import json
