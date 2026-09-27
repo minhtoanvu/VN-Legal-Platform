@@ -148,8 +148,7 @@ async def rag_generate_stream(
     contents.append({"role": "user", "parts": [{"text": question}]})
 
     try:
-        from google import genai as google_genai
-
+        from openai import AsyncOpenAI
         from app.core.circuit_breaker import CircuitState, llm_circuit_breaker
         from app.core.config import settings
 
@@ -165,31 +164,40 @@ async def rag_generate_stream(
                 yield f"**[{i}] {chunk.get('doc_number', '')}** — {chunk.get('title', '')}\n\n"
             return
 
-        client = google_genai.Client(api_key=settings.gemini_api_key)
+        client = AsyncOpenAI(
+            api_key=settings.gemini_api_key,
+            base_url="https://api.xah.io/v1"
+        )
+
+        # Chuyển đổi format tin nhắn sang định dạng của OpenAI
+        openai_messages = [{"role": "system", "content": system_instruction}]
+        if history:
+            for msg in history:
+                role = "user" if msg.get("role") == "user" else "assistant"
+                openai_messages.append({"role": role, "content": msg.get("content", "")})
+        openai_messages.append({"role": "user", "content": question})
 
         t1 = time.perf_counter()
-        stream = await client.aio.models.generate_content_stream(
-            model="gemini-2.5-flash",
-            contents=contents,
-            config=google_genai.types.GenerateContentConfig(
-                temperature=0.1,
-                max_output_tokens=1024,
-                system_instruction=system_instruction,
-            )
+        stream = await client.chat.completions.create(
+            model="gemini-2.5-flash-lite",
+            messages=openai_messages,
+            temperature=0.1,
+            max_tokens=1024,
+            stream=True
         )
 
         iterator = stream.__aiter__()
         try:
             first_chunk = await asyncio.wait_for(iterator.__anext__(), timeout=LLM_TIMEOUT_SEC)
             log.info(f"First token in {(time.perf_counter()-t1)*1000:.0f}ms")
-            if first_chunk.text:
-                yield first_chunk.text
+            if first_chunk.choices and first_chunk.choices[0].delta.content:
+                yield first_chunk.choices[0].delta.content
         except StopAsyncIteration:
             pass
 
         async for chunk in iterator:
-            if chunk.text:
-                yield chunk.text
+            if chunk.choices and chunk.choices[0].delta.content:
+                yield chunk.choices[0].delta.content
 
         llm_circuit_breaker.record_success()
         yield f"\n\n__CITATIONS__:{json.dumps(citations, ensure_ascii=False)}"
