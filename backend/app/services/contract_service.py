@@ -6,7 +6,7 @@ import re
 
 import pdfplumber
 from docx import Document as DocxDocument
-from google import genai as google_genai
+from openai import AsyncOpenAI
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
@@ -28,7 +28,6 @@ Nhiệm vụ của bạn là nhận một điều khoản hợp đồng và th�
   "step3_risk_evaluation": "Rủi ro pháp lý tiềm ẩn cho người dùng là gì? Tại sao?",
   "step4_suggestion": "Đề xuất sửa đổi điều khoản này như thế nào để an toàn hơn?",
   "risk_score": Điểm rủi ro từ 1 đến 10 (số nguyên).
-  "risk_level": "low" (1-3) hoặc "medium" (4-6) hoặc "high" (7-10)
 }
 
 [TÀI LIỆU THAM KHẢO (Luật liên quan)]
@@ -101,38 +100,52 @@ async def analyze_clause_cot(session: AsyncSession, clause_title: str, clause_te
 
     # BƯỚC 2: Gọi Gemini với CoT Prompt
     system_prompt = SYSTEM_COT_PROMPT.replace("{context}", context).replace("{clause_text}", clause_text)
-    client = google_genai.Client(api_key=settings.gemini_api_key)
+    client = AsyncOpenAI(
+        api_key=settings.gemini_api_key,
+        base_url="https://api.xah.io/v1"
+    )
 
     try:
-        response = await client.aio.models.generate_content(
-            model="gemini-2.5-flash",
-            contents="Hãy phân tích điều khoản này và trả về JSON.",
-            config=google_genai.types.GenerateContentConfig(
-                temperature=0.1,
-                response_mime_type="application/json",
-                system_instruction=system_prompt,
-            )
+        response = await client.chat.completions.create(
+            model="gemini-2.5-flash-lite",
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": "Hãy phân tích điều khoản này và trả về JSON."}
+            ],
+            temperature=0.1,
+            response_format={"type": "json_object"}
         )
 
-        result = json.loads(response.text)
+        result = json.loads(response.choices[0].message.content)
 
         # Self-Reflection (Bản 1 implementation plan)
         risk_score = result.get("risk_score", 1)
         is_reflected = False
-        if 4 <= risk_score <= 7:
-            # Ngưỡng trung bình/nhạy cảm, bắt AI suy nghĩ lại 1 lần nữa cho chắc
+        if 4 <= risk_score <= 10:
+            # Ngưỡng trung bình/nhạy cảm/cao, bắt AI suy nghĩ lại 1 lần nữa cho chắc
             reflection_prompt = f"Bạn vừa chấm điểm rủi ro {risk_score}/10 cho điều khoản này. Hãy xem xét lại thật kỹ xem điểm này đã chính xác chưa, có bỏ sót rủi ro ẩn nào không? Hãy trả về JSON tương tự với kết quả sau khi đã suy nghĩ lại."
-            response2 = await client.aio.models.generate_content(
-                model="gemini-2.5-flash",
-                contents=reflection_prompt,
-                config=google_genai.types.GenerateContentConfig(
-                    temperature=0.1,
-                    response_mime_type="application/json",
-                    system_instruction=system_prompt,
-                )
+            response2 = await client.chat.completions.create(
+                model="gemini-2.5-flash-lite",
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": "Hãy phân tích điều khoản này và trả về JSON."},
+                    {"role": "assistant", "content": response.choices[0].message.content},
+                    {"role": "user", "content": reflection_prompt}
+                ],
+                temperature=0.1,
+                response_format={"type": "json_object"}
             )
-            result = json.loads(response2.text)
+            result = json.loads(response2.choices[0].message.content)
             is_reflected = True
+            risk_score = result.get("risk_score", risk_score)
+
+        # Derive risk_level based on risk_score
+        if risk_score <= 3:
+            risk_level = RiskLevel.LOW
+        elif risk_score <= 6:
+            risk_level = RiskLevel.MEDIUM
+        else:
+            risk_level = RiskLevel.HIGH
 
         return ClauseAnalysis(
             clause_title=clause_title,
@@ -141,8 +154,8 @@ async def analyze_clause_cot(session: AsyncSession, clause_title: str, clause_te
             step2_legal_comparison=result.get("step2_legal_comparison", ""),
             step3_risk_evaluation=result.get("step3_risk_evaluation", ""),
             step4_suggestion=result.get("step4_suggestion", ""),
-            risk_score=result.get("risk_score", 1),
-            risk_level=result.get("risk_level", RiskLevel.LOW),
+            risk_score=risk_score,
+            risk_level=risk_level,
             citations=citations,
             is_reflected=is_reflected
         )
@@ -158,7 +171,8 @@ async def analyze_clause_cot(session: AsyncSession, clause_title: str, clause_te
             step3_risk_evaluation=str(e),
             step4_suggestion="N/A",
             risk_score=1,
-            risk_level=RiskLevel.LOW
+            risk_level=RiskLevel.UNKNOWN,
+            analysis_failed=True
         )
 
 async def process_contract(session: AsyncSession, file_bytes: bytes, filename: str) -> ContractReport:
