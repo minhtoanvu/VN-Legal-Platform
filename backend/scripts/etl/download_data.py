@@ -1,5 +1,5 @@
 # Bước 1 ETL: tải dữ liệu từ HuggingFace về máy
-# Dataset: th1nhng0/vietnamese-legal-documents
+# Dataset: tmquan/phapdien-moj-gov-vn (Pháp điển Quốc gia)
 # Chỉ lấy văn bản thuộc lĩnh vực Lao động và Thuế
 
 import argparse
@@ -48,9 +48,9 @@ def detect_field_from_topic(topic_vi: str) -> str | None:
     return None          # không thuộc lĩnh vực nào → bỏ qua
 
 
-# ═══ HÀM TẢI DỮ LIỆU CHÍNH — 2 PASS ═══
+# ═══ HÀM TẢI DỮ LIỆU CHÍNH ═══
 def download_dataset(target_per_field: int = 1500, max_scan: int = 500_000):
-    """Pass 1: quét metadata → chọn ID. Pass 2: lấy content cho các ID đó.
+    """Quét dữ liệu từ bộ Pháp điển tmquan/phapdien-moj-gov-vn.
     Dùng streaming để không tốn RAM — không load toàn bộ dataset về trước.
     """
     try:
@@ -61,46 +61,48 @@ def download_dataset(target_per_field: int = 1500, max_scan: int = 500_000):
     import re
     from bs4 import BeautifulSoup
 
-    print(f"Đang stream th1nhng0/vietnamese-legal-documents...")
+    print(f"Đang stream tmquan/phapdien-moj-gov-vn...")
     print(f"Target: {target_per_field:,} records/lĩnh vực")
 
-    # ── PASS 1: Quét metadata, chọn ID theo lĩnh vực ──
-    # streaming=True → không download toàn bộ, đọc từng record một
     try:
-        ds_meta = load_dataset(
-            "th1nhng0/vietnamese-legal-documents",
-            name="metadata",
-            split="data",
-            streaming=True,   # ← KEY: tránh OOM khi dataset hàng trăm nghìn record
+        ds = load_dataset(
+            "tmquan/phapdien-moj-gov-vn",
+            split="train",
+            streaming=True,   # ← KEY: tránh OOM
         )
     except Exception as e:
-        print(f"Không load được dataset metadata: {e}")
+        print(f"Không load được dataset: {e}")
         return False
 
-    labor_records = {}
-    tax_records = {}
+    labor_records = []
+    tax_records = []
     scanned = 0
 
-    print("Đang scan metadata...")
-    for row in ds_meta:
+    print("Đang scan dataset Pháp điển...")
+    for row in ds:
         scanned += 1
-        topic_vi = row.get("linh_vuc") or row.get("nganh") or ""
-        subject_vi = row.get("title") or ""
+        topic_vi = row.get("topic_title_vi") or ""
+        subject_vi = row.get("subject_title_vi") or ""
         combined = f"{topic_vi} {subject_vi}"
         field = detect_field_from_topic(combined)
 
-        doc_id = row.get("id")
-        if not doc_id:
+        if not field:
             continue
 
-        if field == "labor" and len(labor_records) < target_per_field:
-            labor_records[doc_id] = row
-            labor_records[doc_id]["field_detected"] = "labor"
-        elif field == "tax" and len(tax_records) < target_per_field:
-            tax_records[doc_id] = row
-            tax_records[doc_id]["field_detected"] = "tax"
+        # Ánh xạ trường cho khớp với normalize.py
+        row["content"] = row.get("content_text", "")
+        row["title"] = row.get("article_title", "")
+        row["doc_number"] = row.get("article_id", "")
+        row["url"] = row.get("source_url", "")
 
-        # In tiến độ mỗi 5000 record để theo dõi
+        if field == "labor" and len(labor_records) < target_per_field:
+            row["field_detected"] = "labor"
+            labor_records.append(row)
+        elif field == "tax" and len(tax_records) < target_per_field:
+            row["field_detected"] = "tax"
+            tax_records.append(row)
+
+        # In tiến độ mỗi 5000 record
         if scanned % 5000 == 0:
             print(
                 f"  Scanned: {scanned:,} | "
@@ -108,67 +110,17 @@ def download_dataset(target_per_field: int = 1500, max_scan: int = 500_000):
                 f"Thue: {len(tax_records):,}/{target_per_field:,}"
             )
 
-        # Dừng sớm khi đã đủ cả 2 lĩnh vực — không cần scan thêm
+        # Dừng sớm khi đã đủ cả 2 lĩnh vực
         if len(labor_records) >= target_per_field and len(tax_records) >= target_per_field:
             print(f"Du target, dung scan tai #{scanned:,}")
             break
 
-        # Dừng nếu quét quá max_scan (safety guard)
         if scanned >= max_scan:
             print(f"Da scan {max_scan:,} records, dung.")
             break
 
-    target_ids = set(labor_records.keys()) | set(tax_records.keys())
-    if not target_ids:
-        print("Khong tim thay record nao phu hop.")
-        return False
-
-    # ── PASS 2: Lấy content HTML cho các ID đã chọn ở Pass 1 ──
-    # Chỉ merge metadata + content khi ID khớp → tránh lấy thừa
-    print(f"\nDang lay noi dung cho {len(target_ids):,} documents...")
-    try:
-        ds_content = load_dataset(
-            "th1nhng0/vietnamese-legal-documents",
-            name="content",
-            split="data",
-            streaming=True,
-        )
-    except Exception as e:
-        print(f"Khong load duoc dataset content: {e}")
-        return False
-
-    all_records = []
-    found_content_count = 0
-    scanned_content = 0
-
-    for row in ds_content:
-        scanned_content += 1
-        doc_id = row.get("id")
-        if doc_id in target_ids:
-            if doc_id in labor_records:
-                meta = labor_records[doc_id]
-            else:
-                meta = tax_records[doc_id]
-
-            content_html = row.get("content_html") or ""
-            # Bóc HTML → text thuần (bỏ tags, giữ xuống dòng)
-            soup = BeautifulSoup(content_html, "html.parser")
-            plain_text = soup.get_text(separator="\n", strip=True)
-
-            if plain_text:
-                # Gộp metadata (từ Pass 1) + content (từ Pass 2) thành 1 record
-                merged = {**meta, "content": plain_text}
-                all_records.append(merged)
-                found_content_count += 1
-
-                if found_content_count % 100 == 0:
-                    print(f"  Da lay: {found_content_count:,}/{len(target_ids):,}")
-
-                if found_content_count >= len(target_ids):
-                    print("Da lay du tat ca target documents.")
-                    break
-
-    print(f"\nKet qua: {len(all_records):,} / {len(target_ids):,} records")
+    all_records = labor_records + tax_records
+    print(f"\nKet qua: {len(all_records):,} records")
 
     if len(all_records) == 0:
         print("Khong co records nao duoc luu.")
@@ -177,7 +129,7 @@ def download_dataset(target_per_field: int = 1500, max_scan: int = 500_000):
     # ── LƯU OUTPUT → normalize.py sẽ đọc file này ở Bước 2 ──
     output_path = RAW_DATA_DIR / "main_dataset.json"
     with open(output_path, "w", encoding="utf-8") as f:
-        json.dump(all_records, f, ensure_ascii=False, indent=2)  # ensure_ascii=False để giữ tiếng Việt
+        json.dump(all_records, f, ensure_ascii=False, indent=2)
 
     print(f"Da luu: {output_path} ({output_path.stat().st_size / 1024 / 1024:.1f} MB)")
     return True
