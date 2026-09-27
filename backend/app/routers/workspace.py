@@ -158,15 +158,23 @@ async def get_docs_in_collection(
     db: AsyncSession = Depends(get_db),
 ):
     """Lấy danh sách văn bản đầy đủ trong một collection."""
-    # Kiểm tra quyền truy cập
-    col_result = await db.execute(
-        select(Collection).where(
-            Collection.id == collection_id,
-            Collection.owner_id == current_user.id,
-        )
-    )
-    if not col_result.scalar_one_or_none():
+    # Kiểm tra quyền truy cập (Owner hoặc Được share cùng Organization)
+    col_result = await db.execute(select(Collection).where(Collection.id == collection_id))
+    col = col_result.scalar_one_or_none()
+    
+    if not col:
         raise HTTPException(status_code=404, detail="Collection không tồn tại.")
+        
+    if col.owner_id != current_user.id:
+        if not col.is_shared or not current_user.organization_id:
+            raise HTTPException(status_code=403, detail="Không có quyền truy cập.")
+            
+        from app.models.user import User as UserModel
+        owner_result = await db.execute(select(UserModel.organization_id).where(UserModel.id == col.owner_id))
+        owner_org_id = owner_result.scalar_one_or_none()
+        
+        if owner_org_id != current_user.organization_id:
+            raise HTTPException(status_code=403, detail="Không có quyền truy cập.")
 
     result = await db.execute(
         select(Document)
