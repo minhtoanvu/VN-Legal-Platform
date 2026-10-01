@@ -9,7 +9,7 @@ Bảng:
 """
 
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Optional
 
 import sqlalchemy as sa
@@ -34,7 +34,7 @@ class Collection(Base):
         UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
     )
     name: Mapped[str] = mapped_column(String(255), nullable=False)
-    description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    description: Mapped[str | None] = mapped_column(Text, nullable=True)
     owner_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
         ForeignKey("users.id", ondelete="CASCADE"),
@@ -44,7 +44,7 @@ class Collection(Base):
     # is_shared=True → Enterprise: chia sẻ cho tất cả user cùng organization
     is_shared: Mapped[bool] = mapped_column(Boolean, default=False)
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
+        DateTime(timezone=True), default=lambda: datetime.now(UTC)
     )
 
     # Relationships
@@ -73,7 +73,7 @@ class CollectionDocument(Base):
         nullable=False,
     )
     added_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
+        DateTime(timezone=True), default=lambda: datetime.now(UTC)
     )
 
     # Relationships
@@ -106,12 +106,12 @@ class Note(Base):
     )
     content: Mapped[str] = mapped_column(Text, nullable=False)
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
+        DateTime(timezone=True), default=lambda: datetime.now(UTC)
     )
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
-        default=lambda: datetime.now(timezone.utc),
-        onupdate=lambda: datetime.now(timezone.utc),
+        default=lambda: datetime.now(UTC),
+        onupdate=lambda: datetime.now(UTC),
     )
 
     # Relationships
@@ -136,7 +136,7 @@ class QueryLog(Base):
     id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
     )
-    user_id: Mapped[Optional[uuid.UUID]] = mapped_column(
+    user_id: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True),
         ForeignKey("users.id", ondelete="SET NULL"),
         nullable=True,
@@ -144,13 +144,13 @@ class QueryLog(Base):
     )
     query_text: Mapped[str] = mapped_column(Text, nullable=False)
     # keyword / semantic / hybrid / ai_chat / summarize
-    query_type: Mapped[Optional[str]] = mapped_column(String(20), nullable=True)
+    query_type: Mapped[str | None] = mapped_column(String(20), nullable=True)
     # Câu trả lời AI + sources (để RAG Evaluation sau này)
-    response: Mapped[Optional[dict]] = mapped_column(sa.JSON, nullable=True)
+    response: Mapped[dict | None] = mapped_column(sa.JSON, nullable=True)
     # Thời gian xử lý (ms) để đo hiệu năng theo SLA
-    duration_ms: Mapped[Optional[int]] = mapped_column(nullable=True)
+    duration_ms: Mapped[int | None] = mapped_column(nullable=True)
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
+        DateTime(timezone=True), default=lambda: datetime.now(UTC)
     )
 
     # Relationships

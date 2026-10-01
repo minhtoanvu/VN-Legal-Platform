@@ -9,7 +9,7 @@ version: '3.8'
 
 services:
   db:
-    image: pgvector/pgvector:pg16
+    image: pgvector/pgvector:pg15
     container_name: legal_pgvector
     environment:
       POSTGRES_USER: ${DB_USER:-postgres}
@@ -26,14 +26,7 @@ services:
           memory: 512M
         reservations:
           memory: 256M
-    # Tối ưu PostgreSQL cho RAM thấp
-    command: >
-      postgres
-      -c shared_buffers=128MB
-      -c effective_cache_size=256MB
-      -c work_mem=4MB
-      -c maintenance_work_mem=64MB
-      -c max_connections=50
+    # Tối ưu PostgreSQL cho RAM thấp bị xóa để tránh lỗi crash
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres}"]
       interval: 10s

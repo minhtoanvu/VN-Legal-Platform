@@ -1,8 +1,8 @@
-import time
 import logging
+import time
+from collections.abc import Callable
 from enum import Enum
-from typing import Callable, Any
-import asyncio
+from typing import Any
 
 log = logging.getLogger(__name__)
 

@@ -9,12 +9,11 @@ Theo PhanTichHeThong_v2_Fixed.docx mục 10.2 và UC-05.
 """
 
 import os
+
 os.environ["OMP_NUM_THREADS"] = "1"
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 import asyncio
-from typing import Optional
-from functools import lru_cache
 
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -45,8 +44,8 @@ def embed_query(query: str) -> list[float]:
 async def semantic_search(
     session: AsyncSession,
     query: str,
-    field: Optional[str] = None,
-    filters: Optional[dict] = None,
+    field: str | None = None,
+    filters: dict | None = None,
     top_k: int = 20,
 ) -> list[dict]:
     """
@@ -97,10 +96,14 @@ async def semantic_search(
     params = {"vec": str(query_vec), "top_k": top_k * 3}
     if field:
         params["field"] = f"%{field}%"
-    if filters.get("status"): params["status"] = filters["status"]
-    if filters.get("doc_type"): params["doc_type"] = filters["doc_type"]
-    if filters.get("year_from"): params["year_from"] = filters["year_from"]
-    if filters.get("issuing_body"): params["issuing_body"] = f"%{filters['issuing_body']}%"
+    if filters.get("status"):
+        params["status"] = filters["status"]
+    if filters.get("doc_type"):
+        params["doc_type"] = filters["doc_type"]
+    if filters.get("year_from"):
+        params["year_from"] = filters["year_from"]
+    if filters.get("issuing_body"):
+        params["issuing_body"] = f"%{filters['issuing_body']}%"
 
     result = await session.execute(sql, params)
 
@@ -115,10 +118,10 @@ async def semantic_search(
             docs.append(doc)
             if len(docs) == top_k:
                 break
-                
+
     for i, doc in enumerate(docs):
         doc["rank"] = i + 1
-        
+
     return docs
 
 

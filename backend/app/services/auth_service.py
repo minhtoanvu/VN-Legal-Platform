@@ -1,25 +1,28 @@
 """
 Auth Service — Business logic cho đăng ký và đăng nhập.
 """
-from datetime import datetime, timezone
-from typing import Optional
-from uuid import uuid4
+from datetime import UTC, datetime
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.security import hash_password, verify_password, create_access_token, create_refresh_token
 from app.core.config import settings
-from app.models.user import User, Organization
+from app.core.security import (
+    create_access_token,
+    create_refresh_token,
+    hash_password,
+    verify_password,
+)
+from app.models.user import Organization, User
 
 
-async def get_user_by_email(session: AsyncSession, email: str) -> Optional[User]:
+async def get_user_by_email(session: AsyncSession, email: str) -> User | None:
     """Tìm user theo email."""
     result = await session.execute(select(User).where(User.email == email))
     return result.scalar_one_or_none()
 
 
-async def get_user_by_id(session: AsyncSession, user_id) -> Optional[User]:
+async def get_user_by_id(session: AsyncSession, user_id) -> User | None:
     """Tìm user theo UUID."""
     result = await session.execute(select(User).where(User.id == user_id))
     return result.scalar_one_or_none()
@@ -30,7 +33,7 @@ async def register_user(
     email: str,
     password: str,
     full_name: str,
-    organization_name: Optional[str] = None,
+    organization_name: str | None = None,
 ) -> User:
     """
     Tạo user mới.
@@ -79,7 +82,7 @@ async def login_user(
         raise ValueError("Tài khoản đã bị khóa. Liên hệ admin.")
 
     # Cập nhật last_login
-    user.last_login = datetime.now(timezone.utc)
+    user.last_login = datetime.now(UTC)
     await session.commit()
     return user
 
@@ -93,3 +96,34 @@ def generate_tokens(user: User) -> dict:
         "token_type": "bearer",
         "expires_in": settings.access_token_expire_minutes * 60,
     }
+
+
+async def update_profile(
+    session: AsyncSession,
+    user: User,
+    full_name: str,
+) -> User:
+    """
+    UC-03: Cập nhật hồ sơ cá nhân.
+    Hiện tại chỉ cho phép đổi full_name — email không đổi vì là định danh login.
+    """
+    user.full_name = full_name
+    await session.commit()
+    await session.refresh(user)
+    return user
+
+
+async def change_password(
+    session: AsyncSession,
+    user: User,
+    current_password: str,
+    new_password: str,
+) -> None:
+    """
+    UC-03: Đổi mật khẩu.
+    Raises ValueError nếu mật khẩu cũ sai.
+    """
+    if not await verify_password(current_password, user.password_hash):
+        raise ValueError("Ư4 mật khẩu hiện tại không đúng.")
+    user.password_hash = await hash_password(new_password)
+    await session.commit()

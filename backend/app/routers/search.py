@@ -2,22 +2,21 @@
 Search Router — /search (keyword / semantic / hybrid)
 
 3 modes:
-  - keyword  : BM25 (PostgreSQL tsvector)
-  - semantic : Vector similarity (pgvector HNSW) — cần embedding model
-  - hybrid   : BM25 + Semantic với Reciprocal Rank Fusion (RRF)
+  - keyword  : BM25 (PostgreSQL tsvector) — cho cả Guest và User (UC-04: Actor = "Tất cả")
+  - semantic : Vector similarity (pgvector HNSW) — yêu cầu đăng nhập (UC-05: Actor = "User, Enterprise")
+  - hybrid   : BM25 + Semantic với Reciprocal Rank Fusion (RRF) — yêu cầu đăng nhập
 """
 import time
-from typing import Optional
 
-from fastapi import APIRouter, Depends, Query, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
-from app.schemas.search import SearchRequest, SearchResponse, DocumentResult
-from app.services.bm25_service import bm25_search
-from app.services.rrf_service import reciprocal_rank_fusion, merge_by_score
+from app.core.dependencies import get_optional_user
+from app.schemas.search import DocumentResult, SearchRequest, SearchResponse
 from app.services import semantic_service
-from app.core.dependencies import get_current_active_user
+from app.services.bm25_service import bm25_search
+from app.services.rrf_service import merge_by_score, reciprocal_rank_fusion
 
 router = APIRouter()
 
@@ -28,16 +27,23 @@ router = APIRouter()
     summary="Tìm kiếm văn bản pháp lý",
     description="""
 Tìm kiếm với 3 chế độ:
-- **keyword**: Full-text search BM25 (nhanh, không cần AI)
-- **semantic**: Semantic search bằng vector embedding (cần model loaded)
-- **hybrid**: Kết hợp BM25 + Semantic với Reciprocal Rank Fusion
+- **keyword**: Full-text search BM25 (nhanh, không cần AI) — **Chách dùng không cần đăng nhập**
+- **semantic**: Semantic search bằng vector embedding — yêu cầu đăng nhập (UC-05)
+- **hybrid**: Kết hợp BM25 + Semantic với RRF — yêu cầu đăng nhập
     """,
 )
 async def search(
     body: SearchRequest,
     db: AsyncSession = Depends(get_db),
-    current_user = Depends(get_current_active_user),
+    current_user = Depends(get_optional_user),
 ):
+    # Phân quyền theo mode: semantic và hybrid yêu cầu User đăng nhập (UC-05)
+    if body.mode in ("semantic", "hybrid") and current_user is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Tìm kiếm ngữ nghĩa và hybrid yêu cầu đăng nhập. Vui lòng đăng nhập hoặc dùng chế độ tìm kiếm từ khóa.",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
     start_total = time.perf_counter()
 
     bm25_docs = []
@@ -106,16 +112,16 @@ async def search(
 @router.get(
     "",
     response_model=SearchResponse,
-    summary="Tìm kiếm nhanh (GET)",
+    summary="Tìm kiếm nhanh (GET) — keyword không cần đăng nhập",
 )
 async def search_get(
     q: str = Query(..., min_length=1, description="Từ khóa tìm kiếm"),
     mode: str = Query(default="keyword", description="keyword | semantic | hybrid"),
-    field: Optional[str] = Query(default=None, description="Lọc theo lĩnh vực"),
+    field: str | None = Query(default=None, description="Lọc theo lĩnh vực"),
     limit: int = Query(default=10, ge=1, le=50),
     db: AsyncSession = Depends(get_db),
-    current_user = Depends(get_current_active_user),
+    current_user = Depends(get_optional_user),
 ):
-    """GET endpoint để dễ test trên Swagger / browser."""
+    """GET endpoint để dễ test trên Swagger / browser. Keyword mode không cần đăng nhập."""
     body = SearchRequest(query=q, mode=mode, field=field, limit=limit)
     return await search(body=body, db=db, current_user=current_user)

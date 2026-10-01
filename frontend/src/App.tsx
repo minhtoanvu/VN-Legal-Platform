@@ -5,7 +5,10 @@ import { DocumentPage } from './pages/DocumentPage';
 import { AnalyticsPage } from './pages/AnalyticsPage';
 import { WorkspacePage } from './pages/WorkspacePage';
 import { ContractAnalysisPage } from './pages/ContractAnalysisPage';
+import { AdminPage } from './pages/AdminPage';
+import { ProfilePage } from './pages/ProfilePage';
 import { AppLayout } from './components/layout/AppLayout';
+import { AdminRoute } from './components/layout/AdminRoute';
 
 function App() {
   return (
@@ -21,6 +24,14 @@ function App() {
           <Route path="/analytics" element={<AnalyticsPage />} />
           <Route path="/workspace" element={<WorkspacePage />} />
           <Route path="/contract" element={<ContractAnalysisPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
+        </Route>
+
+        {/* Admin-only routes — double guard: AppLayout (auth) + AdminRoute (role) */}
+        <Route element={<AppLayout />}>
+          <Route element={<AdminRoute />}>
+            <Route path="/admin" element={<AdminPage />} />
+          </Route>
         </Route>
 
         {/* Fallback redirect */}

@@ -1,0 +1,82 @@
+[
+  {
+    "question": "Người lao động có quyền đơn phương chấm dứt hợp đồng lao động không?",
+    "expected_doc_number": "LQ.35"
+  },
+  {
+    "question": "Tuổi nghỉ hưu của người lao động trong điều kiện bình thường là bao nhiêu?",
+    "expected_doc_number": "LQ.169"
+  },
+  {
+    "question": "Thời gian thử việc tối đa đối với công việc cần trình độ cao đẳng là bao lâu?",
+    "expected_doc_number": "LQ.25"
+  },
+  {
+    "question": "Người lao động nghỉ thai sản được hưởng trợ cấp trong bao nhiêu tháng?",
+    "expected_doc_number": "LQ.139"
+  },
+  {
+    "question": "Thời giờ làm việc bình thường của người lao động tối đa là bao nhiêu giờ một ngày?",
+    "expected_doc_number": "LQ.105"
+  },
+  {
+    "question": "Người lao động làm thêm giờ vào ban đêm được trả lương như thế nào?",
+    "expected_doc_number": "LQ.98"
+  },
+  {
+    "question": "Người lao động làm việc đủ 12 tháng thì được nghỉ hằng năm bao nhiêu ngày?",
+    "expected_doc_number": "LQ.113"
+  },
+  {
+    "question": "Người lao động được nghỉ làm việc và hưởng nguyên lương trong những ngày lễ, tết nào?",
+    "expected_doc_number": "LQ.112"
+  },
+  {
+    "question": "Người lao động được nghỉ việc riêng mà vẫn hưởng nguyên lương trong trường hợp nào?",
+    "expected_doc_number": "LQ.115"
+  },
+  {
+    "question": "Tiền lương của người lao động trong thời gian thử việc do hai bên thỏa thuận là bao nhiêu phần trăm?",
+    "expected_doc_number": "LQ.26"
+  },
+  {
+    "question": "Khi chấm dứt hợp đồng lao động, trợ cấp thôi việc được tính như thế nào?",
+    "expected_doc_number": "LQ.46"
+  },
+  {
+    "question": "Điều kiện và mức hưởng trợ cấp mất việc làm của người lao động là gì?",
+    "expected_doc_number": "LQ.47"
+  },
+  {
+    "question": "Hình thức trả lương cho người lao động được quy định như thế nào?",
+    "expected_doc_number": "LQ.96"
+  },
+  {
+    "question": "Nếu phải ngừng việc do lỗi của người sử dụng lao động, người lao động được trả lương ra sao?",
+    "expected_doc_number": "LQ.99"
+  },
+  {
+    "question": "Người lao động có được tạm ứng tiền lương không?",
+    "expected_doc_number": "LQ.97"
+  },
+  {
+    "question": "Hợp đồng lao động có thể được giao kết bằng lời nói trong trường hợp nào?",
+    "expected_doc_number": "LQ.14"
+  },
+  {
+    "question": "Có bao nhiêu loại hợp đồng lao động theo quy định hiện hành?",
+    "expected_doc_number": "LQ.20"
+  },
+  {
+    "question": "Hợp đồng lao động phải bao gồm những nội dung chủ yếu nào?",
+    "expected_doc_number": "LQ.21"
+  },
+  {
+    "question": "Người lao động cao tuổi có được rút ngắn thời giờ làm việc không?",
+    "expected_doc_number": "LQ.148"
+  },
+  {
+    "question": "Người sử dụng lao động có được sử dụng lao động nữ mang thai làm thêm giờ không?",
+    "expected_doc_number": "LQ.137"
+  }
+]

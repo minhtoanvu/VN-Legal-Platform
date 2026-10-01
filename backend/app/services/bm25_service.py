@@ -2,21 +2,18 @@
 BM25 Search Service — Full-Text Search bằng PostgreSQL tsvector.
 """
 import time
-from typing import List, Optional
 
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
-
-from app.schemas.search import DocumentResult
 
 
 async def bm25_search(
     session: AsyncSession,
     query: str,
-    field: Optional[str] = None,
-    filters: Optional[dict] = None,
+    field: str | None = None,
+    filters: dict | None = None,
     limit: int = 20,
-) -> List[dict]:
+) -> list[dict]:
     """
     Tìm kiếm từ khóa bằng PostgreSQL Full-Text Search (tsvector + ts_rank).
     Trả về list dict với id, score, rank.
@@ -62,10 +59,14 @@ async def bm25_search(
     params = {"query": query, "limit": limit}
     if field:
         params["field"] = f"%{field}%"
-    if filters.get("status"): params["status"] = filters["status"]
-    if filters.get("doc_type"): params["doc_type"] = filters["doc_type"]
-    if filters.get("year_from"): params["year_from"] = filters["year_from"]
-    if filters.get("issuing_body"): params["issuing_body"] = f"%{filters['issuing_body']}%"
+    if filters.get("status"):
+        params["status"] = filters["status"]
+    if filters.get("doc_type"):
+        params["doc_type"] = filters["doc_type"]
+    if filters.get("year_from"):
+        params["year_from"] = filters["year_from"]
+    if filters.get("issuing_body"):
+        params["issuing_body"] = f"%{filters['issuing_body']}%"
 
     result = await session.execute(sql, params)
     rows = result.mappings().all()

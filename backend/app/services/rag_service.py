@@ -1,16 +1,25 @@
 """
-RAG Service Module
+RAG Service Module — Custom Implementation (No LangChain)
+
+Luồng xử lý:
+  1. Retrieve  : BM25 (Full-text) + Semantic HNSW search (song song)
+  2. Rerank    : Reciprocal Rank Fusion (RRF, k=60) để kết hợp 2 danh sách
+  3. Augment   : Xây dựng System Prompt với ngữ cảnh Top-K chunks
+  4. Generate  : Gọi Gemini 2.5 Flash (SSE streaming)
+  5. Fallback  : Circuit Breaker → trả về Semantic results nếu LLM lỗi/timeout
+
+Không dùng LangChain — toàn bộ pipeline được viết thuần Python
+để kiểm soát từng bước và tối ưu hiệu năng cho bài toán pháp lý tiếng Việt.
 """
 
 import asyncio
 import time
-from typing import AsyncGenerator, Optional
-from uuid import UUID
+from collections.abc import AsyncGenerator
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.services.bm25_service import bm25_search
 from app.services import semantic_service
+from app.services.bm25_service import bm25_search
 from app.services.rrf_service import reciprocal_rank_fusion
 
 TOP_K_RETRIEVE = 20
@@ -34,7 +43,7 @@ QUY TẮC BẮT BUỘC:
 async def rag_retrieve(
     session: AsyncSession,
     question: str,
-    field: Optional[str] = None,
+    field: str | None = None,
 ) -> list[dict]:
     import logging
     log = logging.getLogger(__name__)
@@ -100,6 +109,7 @@ def _build_context(chunks: list[dict]) -> tuple[str, list[dict]]:
             "doc_id": str(chunk.get("doc_id") or chunk.get("id", "")),
             "doc_number": doc_number,
             "title": title,
+            "snippet": snippet,
         })
 
     return "\n\n---\n\n".join(context_parts), citations
@@ -108,10 +118,11 @@ def _build_context(chunks: list[dict]) -> tuple[str, list[dict]]:
 async def rag_generate_stream(
     session: AsyncSession,
     question: str,
-    field: Optional[str] = None,
-    history: Optional[list[dict]] = None
+    field: str | None = None,
+    history: list[dict] | None = None
 ) -> AsyncGenerator[str, None]:
-    import logging, json
+    import json
+    import logging
     log = logging.getLogger(__name__)
 
     yield "*(⏳ Đang tra cứu cơ sở dữ liệu pháp luật...)*\n\n"
@@ -133,13 +144,13 @@ async def rag_generate_stream(
         for msg in history:
             role = "user" if msg.get("role") == "user" else "model"
             contents.append({"role": role, "parts": [{"text": msg.get("content", "")}]})
-    
+
     contents.append({"role": "user", "parts": [{"text": question}]})
 
     try:
+        from openai import AsyncOpenAI
+        from app.core.circuit_breaker import CircuitState, llm_circuit_breaker
         from app.core.config import settings
-        from google import genai as google_genai
-        from app.core.circuit_breaker import llm_circuit_breaker, CircuitState
 
         if not settings.gemini_api_key:
             yield "⚠️ Chưa cấu hình GEMINI_API_KEY. Vui lòng thêm key vào file .env."
@@ -153,36 +164,45 @@ async def rag_generate_stream(
                 yield f"**[{i}] {chunk.get('doc_number', '')}** — {chunk.get('title', '')}\n\n"
             return
 
-        client = google_genai.Client(api_key=settings.gemini_api_key)
+        client = AsyncOpenAI(
+            api_key=settings.gemini_api_key,
+            base_url="https://api.xah.io/v1"
+        )
+
+        # Chuyển đổi format tin nhắn sang định dạng của OpenAI
+        openai_messages = [{"role": "system", "content": system_instruction}]
+        if history:
+            for msg in history:
+                role = "user" if msg.get("role") == "user" else "assistant"
+                openai_messages.append({"role": role, "content": msg.get("content", "")})
+        openai_messages.append({"role": "user", "content": question})
 
         t1 = time.perf_counter()
-        stream = await client.aio.models.generate_content_stream(
-            model="gemini-2.5-flash",
-            contents=contents,
-            config=google_genai.types.GenerateContentConfig(
-                temperature=0.1,
-                max_output_tokens=1024,
-                system_instruction=system_instruction,
-            )
+        stream = await client.chat.completions.create(
+            model="gemini-2.5-flash-lite",
+            messages=openai_messages,
+            temperature=0.1,
+            max_tokens=1024,
+            stream=True
         )
 
         iterator = stream.__aiter__()
         try:
             first_chunk = await asyncio.wait_for(iterator.__anext__(), timeout=LLM_TIMEOUT_SEC)
             log.info(f"First token in {(time.perf_counter()-t1)*1000:.0f}ms")
-            if first_chunk.text:
-                yield first_chunk.text
+            if first_chunk.choices and first_chunk.choices[0].delta.content:
+                yield first_chunk.choices[0].delta.content
         except StopAsyncIteration:
             pass
 
         async for chunk in iterator:
-            if chunk.text:
-                yield chunk.text
+            if chunk.choices and chunk.choices[0].delta.content:
+                yield chunk.choices[0].delta.content
 
         llm_circuit_breaker.record_success()
         yield f"\n\n__CITATIONS__:{json.dumps(citations, ensure_ascii=False)}"
 
-    except asyncio.TimeoutError:
+    except TimeoutError:
         llm_circuit_breaker.record_failure()
         yield "⚠️ AI phản hồi quá 10 giây (Timeout), đây là kết quả tìm kiếm thay thế:\n\n"
         for i, chunk in enumerate(chunks, 1):

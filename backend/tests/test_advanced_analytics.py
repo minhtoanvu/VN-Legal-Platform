@@ -1,7 +1,9 @@
 import asyncio
+import json
+
 from app.core.database import AsyncSessionLocal
 from app.services.analytics_service import get_advanced_analytics
-import json
+
 
 async def run_test():
     async with AsyncSessionLocal() as session:

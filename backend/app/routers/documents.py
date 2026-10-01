@@ -3,11 +3,10 @@ Documents Router — /documents
 UC-07: Xem chi tiết toàn văn, metadata và trạng thái hiệu lực
 UC-08: Xem Timeline lịch sử thay đổi của một văn bản
 """
-from typing import Optional
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from sqlalchemy import select, text
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
@@ -15,8 +14,8 @@ from app.models.document import Document, DocumentRelation
 from app.schemas.document import (
     DocumentDetail,
     DocumentListItem,
-    DocumentWithTimeline,
     DocumentRelationOut,
+    DocumentWithTimeline,
     TimelineEvent,
 )
 
@@ -29,9 +28,9 @@ router = APIRouter()
     summary="Danh sách văn bản (phân trang)",
 )
 async def list_documents(
-    field: Optional[str] = Query(None, description="Lọc theo lĩnh vực"),
-    status: Optional[str] = Query(None, description="Lọc theo trạng thái: active/expired/amended"),
-    doc_type: Optional[str] = Query(None, description="Lọc theo loại văn bản"),
+    field: str | None = Query(None, description="Lọc theo lĩnh vực"),
+    status: str | None = Query(None, description="Lọc theo trạng thái: active/expired/amended"),
+    doc_type: str | None = Query(None, description="Lọc theo loại văn bản"),
     limit: int = Query(default=20, ge=1, le=100),
     offset: int = Query(default=0, ge=0),
     db: AsyncSession = Depends(get_db),
@@ -104,7 +103,7 @@ async def get_document(
         else:
             direction = "incoming"
             related_doc = r.source_document
-            
+
         mapped_relations.append(DocumentRelationOut(
             id=r.id,
             relation_type=r.relation_type,
@@ -144,7 +143,7 @@ def _build_timeline(doc: Document, relations: list) -> list[TimelineEvent]:
             events.append(TimelineEvent(
                 date=None,
                 event_type="amended",
-                label=f"Sửa đổi / bổ sung bởi văn bản khác",
+                label="Sửa đổi / bổ sung bởi văn bản khác",
                 related_doc_id=rel.source_doc_id,
             ))
 

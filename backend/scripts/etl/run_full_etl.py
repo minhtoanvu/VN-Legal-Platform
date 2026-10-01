@@ -1,15 +1,7 @@
-"""
-Pipeline Tổng hợp: Re-ETL với đúng dữ liệu Lao động & Thuế
-
-Script này chạy tuần tự:
-  1. download_data.py  — Tải dữ liệu từ HuggingFace (lọc đúng lĩnh vực)
-  2. normalize.py      — Chuẩn hóa schema
-  3. load_db.py        — Load vào PostgreSQL (xóa và insert lại)
-  4. chunker.py        — Cắt chunks (sliding window)
-
-Chạy: python scripts/etl/run_full_etl.py
-      python scripts/etl/run_full_etl.py --target-per-field 2000 --skip-download
-"""
+# Script chạy toàn bộ pipeline ETL từ đầu đến cuối
+# Thứ tự: download -> normalize -> load DB -> chunking
+# Chạy: python scripts/etl/run_full_etl.py
+#        python scripts/etl/run_full_etl.py --target-per-field 2000 --skip-download
 
 import argparse
 import asyncio
@@ -17,7 +9,6 @@ import sys
 import time
 from pathlib import Path
 
-# Thêm backend root vào path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 if hasattr(sys.stdout, "reconfigure"):
@@ -28,12 +19,12 @@ if hasattr(sys.stderr, "reconfigure"):
 
 def print_step(step: int, title: str):
     print(f"\n{'='*60}")
-    print(f"  BƯỚC {step}: {title}")
+    print(f"  BUOC {step}: {title}")
     print(f"{'='*60}")
 
 
 def run_download(target_per_field: int) -> bool:
-    print_step(1, "Tải dữ liệu Lao động & Thuế từ HuggingFace")
+    print_step(1, "Tai du lieu Lao dong & Thue tu HuggingFace")
     from scripts.etl.download_data import download_dataset, download_eval_dataset
     ok = download_dataset(target_per_field=target_per_field)
     if ok:
@@ -42,7 +33,7 @@ def run_download(target_per_field: int) -> bool:
 
 
 def run_normalize() -> int:
-    print_step(2, "Chuẩn hóa schema → documents_normalized.jsonl")
+    print_step(2, "Chuan hoa schema -> documents_normalized.jsonl")
     raw_dir = Path(__file__).parent.parent.parent / "data" / "raw"
     processed_dir = Path(__file__).parent.parent.parent / "data" / "processed"
     from scripts.etl.normalize import normalize_dataset
@@ -54,7 +45,7 @@ def run_normalize() -> int:
 
 
 async def run_load_db() -> int:
-    print_step(3, "Load documents vào PostgreSQL (xóa cũ + insert mới)")
+    print_step(3, "Load documents vao PostgreSQL (xoa cu + insert moi)")
     from sqlalchemy import text
     from app.core.database import AsyncSessionLocal, engine
     from scripts.etl.load_db import load_documents, verify_load
@@ -62,13 +53,12 @@ async def run_load_db() -> int:
     processed_dir = Path(__file__).parent.parent.parent / "data" / "processed"
     input_file = processed_dir / "documents_normalized.jsonl"
 
-    # Xóa dữ liệu cũ trước khi insert lại
-    print("   Xóa dữ liệu cũ trong DB...")
+    print("  Xoa du lieu cu trong DB...")
     async with AsyncSessionLocal() as session:
         await session.execute(text("TRUNCATE TABLE document_chunks CASCADE"))
         await session.execute(text("TRUNCATE TABLE documents CASCADE"))
         await session.commit()
-        print("   ✅ Đã xóa documents + document_chunks cũ")
+        print("  Da xoa documents + document_chunks cu")
 
     inserted = await load_documents(input_file, batch_size=100)
     await verify_load()
@@ -76,8 +66,7 @@ async def run_load_db() -> int:
 
 
 async def run_chunker() -> int:
-    print_step(4, "Cắt chunks (sliding window 500 ký tự, overlap 50)")
-    # Import và chạy trực tiếp chunker logic
+    print_step(4, "Cat chunks (sliding window 500 ky tu, overlap 50)")
     from sqlalchemy import select, text
     from app.core.database import AsyncSessionLocal
     from app.models.document import Document, DocumentChunk
@@ -101,7 +90,7 @@ async def run_chunker() -> int:
         )
         docs = result.all()
         total_docs = len(docs)
-        print(f"   {total_docs:,} documents cần xử lý")
+        print(f"  {total_docs:,} documents can xu ly")
 
         batch_size = 100
         chunks_to_insert = []
@@ -124,60 +113,54 @@ async def run_chunker() -> int:
                 session.add_all(chunks_to_insert)
                 await session.commit()
                 pct = (i + 1) / total_docs * 100
-                print(f"   [{pct:5.1f}%] {i+1:,}/{total_docs:,} docs | {total_chunks:,} chunks", end="\r")
+                print(f"  [{pct:5.1f}%] {i+1:,}/{total_docs:,} docs | {total_chunks:,} chunks", end="\r")
                 chunks_to_insert = []
 
-    print(f"\n   ✅ Tổng chunks đã tạo: {total_chunks:,}")
+    print(f"\n  Tong chunks da tao: {total_chunks:,}")
     return total_chunks
 
 
 async def main(target_per_field: int, skip_download: bool):
     t0 = time.time()
-    print("\n🚀 BẮT ĐẦU RE-ETL PIPELINE — AI Legal Intelligence Platform")
-    print(f"   Target: {target_per_field:,} records/lĩnh vực")
+    print("\n=== BAT DAU ETL PIPELINE — AI Legal Intelligence Platform ===")
+    print(f"  Target: {target_per_field:,} records/linh vuc")
 
-    # Bước 1: Download
     if not skip_download:
         ok = run_download(target_per_field)
         if not ok:
-            print("\n❌ Download thất bại. Dừng pipeline.")
+            print("\nDownload that bai. Dung pipeline.")
             return
     else:
-        print("\n⏭️  Bỏ qua download (--skip-download)")
+        print("\nBo qua download (--skip-download)")
 
-    # Bước 2: Normalize
     n_docs = run_normalize()
     if n_docs == 0:
-        print("\n❌ Normalize không ra documents. Kiểm tra dữ liệu raw.")
+        print("\nNormalize khong ra documents. Kiem tra du lieu raw.")
         return
 
-    # Bước 3: Load DB
     inserted = await run_load_db()
-
-    # Bước 4: Chunker
     n_chunks = await run_chunker()
 
-    # Tổng kết
     elapsed = time.time() - t0
     print(f"\n{'='*60}")
-    print(f"  ✅ PIPELINE HOÀN THÀNH — {elapsed/60:.1f} phút")
+    print(f"  PIPELINE HOAN THANH — {elapsed/60:.1f} phut")
     print(f"{'='*60}")
-    print(f"  📄 Documents trong DB : {inserted:,}")
-    print(f"  🔖 Chunks trong DB    : {n_chunks:,}")
-    print(f"\n  Bước tiếp theo:")
-    print(f"  → Chạy embedder.py để tạo vector embedding")
-    print(f"  → Chạy build_index.py để tạo HNSW index")
+    print(f"  Documents trong DB : {inserted:,}")
+    print(f"  Chunks trong DB    : {n_chunks:,}")
+    print(f"\n  Buoc tiep theo:")
+    print(f"  -> Chay embedder.py de tao vector embedding")
+    print(f"  -> Chay build_index.py de tao HNSW index")
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Chạy toàn bộ ETL pipeline")
+    parser = argparse.ArgumentParser(description="Chay toan bo ETL pipeline")
     parser.add_argument(
         "--target-per-field", type=int, default=1500,
-        help="Số records cần cho mỗi lĩnh vực (default: 1500)"
+        help="So records can cho moi linh vuc (default: 1500)"
     )
     parser.add_argument(
         "--skip-download", action="store_true",
-        help="Bỏ qua bước download (dùng file raw có sẵn)"
+        help="Bo qua buoc download (dung file raw co san)"
     )
     args = parser.parse_args()
 

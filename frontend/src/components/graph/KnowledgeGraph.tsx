@@ -116,7 +116,7 @@ export const KnowledgeGraph: React.FC<KnowledgeGraphProps> = ({ data, onNodeClic
       networkRef.current?.destroy();
       networkRef.current = null;
     };
-  }, [data]);
+  }, [data, onNodeClick]);
 
   return (
     <div style={{ position: 'relative', width: '100%', height: '420px', borderRadius: 'var(--radius-md)', overflow: 'hidden', background: 'rgba(8,12,20,0.8)' }}>

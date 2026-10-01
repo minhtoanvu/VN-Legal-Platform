@@ -3,7 +3,7 @@ import type { Collection, DocInCollection } from '../types';
 import { api } from '../services/api';
 import {
   FolderOpen, Plus, Trash2, FileText, ExternalLink,
-  BookMarked, Loader2, AlertTriangle, FolderX, X, Check,
+  BookMarked, Loader2, FolderX, X, Check,
   StickyNote,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -12,18 +12,19 @@ import { StatusBadge } from '../components/document/StatusBadge';
 /* ── tiny modal ──────────────────────────────────────────────────────── */
 interface CreateModalProps {
   onClose: () => void;
-  onCreate: (name: string, desc: string) => Promise<void>;
+  onCreate: (name: string, desc: string, is_shared: boolean) => Promise<void>;
 }
 const CreateModal: React.FC<CreateModalProps> = ({ onClose, onCreate }) => {
   const [name, setName] = useState('');
   const [desc, setDesc] = useState('');
+  const [isShared, setIsShared] = useState(false);
   const [saving, setSaving] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) return;
     setSaving(true);
-    try { await onCreate(name.trim(), desc.trim()); onClose(); }
+    try { await onCreate(name.trim(), desc.trim(), isShared); onClose(); }
     finally { setSaving(false); }
   };
 
@@ -67,8 +68,19 @@ const CreateModal: React.FC<CreateModalProps> = ({ onClose, onCreate }) => {
               onChange={e => setDesc(e.target.value)}
               placeholder="Ghi chú thêm về collection này..."
               rows={3}
-              style={{ width: '100%', padding: '10px 14px', fontSize: '0.88rem', resize: 'none' }}
+              style={{ width: '100%', padding: '10px 14px', fontSize: '0.88rem', resize: 'none', marginBottom: '8px' }}
             />
+          </div>
+          <div>
+            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+              <input
+                type="checkbox"
+                checked={isShared}
+                onChange={e => setIsShared(e.target.checked)}
+                style={{ accentColor: 'var(--primary)' }}
+              />
+              Chia sẻ cho cả tổ chức (Enterprise)
+            </label>
           </div>
           <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 6 }}>
             <button type="button" onClick={onClose} className="btn btn-outline" style={{ padding: '9px 18px' }}>Huỷ</button>
@@ -105,8 +117,17 @@ export const WorkspacePage: React.FC = () => {
   const fetchCollections = useCallback(async () => {
     setLoadingCols(true);
     try {
-      const res = await api.get<Collection[]>('/workspace/collections');
-      setCollections(res.data);
+      // Gọi song song 2 API: lấy thư mục cá nhân và thư mục chia sẻ chung
+      const [ownRes, sharedRes] = await Promise.all([
+        api.get<Collection[]>('/workspace/collections'),
+        api.get<Collection[]>('/workspace/shared-collections').catch(() => ({ data: [] })) // Bỏ qua nếu user không phải Enterprise
+      ]);
+
+      // Lọc bỏ các thư mục shared mà bản thân user đã tạo (vì nó đã nằm trong ownRes)
+      const ownIds = new Set(ownRes.data.map(c => c.id));
+      const otherShared = sharedRes.data.filter(c => !ownIds.has(c.id));
+
+      setCollections([...ownRes.data, ...otherShared]);
     } catch { /* ignore */ }
     finally { setLoadingCols(false); }
   }, []);
@@ -124,8 +145,8 @@ export const WorkspacePage: React.FC = () => {
   }, [selectedCol]);
 
   /* create collection */
-  const handleCreate = async (name: string, desc: string) => {
-    await api.post('/workspace/collections', { name, description: desc || null });
+  const handleCreate = async (name: string, desc: string, is_shared: boolean) => {
+    await api.post('/workspace/collections', { name, description: desc || null, is_shared });
     await fetchCollections();
   };
 
@@ -240,15 +261,26 @@ export const WorkspacePage: React.FC = () => {
                       </p>
                     )}
                   </div>
-                  {/* Doc count badge */}
-                  <span style={{
-                    fontSize: '0.7rem', fontWeight: 700, padding: '2px 7px',
-                    borderRadius: 99, flexShrink: 0,
-                    background: isSelected ? 'rgba(99,102,241,0.2)' : 'rgba(255,255,255,0.06)',
-                    color: isSelected ? 'var(--primary)' : 'var(--text-muted)',
-                  }}>
-                    {col.doc_count}
-                  </span>
+                  {/* Doc count & Shared badge */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    {col.is_shared && (
+                      <span style={{
+                        fontSize: '0.65rem', fontWeight: 600, padding: '2px 5px',
+                        borderRadius: 4, background: 'rgba(168,85,247,0.1)',
+                        color: 'var(--accent-purple)', flexShrink: 0,
+                      }} title="Đã chia sẻ cho doanh nghiệp">
+                        SHARED
+                      </span>
+                    )}
+                    <span style={{
+                      fontSize: '0.7rem', fontWeight: 700, padding: '2px 7px',
+                      borderRadius: 99, flexShrink: 0,
+                      background: isSelected ? 'rgba(99,102,241,0.2)' : 'rgba(255,255,255,0.06)',
+                      color: isSelected ? 'var(--primary)' : 'var(--text-muted)',
+                    }}>
+                      {col.doc_count}
+                    </span>
+                  </div>
                   {/* Delete btn */}
                   <button
                     onClick={e => { e.stopPropagation(); handleDeleteCol(col.id); }}

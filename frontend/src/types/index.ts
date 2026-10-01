@@ -52,16 +52,18 @@ export interface DocumentRelation {
 
 export interface DocumentDetail extends DocumentListItem {
   content_summary: string | null;
-  content_full: string | null;
+  content: string | null;
   expiry_date: string | null;
   relations: DocumentRelation[];
+  timeline?: TimelineEvent[];
   chunks_count: number;
 }
 
 export interface TimelineEvent {
-  date: string;
+  date?: string;
   event_type: string;
-  description: string;
+  description?: string;
+  label?: string;
   related_doc_id?: string;
   related_doc_title?: string;
 }
@@ -157,6 +159,20 @@ export interface AnalyticsDashboard {
     created_at: string;
   }[];
   avg_query_duration_ms?: number;
+  heatmap?: { year: number; month: number; count: number }[];
+}
+
+export interface AdvancedAnalytics {
+  pagerank_top_nodes: {
+    doc_id: string;
+    doc_number: string;
+    title: string;
+    score: number;
+  }[];
+  communities: {
+    community_id: number;
+    node_count: number;
+  }[];
 }
 
 // ===== Workspace =====

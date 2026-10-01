@@ -4,17 +4,20 @@ Auth Router — /auth/register, /auth/login, /auth/refresh, /auth/me
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.config import settings
 from app.core.database import get_db
-from app.core.dependencies import get_current_user
+from app.core.dependencies import get_current_active_user
 from app.core.security import decode_token
 from app.models.user import User
 from app.schemas.auth import (
-    RegisterRequest,
+    ChangePasswordRequest,
     LoginRequest,
-    TokenResponse,
     RefreshRequest,
-    UserResponse,
+    RegisterRequest,
     RegisterResponse,
+    TokenResponse,
+    UpdateProfileRequest,
+    UserResponse,
 )
 from app.services import auth_service
 
@@ -116,21 +119,75 @@ async def refresh_token(
     response_model=UserResponse,
     summary="Lấy thông tin tài khoản hiện tại",
 )
-async def get_me(current_user: User = Depends(get_current_user)):
+async def get_me(current_user: User = Depends(get_current_active_user)):
     """Trả về thông tin user đang đăng nhập (yêu cầu Bearer token)."""
     return UserResponse.model_validate(current_user)
 
 
+@router.patch(
+    "/me",
+    response_model=UserResponse,
+    summary="Cập nhật hồ sơ cá nhân - UC-03",
+)
+async def update_me(
+    body: UpdateProfileRequest,
+    current_user: User = Depends(get_current_active_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Cập nhật full_name. Email không đổi vì là định danh đăng nhập."""
+    user = await auth_service.update_profile(
+        session=db,
+        user=current_user,
+        full_name=body.full_name,
+    )
+    return UserResponse.model_validate(user)
+
+
+@router.post(
+    "/change-password",
+    status_code=status.HTTP_200_OK,
+    summary="Đổi mật khẩu - UC-03",
+)
+async def change_password(
+    body: ChangePasswordRequest,
+    current_user: User = Depends(get_current_active_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Đổi mật khẩu: xác minh mật khẩu cũ, sau đó hash và lưu mật khẩu mới.
+    Yêu cầu Bearer token.
+    """
+    try:
+        await auth_service.change_password(
+            session=db,
+            user=current_user,
+            current_password=body.current_password,
+            new_password=body.new_password,
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+    return {"message": "Đổi mật khẩu thành công."}
+
+
 @router.post(
     "/promote-admin",
-    summary="Nâng cấp tài khoản hiện tại lên Admin (API Tạm thời)",
-    description="⚠️ Chỉ dùng trong lúc chấm Đồ án để tự thăng cấp tài khoản của mình."
+    summary="Nâng cấp tài khoản hiện tại lên Admin (API Tạm thời — seed only)",
+    description="⚠️ Chỉ khả dụng khi biến môi trường `ALLOW_PROMOTE_ADMIN=true`. Dùng để khởi tạo tài khoản Admin lần đầu tiên."
 )
 async def promote_to_admin(
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_active_user),
     db: AsyncSession = Depends(get_db)
 ):
-    """Cập nhật role của user đang đăng nhập thành 'admin'."""
+    """
+    Nâng cấp role của user đang đăng nhập thành 'admin'.
+    Bị tắt mặc định. Độc biến ALLOW_PROMOTE_ADMIN từ .env để bật.
+    """
+    allow = getattr(settings, "allow_promote_admin", False)
+    if not allow:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Tính năng này đã bị tắt. Liên hệ system administrator."
+        )
     current_user.role = "admin"
     db.add(current_user)
     await db.commit()

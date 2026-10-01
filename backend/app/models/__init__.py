@@ -1,17 +1,17 @@
 from app.core.database import Base
-from app.models.document import Document, DocumentChunk, DocumentRelation  # noqa
-from app.models.user import User, Organization  # noqa
-from app.models.workspace import Collection, CollectionDocument, Note, QueryLog  # noqa
+from app.models.document import Document, DocumentChunk, DocumentRelation
+from app.models.user import Organization, User
+from app.models.workspace import Collection, CollectionDocument, Note, QueryLog
 
 __all__ = [
     "Base",
+    "Collection",
+    "CollectionDocument",
     "Document",
     "DocumentChunk",
     "DocumentRelation",
-    "User",
-    "Organization",
-    "Collection",
-    "CollectionDocument",
     "Note",
+    "Organization",
     "QueryLog",
+    "User",
 ]

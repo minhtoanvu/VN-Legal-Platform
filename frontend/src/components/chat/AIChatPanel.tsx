@@ -158,7 +158,7 @@ export const AIChatPanel: React.FC<AIChatPanelProps> = ({ contextDocId }) => {
       );
       setIsStreaming(false);
     }
-  }, [input, isStreaming, contextDocId]);
+  }, [input, isStreaming, contextDocId, messages]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
