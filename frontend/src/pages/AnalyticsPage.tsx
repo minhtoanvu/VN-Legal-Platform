@@ -49,7 +49,7 @@ export const AnalyticsPage: React.FC = () => {
       const intensity = Math.min(1, count / maxCount);
       return `rgba(99, 102, 241, ${0.2 + intensity * 0.8})`; 
     };
-  
+    
     return (
       <div style={{ overflowX: 'auto', padding: '10px 0' }}>
         <div style={{ display: 'grid', gridTemplateColumns: '40px repeat(12, 1fr)', gap: '6px', minWidth: '400px' }}>
@@ -388,7 +388,7 @@ export const AnalyticsPage: React.FC = () => {
                       {advancedData.pagerank_top_nodes.map((node, i) => (
                         <tr key={i} style={{ borderBottom: '1px solid var(--border-light)', transition: 'background 0.1s' }} onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.02)'} onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'transparent'}>
                           <td style={{ padding: '12px 14px', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)', whiteSpace: 'nowrap' }}>{node.doc_number}</td>
-                          <td style={{ padding: '12px 14px', fontSize: '0.82rem', maxWidth: '250px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: 'var(--text-secondary)' }} title={node.title}>{node.title}</td>
+                          <td style={{ padding: '12px 14px', fontSize: '0.82rem', maxWidth: '250px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: 'var(--text-secondary)' }}>{node.title}</td>
                           <td style={{ padding: '12px 14px' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                               <div style={{ width: '100%', maxWidth: '100px', height: '6px', background: 'var(--border-light)', borderRadius: '3px', overflow: 'hidden' }}>
@@ -414,10 +414,10 @@ export const AnalyticsPage: React.FC = () => {
                     <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" vertical={false} />
                     <XAxis dataKey="name" tick={{ fill: 'var(--text-muted)', fontSize: 11 }} axisLine={false} tickLine={false} />
                     <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} axisLine={false} tickLine={false} />
-                    <Tooltip contentStyle={{ background: 'var(--bg-surface)', border: '1px solid var(--border-light)', borderRadius: '8px', fontSize: '0.82rem' }} formatter={(v) => [Number(v).toLocaleString('vi-VN'), 'Văn bản']} />
+                    <Tooltip contentStyle={{ background: 'var(--bg-surface)', border: '1px solid var(--border-light)', borderRadius: '8px', fontSize: '0.82rem' }} formatter={(v) => [Number(v).toLocaleString('vi-VN'), 'Cụm']} />
                     <Bar dataKey="value" radius={[4, 4, 0, 0]} maxBarSize={40}>
                       {
-                        advancedData.communities.map((entry, index) => (
+                        advancedData.communities.map((_, index) => (
                           <Cell key={`cell-${index}`} fill={['#6366f1', '#14b8a6', '#f97316', '#a855f7', '#ec4899'][index % 5]} />
                         ))
                       }
