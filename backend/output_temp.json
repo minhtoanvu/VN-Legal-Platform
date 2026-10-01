@@ -1,0 +1,130 @@
+{
+  "README": {
+    "columns": [
+      "Phân bố",
+      "6 lao động + 6 mua bán thương mại + 6 dịch vụ thương mại"
+    ],
+    "sample": [
+      {
+        "Phân bố": "Số điều khoản",
+        "6 lao động + 6 mua bán thương mại + 6 dịch vụ thương mại": 144
+      },
+      {
+        "Phân bố": "Nhãn",
+        "6 lao động + 6 mua bán thương mại + 6 dịch vụ thương mại": "low = không phát hiện rủi ro pháp lý rõ; medium = rủi ro/điểm cần kiểm tra; high = lỗi pháp lý rõ hoặc điều khoản có khả năng vi phạm đáng kể."
+      },
+      {
+        "Phân bố": "Lưu ý",
+        "6 lao động + 6 mua bán thương mại + 6 dịch vụ thương mại": "Tất cả tên, số liệu, mã số và nội dung là dữ liệu tổng hợp. Không dùng làm hợp đồng thực tế."
+      }
+    ]
+  },
+  "Contracts": {
+    "columns": [
+      "L03",
+      "Lao động",
+      "Hợp đồng lao động – Nhân viên Kinh doanh",
+      "Công ty CP Thương mại Nam Việt; Lê Hoàng Mai",
+      "Hà Nội – Vùng I",
+      "high",
+      8
+    ],
+    "sample": [
+      {
+        "L03": "L04",
+        "Lao động": "Lao động",
+        "Hợp đồng lao động – Nhân viên Kinh doanh": "Hợp đồng lao động – Nhân viên Chăm sóc khách hàng",
+        "Công ty CP Thương mại Nam Việt; Lê Hoàng Mai": "Công ty TNHH Dịch vụ Sao Việt; Phạm Thùy Linh",
+        "Hà Nội – Vùng I": "Đà Nẵng – Vùng II",
+        "high": "high",
+        "8": 8
+      },
+      {
+        "L03": "L05",
+        "Lao động": "Lao động",
+        "Hợp đồng lao động – Nhân viên Kinh doanh": "Hợp đồng lao động – Kế toán tổng hợp",
+        "Công ty CP Thương mại Nam Việt; Lê Hoàng Mai": "Công ty CP Nội thất Đông Dương; Võ Thanh Huyền",
+        "Hà Nội – Vùng I": "Bình Dương – Vùng I",
+        "high": "high",
+        "8": 8
+      },
+      {
+        "L03": "L06",
+        "Lao động": "Lao động",
+        "Hợp đồng lao động – Nhân viên Kinh doanh": "Hợp đồng lao động – Lập trình viên",
+        "Công ty CP Thương mại Nam Việt; Lê Hoàng Mai": "Công ty TNHH Phần mềm Sao Bắc; Nguyễn Gia Khang",
+        "Hà Nội – Vùng I": "TP.HCM – Vùng I",
+        "high": "medium",
+        "8": 8
+      }
+    ]
+  },
+  "Clauses": {
+    "columns": [
+      "L01",
+      "C03",
+      "Lương",
+      "Lương theo công việc là 12.000.000 đồng/tháng; trả vào ngày 05 hằng tháng qua tài khoản.",
+      "low",
+      "Mức lương cao hơn mức tối thiểu Vùng I năm 2026 là 5.310.000 đồng/tháng.",
+      "Nghị định 293/2025/NĐ-CP; Bộ luật Lao động 2019, Điều 90",
+      "false"
+    ],
+    "sample": [
+      {
+        "L01": "L01",
+        "C03": "C04",
+        "Lương": "BHXH",
+        "Lương theo công việc là 12.000.000 đồng/tháng; trả vào ngày 05 hằng tháng qua tài khoản.": "Công ty và người lao động thực hiện BHXH, BHYT, BHTN theo quy định pháp luật hiện hành.",
+        "low": "low",
+        "Mức lương cao hơn mức tối thiểu Vùng I năm 2026 là 5.310.000 đồng/tháng.": "Điều khoản phù hợp với nghĩa vụ bảo hiểm.",
+        "Nghị định 293/2025/NĐ-CP; Bộ luật Lao động 2019, Điều 90": "Luật BHXH 2024, Điều 2",
+        "false": false
+      },
+      {
+        "L01": "L01",
+        "C03": "C05",
+        "Lương": "Thử việc",
+        "Lương theo công việc là 12.000.000 đồng/tháng; trả vào ngày 05 hằng tháng qua tài khoản.": "Thử việc 60 ngày, hưởng 85% mức lương của công việc.",
+        "low": "low",
+        "Mức lương cao hơn mức tối thiểu Vùng I năm 2026 là 5.310.000 đồng/tháng.": "Thời gian và mức thử việc phù hợp với giới hạn áp dụng cho công việc cần trình độ chuyên môn.",
+        "Nghị định 293/2025/NĐ-CP; Bộ luật Lao động 2019, Điều 90": "Bộ luật Lao động 2019, Điều 25, 26",
+        "false": false
+      },
+      {
+        "L01": "L01",
+        "C03": "C06",
+        "Lương": "Chấm dứt",
+        "Lương theo công việc là 12.000.000 đồng/tháng; trả vào ngày 05 hằng tháng qua tài khoản.": "Người lao động đơn phương chấm dứt hợp đồng xác định thời hạn 24 tháng phải báo trước ít nhất 30 ngày, trừ trường hợp pháp luật cho phép không báo trước.",
+        "low": "low",
+        "Mức lương cao hơn mức tối thiểu Vùng I năm 2026 là 5.310.000 đồng/tháng.": "Phù hợp với hợp đồng xác định thời hạn từ 12 đến 36 tháng.",
+        "Nghị định 293/2025/NĐ-CP; Bộ luật Lao động 2019, Điều 90": "Bộ luật Lao động 2019, Điều 35",
+        "false": false
+      }
+    ]
+  },
+  "Full_Contracts": {
+    "columns": [
+      "L03",
+      "Hợp đồng lao động – Nhân viên Kinh doanh",
+      "HỢP ĐỒNG MÔ PHỎNG — DỮ LIỆU THỰC NGHIỆM\nHỢP ĐỒNG LAO ĐỘNG – NHÂN VIÊN KINH DOANH\nMã hợp đồng: L03\nLoại: Lao động\nCác bên: Công ty CP Thương mại Nam Việt; Lê Hoàng Mai\nĐịa bàn: Hà Nội – Vùng I\n\nĐiều 1. Nội dung và các thỏa thuận\n1. Thời hạn: Hợp đồng xác định thời hạn 24 tháng, từ 05/10/2026 đến hết 04/10/2028.\n2. Lương: Lương 11.000.000 đồng/tháng, trả ngày 05 hằng tháng.\n3. BHXH: Công ty đăng ký BHXH bắt buộc và các loại bảo hiểm liên quan theo quy định.\n4. Báo trước của NLĐ: Người lao động phải báo trước 15 ngày khi đơn phương chấm dứt hợp đồng.\n5. Báo trước của NSDLĐ: Công ty có thể chấm dứt hợp đồng bất cứ lúc nào và chỉ cần báo trước 07 ngày.\n6. Thử việc: Thử việc 60 ngày với mức lương thử việc 90% lương công việc.\n7. KPI: Thưởng doanh số tối đa 4.000.000 đồng/tháng theo chính sách thưởng công bố riêng.\n8. Kỷ luật: Công ty có quyền xử lý kỷ luật theo nội quy lao động và pháp luật.\n\nĐiều 2. Cam kết chung\nHai bên xác nhận các thông tin nêu trên là dữ liệu mô phỏng phục vụ nghiên cứu, không phải hợp đồng thật.\nĐiều 3. Giải quyết tranh chấp\nThực hiện theo điều khoản tranh chấp đã nêu và pháp luật Việt Nam áp dụng.\n\nGROUND TRUTH TỔNG: HIGH"
+    ],
+    "sample": [
+      {
+        "L03": "L04",
+        "Hợp đồng lao động – Nhân viên Kinh doanh": "Hợp đồng lao động – Nhân viên Chăm sóc khách hàng",
+        "HỢP ĐỒNG MÔ PHỎNG — DỮ LIỆU THỰC NGHIỆM\nHỢP ĐỒNG LAO ĐỘNG – NHÂN VIÊN KINH DOANH\nMã hợp đồng: L03\nLoại: Lao động\nCác bên: Công ty CP Thương mại Nam Việt; Lê Hoàng Mai\nĐịa bàn: Hà Nội – Vùng I\n\nĐiều 1. Nội dung và các thỏa thuận\n1. Thời hạn: Hợp đồng xác định thời hạn 24 tháng, từ 05/10/2026 đến hết 04/10/2028.\n2. Lương: Lương 11.000.000 đồng/tháng, trả ngày 05 hằng tháng.\n3. BHXH: Công ty đăng ký BHXH bắt buộc và các loại bảo hiểm liên quan theo quy định.\n4. Báo trước của NLĐ: Người lao động phải báo trước 15 ngày khi đơn phương chấm dứt hợp đồng.\n5. Báo trước của NSDLĐ: Công ty có thể chấm dứt hợp đồng bất cứ lúc nào và chỉ cần báo trước 07 ngày.\n6. Thử việc: Thử việc 60 ngày với mức lương thử việc 90% lương công việc.\n7. KPI: Thưởng doanh số tối đa 4.000.000 đồng/tháng theo chính sách thưởng công bố riêng.\n8. Kỷ luật: Công ty có quyền xử lý kỷ luật theo nội quy lao động và pháp luật.\n\nĐiều 2. Cam kết chung\nHai bên xác nhận các thông tin nêu trên là dữ liệu mô phỏng phục vụ nghiên cứu, không phải hợp đồng thật.\nĐiều 3. Giải quyết tranh chấp\nThực hiện theo điều khoản tranh chấp đã nêu và pháp luật Việt Nam áp dụng.\n\nGROUND TRUTH TỔNG: HIGH": "HỢP ĐỒNG MÔ PHỎNG — DỮ LIỆU THỰC NGHIỆM\nHỢP ĐỒNG LAO ĐỘNG – NHÂN VIÊN CHĂM SÓC KHÁCH HÀNG\nMã hợp đồng: L04\nLoại: Lao động\nCác bên: Công ty TNHH Dịch vụ Sao Việt; Phạm Thùy Linh\nĐịa bàn: Đà Nẵng – Vùng II\n\nĐiều 1. Nội dung và các thỏa thuận\n1. Lương: Lương 8.000.000 đồng/tháng, trả ngày 05 hằng tháng.\n2. BHXH: Công ty thực hiện đăng ký và đóng các khoản bảo hiểm bắt buộc theo luật.\n3. Phạt đi muộn: Mỗi lần đi muộn quá 10 phút bị phạt 300.000 đồng; khoản phạt được khấu trừ vào lương tháng đó.\n4. Bảo mật: Người lao động phải bảo mật dữ liệu khách hàng trong thời gian làm việc và 12 tháng sau khi nghỉ việc.\n5. Báo trước: Hợp đồng xác định thời hạn 12 tháng; người lao động báo trước 30 ngày khi đơn phương chấm dứt.\n6. Thử việc: Thử việc 90 ngày cho vị trí chăm sóc khách hàng, hưởng 70% lương.\n7. Nghỉ phép: Người lao động được nghỉ 12 ngày làm việc/năm.\n8. Thời giờ: Làm việc 08:30–17:30, thứ Hai đến thứ Sáu, nghỉ trưa 60 phút.\n\nĐiều 2. Cam kết chung\nHai bên xác nhận các thông tin nêu trên là dữ liệu mô phỏng phục vụ nghiên cứu, không phải hợp đồng thật.\nĐiều 3. Giải quyết tranh chấp\nThực hiện theo điều khoản tranh chấp đã nêu và pháp luật Việt Nam áp dụng.\n\nGROUND TRUTH TỔNG: HIGH"
+      },
+      {
+        "L03": "L05",
+        "Hợp đồng lao động – Nhân viên Kinh doanh": "Hợp đồng lao động – Kế toán tổng hợp",
+        "HỢP ĐỒNG MÔ PHỎNG — DỮ LIỆU THỰC NGHIỆM\nHỢP ĐỒNG LAO ĐỘNG – NHÂN VIÊN KINH DOANH\nMã hợp đồng: L03\nLoại: Lao động\nCác bên: Công ty CP Thương mại Nam Việt; Lê Hoàng Mai\nĐịa bàn: Hà Nội – Vùng I\n\nĐiều 1. Nội dung và các thỏa thuận\n1. Thời hạn: Hợp đồng xác định thời hạn 24 tháng, từ 05/10/2026 đến hết 04/10/2028.\n2. Lương: Lương 11.000.000 đồng/tháng, trả ngày 05 hằng tháng.\n3. BHXH: Công ty đăng ký BHXH bắt buộc và các loại bảo hiểm liên quan theo quy định.\n4. Báo trước của NLĐ: Người lao động phải báo trước 15 ngày khi đơn phương chấm dứt hợp đồng.\n5. Báo trước của NSDLĐ: Công ty có thể chấm dứt hợp đồng bất cứ lúc nào và chỉ cần báo trước 07 ngày.\n6. Thử việc: Thử việc 60 ngày với mức lương thử việc 90% lương công việc.\n7. KPI: Thưởng doanh số tối đa 4.000.000 đồng/tháng theo chính sách thưởng công bố riêng.\n8. Kỷ luật: Công ty có quyền xử lý kỷ luật theo nội quy lao động và pháp luật.\n\nĐiều 2. Cam kết chung\nHai bên xác nhận các thông tin nêu trên là dữ liệu mô phỏng phục vụ nghiên cứu, không phải hợp đồng thật.\nĐiều 3. Giải quyết tranh chấp\nThực hiện theo điều khoản tranh chấp đã nêu và pháp luật Việt Nam áp dụng.\n\nGROUND TRUTH TỔNG: HIGH": "HỢP ĐỒNG MÔ PHỎNG — DỮ LIỆU THỰC NGHIỆM\nHỢP ĐỒNG LAO ĐỘNG – KẾ TOÁN TỔNG HỢP\nMã hợp đồng: L05\nLoại: Lao động\nCác bên: Công ty CP Nội thất Đông Dương; Võ Thanh Huyền\nĐịa bàn: Bình Dương – Vùng I\n\nĐiều 1. Nội dung và các thỏa thuận\n1. Lương: Lương 13.500.000 đồng/tháng.\n2. Thử việc: Thử việc 90 ngày, lương thử việc 8.000.000 đồng/tháng.\n3. BHXH: Công ty tham gia BHXH từ tháng thứ 7 sau khi người lao động ký hợp đồng.\n4. Chấm dứt: Người lao động phải báo trước 30 ngày.\n5. Bồi thường: Nếu nghỉ việc trước hạn, người lao động tự động bồi thường 03 tháng lương bất kể lý do.\n6. Nghỉ phép: 12 ngày/năm và nghỉ lễ theo pháp luật.\n7. Làm thêm: Làm thêm giờ chỉ khi có thỏa thuận và được thanh toán theo quy định.\n8. Kỷ luật: Mọi vi phạm đều có thể bị công ty phạt tiền từ 1.000.000 đến 5.000.000 đồng.\n\nĐiều 2. Cam kết chung\nHai bên xác nhận các thông tin nêu trên là dữ liệu mô phỏng phục vụ nghiên cứu, không phải hợp đồng thật.\nĐiều 3. Giải quyết tranh chấp\nThực hiện theo điều khoản tranh chấp đã nêu và pháp luật Việt Nam áp dụng.\n\nGROUND TRUTH TỔNG: HIGH"
+      },
+      {
+        "L03": "L06",
+        "Hợp đồng lao động – Nhân viên Kinh doanh": "Hợp đồng lao động – Lập trình viên",
+        "HỢP ĐỒNG MÔ PHỎNG — DỮ LIỆU THỰC NGHIỆM\nHỢP ĐỒNG LAO ĐỘNG – NHÂN VIÊN KINH DOANH\nMã hợp đồng: L03\nLoại: Lao động\nCác bên: Công ty CP Thương mại Nam Việt; Lê Hoàng Mai\nĐịa bàn: Hà Nội – Vùng I\n\nĐiều 1. Nội dung và các thỏa thuận\n1. Thời hạn: Hợp đồng xác định thời hạn 24 tháng, từ 05/10/2026 đến hết 04/10/2028.\n2. Lương: Lương 11.000.000 đồng/tháng, trả ngày 05 hằng tháng.\n3. BHXH: Công ty đăng ký BHXH bắt buộc và các loại bảo hiểm liên quan theo quy định.\n4. Báo trước của NLĐ: Người lao động phải báo trước 15 ngày khi đơn phương chấm dứt hợp đồng.\n5. Báo trước của NSDLĐ: Công ty có thể chấm dứt hợp đồng bất cứ lúc nào và chỉ cần báo trước 07 ngày.\n6. Thử việc: Thử việc 60 ngày với mức lương thử việc 90% lương công việc.\n7. KPI: Thưởng doanh số tối đa 4.000.000 đồng/tháng theo chính sách thưởng công bố riêng.\n8. Kỷ luật: Công ty có quyền xử lý kỷ luật theo nội quy lao động và pháp luật.\n\nĐiều 2. Cam kết chung\nHai bên xác nhận các thông tin nêu trên là dữ liệu mô phỏng phục vụ nghiên cứu, không phải hợp đồng thật.\nĐiều 3. Giải quyết tranh chấp\nThực hiện theo điều khoản tranh chấp đã nêu và pháp luật Việt Nam áp dụng.\n\nGROUND TRUTH TỔNG: HIGH": "HỢP ĐỒNG MÔ PHỎNG — DỮ LIỆU THỰC NGHIỆM\nHỢP ĐỒNG LAO ĐỘNG – LẬP TRÌNH VIÊN\nMã hợp đồng: L06\nLoại: Lao động\nCác bên: Công ty TNHH Phần mềm Sao Bắc; Nguyễn Gia Khang\nĐịa bàn: TP.HCM – Vùng I\n\nĐiều 1. Nội dung và các thỏa thuận\n1. Lương: Lương 18.000.000 đồng/tháng.\n2. Thử việc: Thử việc 60 ngày, hưởng 90% lương.\n3. BHXH: Công ty thực hiện BHXH bắt buộc theo quy định.\n4. Báo trước: Hợp đồng xác định thời hạn 24 tháng; người lao động báo trước 45 ngày khi đơn phương chấm dứt.\n5. Sở hữu mã nguồn: Mã nguồn tạo ra trong phạm vi công việc thuộc quyền sử dụng của Công ty theo thỏa thuận và pháp luật sở hữu trí tuệ.\n6. Bảo mật: Người lao động không được tiết lộ mã nguồn, khóa API và dữ liệu khách hàng.\n7. Kỷ luật: Công ty xử lý vi phạm theo nội quy lao động và pháp luật.\n8. Làm thêm: Làm thêm tối đa 40 giờ/tháng nếu có sự đồng ý của người lao động và được trả lương làm thêm theo luật.\n\nĐiều 2. Cam kết chung\nHai bên xác nhận các thông tin nêu trên là dữ liệu mô phỏng phục vụ nghiên cứu, không phải hợp đồng thật.\nĐiều 3. Giải quyết tranh chấp\nThực hiện theo điều khoản tranh chấp đã nêu và pháp luật Việt Nam áp dụng.\n\nGROUND TRUTH TỔNG: MEDIUM"
+      }
+    ]
+  }
+}
